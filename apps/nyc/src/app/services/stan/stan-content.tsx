@@ -90,9 +90,9 @@ export function StanContent() {
 						<div className='glass mb-8 rounded-2xl p-8'>
 							<p className='mb-6 text-lg leading-relaxed text-white/80'>
 								Every major artist has them now—TikTok accounts that post memes,
-								chopped-up clips, chaotic fan content, and all the stuff that
-								doesn&apos;t fit the artist&apos;s &quot;real&quot; feed. They&apos;re
-								breadth machines: pure reach and exposure at scale.
+								chopped-up clips, chaotic fan content, and all the stuff that doesn&apos;t
+								fit the artist&apos;s &quot;real&quot; feed. They&apos;re breadth
+								machines: pure reach and exposure at scale.
 							</p>
 							<p className='mb-6 text-xl font-semibold text-white'>
 								Why? Because they work.
@@ -214,9 +214,7 @@ export function StanContent() {
 								<div className='flex items-start gap-4'>
 									<span className='text-2xl'>💬</span>
 									<div>
-										<p className='font-semibold text-white'>
-											We Reply to Everything
-										</p>
+										<p className='font-semibold text-white'>We Reply to Everything</p>
 										<p className='text-sm text-white/70'>
 											DMs and comments get responses. This is how you build a community,
 											not just an audience. We handle the daily engagement so the account
@@ -289,8 +287,8 @@ export function StanContent() {
 										Instagram Reels Add-On (+${NYC_STAN.igReelsAddon}/mo)
 									</p>
 									<p className='text-sm text-white/70'>
-										Repurpose your TikTok content to Instagram Reels for additional
-										reach. Same content, different platform, more surface area.
+										Repurpose your TikTok content to Instagram Reels for additional reach.
+										Same content, different platform, more surface area.
 									</p>
 								</div>
 							</div>
@@ -301,9 +299,7 @@ export function StanContent() {
 						<div className='mt-8 text-center'>
 							<MarketingButton
 								marketingLook='hero-primary'
-								onClick={() =>
-									handleCtaClick('features', 'stan', { service: 'stan' })
-								}
+								onClick={() => handleCtaClick('features', 'stan', { service: 'stan' })}
 							>
 								Get Started with Stan
 							</MarketingButton>
@@ -331,12 +327,11 @@ export function StanContent() {
 							<p className='mb-6 text-lg leading-relaxed text-white/80'>
 								Our standard services (Bedroom+, Rising+, Breakout+) are{' '}
 								<span className='font-semibold text-white'>depth</span>
-								—converting that exposure into real fans, real revenue, and real
-								careers.
+								—converting that exposure into real fans, real revenue, and real careers.
 							</p>
 							<p className='text-lg leading-relaxed text-white/80'>
-								The best results come from both working together. That&apos;s why Stan
-								is discounted for Rising+ clients and included with Breakout+.
+								The best results come from both working together. That&apos;s why Stan is
+								discounted for Rising+ clients and included with Breakout+.
 							</p>
 						</div>
 					</AnimatedSection>
@@ -416,7 +411,7 @@ export function StanContent() {
 							{
 								step: '3',
 								title: 'Content System Build',
-								desc: "We build out the content pipeline—visual templates, content categories, posting schedule—and get your approval on the general direction.",
+								desc: 'We build out the content pipeline—visual templates, content categories, posting schedule—and get your approval on the general direction.',
 							},
 							{
 								step: '4',
@@ -461,8 +456,8 @@ export function StanContent() {
 								<ul className='space-y-3'>
 									{[
 										"Artists who know they need consistent TikTok presence but don't have time",
-										"Musicians whose main feed is too curated for chaotic fan content",
-										"Artists on Rising+ or Breakout+ who want breadth alongside their depth campaigns",
+										'Musicians whose main feed is too curated for chaotic fan content',
+										'Artists on Rising+ or Breakout+ who want breadth alongside their depth campaigns',
 										'Indie labels looking to build TikTok presence across multiple artists',
 										"Anyone who's tried to maintain a fan account and burned out",
 									].map((item, index) => (
@@ -515,9 +510,7 @@ export function StanContent() {
 									<tr className='border-b border-white/10'>
 										<th className='p-4 text-left text-white/70'></th>
 										<th className='p-4 text-center text-white/70'>Standalone</th>
-										<th className='p-4 text-center text-white/70'>
-											Rising+ Bundle
-										</th>
+										<th className='p-4 text-center text-white/70'>Rising+ Bundle</th>
 										<th className='p-4 text-center text-white/70'>Included With</th>
 									</tr>
 								</thead>
@@ -533,9 +526,7 @@ export function StanContent() {
 										<td className='p-4 text-center text-purple-300'>Breakout+</td>
 									</tr>
 									<tr>
-										<td className='p-4 font-semibold text-white/70'>
-											+ IG Reels Add-On
-										</td>
+										<td className='p-4 font-semibold text-white/70'>+ IG Reels Add-On</td>
 										<td className='p-4 text-center text-white/70'>
 											+${NYC_STAN.igReelsAddon}/month
 										</td>
@@ -560,9 +551,7 @@ export function StanContent() {
 									<thead>
 										<tr className='border-b border-white/10'>
 											<th className='p-4 text-left text-white/70'>Accounts</th>
-											<th className='p-4 text-center text-white/70'>
-												Per Account/Month
-											</th>
+											<th className='p-4 text-center text-white/70'>Per Account/Month</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -641,10 +630,10 @@ export function StanContent() {
 								For Labels & Management Companies
 							</H>
 							<p className='mb-4 text-lg text-white/80'>
-								Managing TikTok presence across a roster? Our label package covers up
-								to {NYC_STAN.labelPackage.maxAccounts} accounts for $
-								{NYC_STAN.labelPackage.price.toLocaleString()}/month with volume
-								discounts for larger rosters.
+								Managing TikTok presence across a roster? Our label package covers up to{' '}
+								{NYC_STAN.labelPackage.maxAccounts} accounts for $
+								{NYC_STAN.labelPackage.price.toLocaleString()}/month with volume discounts
+								for larger rosters.
 							</p>
 							<Link href='/services/labels'>
 								<MarketingButton marketingLook='glass' size='sm'>

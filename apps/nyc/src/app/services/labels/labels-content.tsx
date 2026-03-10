@@ -163,8 +163,8 @@ export function LabelsContent() {
 								<div className='flex items-start gap-4'>
 									<span className='mt-0.5 text-green-500'>✓</span>
 									<p className='text-lg text-white/80'>
-										Labels wanting to build consistent TikTok presence across their
-										roster without managing it in-house
+										Labels wanting to build consistent TikTok presence across their roster
+										without managing it in-house
 									</p>
 								</div>
 							</div>
@@ -199,9 +199,7 @@ export function LabelsContent() {
 									for ongoing roster work. Roster-wide strategy, release planning, and
 									program management is separately priced based on scope and complexity.
 								</p>
-								<p>
-									Book a call to talk through what makes sense for your situation.
-								</p>
+								<p>Book a call to talk through what makes sense for your situation.</p>
 							</div>
 						</div>
 					</AnimatedSection>
