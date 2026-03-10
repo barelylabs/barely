@@ -79,11 +79,15 @@ export function ShipOrderModal() {
 	// Mutation for creating shipping label
 	const { mutateAsync: shipOrder, isPending } = useMutation(
 		trpc.cartOrder.shipOrder.mutationOptions({
-			onSuccess: data => {
+			onSuccess: async data => {
 				setLabelUrl(data.labelDownloadUrl);
 				setTrackingNumber(data.trackingNumber);
 				// Auto-open label in new window for printing
 				window.open(data.labelDownloadUrl, '_blank');
+
+				await queryClient.invalidateQueries({
+					queryKey: trpc.cartOrder.byWorkspace.queryKey(),
+				});
 			},
 			onError: error => {
 				console.error('Failed to create shipping label:', error);
