@@ -53,7 +53,7 @@ export const NYC_STAN: StanConfig = {
 	igReelsAddon: 150,
 	volumePricing: {
 		twoToFour: 400,
-		fivePlus: 300,
+		fivePlus: 350,
 	},
 	labelPackage: {
 		price: 2500,
