@@ -12,7 +12,7 @@ export default async function HandleLayout({
 	children,
 }: {
 	params: Promise<{ handle: string }>;
-	children: React.ReactElement;
+	children: React.ReactNode;
 }) {
 	const session = await getSession();
 

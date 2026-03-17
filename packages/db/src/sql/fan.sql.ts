@@ -44,7 +44,7 @@ export const Fans = pgTable(
 		stripePaymentMethodId: varchar('stripePaymentMethodId', { length: 255 }),
 	},
 	f => ({
-		unique: uniqueIndex('unique_email').on(f.email),
+		unique: uniqueIndex('unique_email').on(f.email, f.workspaceId),
 	}),
 );
 
