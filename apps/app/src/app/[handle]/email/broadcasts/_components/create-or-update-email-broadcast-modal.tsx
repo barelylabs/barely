@@ -127,7 +127,12 @@ export function CreateOrUpdateEmailBroadcastModal({
 
 	const { mutateAsync: createEmailBroadcastWithTemplate } = useMutation(
 		trpc.emailBroadcast.createWithTemplate.mutationOptions({
-			onSuccess: async () => {
+			onSuccess: async (_, variables) => {
+				toast.success(
+					variables.status === 'draft' ? 'Draft saved'
+					: variables.scheduledAt ? 'Broadcast scheduled'
+					: 'Broadcast sending',
+				);
 				await handleCloseModal();
 			},
 		}),
@@ -135,7 +140,12 @@ export function CreateOrUpdateEmailBroadcastModal({
 
 	const { mutateAsync: updateEmailBroadcastWithTemplate } = useMutation(
 		trpc.emailBroadcast.updateWithTemplate.mutationOptions({
-			onSuccess: async () => {
+			onSuccess: async (_, variables) => {
+				toast.success(
+					variables.status === 'draft' ? 'Draft saved'
+					: variables.scheduledAt ? 'Broadcast scheduled'
+					: 'Broadcast sending',
+				);
 				await handleCloseModal();
 			},
 		}),
@@ -248,7 +258,6 @@ export function CreateOrUpdateEmailBroadcastModal({
 			status: 'draft',
 			handle,
 		});
-		toast.success('Draft saved');
 	};
 
 	const handleScheduleNew = async (
@@ -269,7 +278,6 @@ export function CreateOrUpdateEmailBroadcastModal({
 			status: 'scheduled',
 			handle,
 		});
-		toast.success(data.scheduledAt ? 'Broadcast scheduled' : 'Broadcast sending');
 	};
 
 	// Handlers for update form
@@ -282,7 +290,6 @@ export function CreateOrUpdateEmailBroadcastModal({
 			status: 'draft',
 			handle,
 		});
-		toast.success('Draft saved');
 	};
 
 	const handleScheduleUpdate = async (
@@ -303,7 +310,6 @@ export function CreateOrUpdateEmailBroadcastModal({
 			status: 'scheduled',
 			handle,
 		});
-		toast.success(data.scheduledAt ? 'Broadcast scheduled' : 'Broadcast sending');
 	};
 
 	const showEmailBroadcastModal = mode === 'create' ? showCreateModal : showUpdateModal;
