@@ -74,9 +74,8 @@ export function FulfillmentContent() {
 									Connect Your Storefront
 								</H>
 								<p className='text-white/70'>
-									Fulfillment is integrated directly into barely.cart. Your orders flow
-									in automatically — no manual syncing, no third-party connections to
-									manage.
+									Fulfillment is integrated directly into barely.cart. Your orders flow in
+									automatically — no manual syncing, no third-party connections to manage.
 								</p>
 							</div>
 						</AnimatedSection>
@@ -88,8 +87,8 @@ export function FulfillmentContent() {
 									We Ship Your Orders
 								</H>
 								<p className='text-white/70'>
-									Orders are picked, packed, and shipped within 1-2 business days. You
-									get tracking and inventory updates in real time.
+									Orders are picked, packed, and shipped within 1-2 business days. You get
+									tracking and inventory updates in real time.
 								</p>
 							</div>
 						</AnimatedSection>
@@ -194,8 +193,8 @@ export function FulfillmentContent() {
 								Packaging
 							</H>
 							<p className='mb-4 text-sm text-white/60'>
-								One packaging fee per order based on the mailer type used. If an order
-								has multiple item types, the fee is based on whichever mailer is needed.
+								One packaging fee per order based on the mailer type used. If an order has
+								multiple item types, the fee is based on whichever mailer is needed.
 							</p>
 							<div className='glass overflow-hidden rounded-xl'>
 								<table className='w-full'>
@@ -217,10 +216,7 @@ export function FulfillmentContent() {
 											['LP mailer (single)', '$2.00'],
 											['LP mailer (double / gatefold)', '$2.50'],
 										].map(([type, fee], i) => (
-											<tr
-												key={i}
-												className={i < 4 ? 'border-b border-white/5' : ''}
-											>
+											<tr key={i} className={i < 4 ? 'border-b border-white/5' : ''}>
 												<td className='px-6 py-4 text-white/80'>{type}</td>
 												<td className='px-6 py-4 text-right font-medium text-white'>
 													{fee}
@@ -258,10 +254,7 @@ export function FulfillmentContent() {
 											['Inventory receiving', '$40.00 / hour'],
 											['Returns processing', '$3.00 / return'],
 										].map(([fee, rate], i) => (
-											<tr
-												key={i}
-												className={i < 3 ? 'border-b border-white/5' : ''}
-											>
+											<tr key={i} className={i < 3 ? 'border-b border-white/5' : ''}>
 												<td className='px-6 py-4 text-white/80'>{fee}</td>
 												<td className='px-6 py-4 text-right font-medium text-white'>
 													{rate}
@@ -284,8 +277,7 @@ export function FulfillmentContent() {
 								In barely.cart, you can toggle packaging and pick fees on or off at
 								checkout. When enabled, they&apos;re bundled into the &quot;shipping &
 								handling&quot; total your customer sees — invisible as a separate line
-								item. Your effective cost drops to just the $2.50 handling fee per
-								order.
+								item. Your effective cost drops to just the $2.50 handling fee per order.
 							</p>
 						</div>
 					</AnimatedSection>
@@ -339,20 +331,13 @@ export function FulfillmentContent() {
 											],
 											['1 CD + t-shirt', '$2.50', '$0.50', '$0.25', '$3.25'],
 										].map(([order, handling, packaging, pick, total], i) => (
-											<tr
-												key={i}
-												className={i < 5 ? 'border-b border-white/5' : ''}
-											>
+											<tr key={i} className={i < 5 ? 'border-b border-white/5' : ''}>
 												<td className='px-6 py-4 text-white/80'>{order}</td>
-												<td className='px-6 py-4 text-right text-white/70'>
-													{handling}
-												</td>
+												<td className='px-6 py-4 text-right text-white/70'>{handling}</td>
 												<td className='px-6 py-4 text-right text-white/70'>
 													{packaging}
 												</td>
-												<td className='px-6 py-4 text-right text-white/70'>
-													{pick}
-												</td>
+												<td className='px-6 py-4 text-right text-white/70'>{pick}</td>
 												<td className='px-6 py-4 text-right font-medium text-white'>
 													{total}
 												</td>
@@ -379,15 +364,15 @@ export function FulfillmentContent() {
 						<div className='space-y-6'>
 							<p className='text-lg leading-relaxed text-white/80'>
 								When a customer places an order through barely.cart, shipping costs are
-								calculated and collected at checkout. Those funds are held until the
-								order is fulfilled. We use those collected funds to purchase the actual
-								shipping label — you never need to front carrier costs.
+								calculated and collected at checkout. Those funds are held until the order
+								is fulfilled. We use those collected funds to purchase the actual shipping
+								label — you never need to front carrier costs.
 							</p>
 							<p className='text-lg leading-relaxed text-white/80'>
-								We optimize shipping method based on item type. Vinyl records and CDs
-								ship via USPS Media Mail when eligible ($3-5 for a single domestic LP).
-								Apparel and non-media items ship via the most cost-effective service
-								(USPS First Class, Ground Advantage, or Priority depending on weight).
+								We optimize shipping method based on item type. Vinyl records and CDs ship
+								via USPS Media Mail when eligible ($3-5 for a single domestic LP). Apparel
+								and non-media items ship via the most cost-effective service (USPS First
+								Class, Ground Advantage, or Priority depending on weight).
 							</p>
 						</div>
 					</AnimatedSection>
@@ -415,7 +400,7 @@ export function FulfillmentContent() {
 							},
 							{
 								q: 'Do I need to use barely.cart?',
-								a: "Yes — during the pilot program, fulfillment is exclusively available to barely.cart users. The integration is built directly into the platform: automatic order flow, dynamic packaging fee calculation at checkout, and the option to pass handling costs through to customers. Support for external platforms (Shopify, Bandcamp, etc.) is on the roadmap.",
+								a: 'Yes — during the pilot program, fulfillment is exclusively available to barely.cart users. The integration is built directly into the platform: automatic order flow, dynamic packaging fee calculation at checkout, and the option to pass handling costs through to customers. Support for external platforms (Shopify, Bandcamp, etc.) is on the roadmap.',
 							},
 							{
 								q: 'What does "handling pass-through" mean?',
@@ -447,10 +432,7 @@ export function FulfillmentContent() {
 			<section className='px-4 py-24 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-4xl text-center'>
 					<AnimatedSection animation='scale'>
-						<H
-							size='2'
-							className='gradient-text mb-8 text-3xl md:text-4xl lg:text-5xl'
-						>
+						<H size='2' className='gradient-text mb-8 text-3xl md:text-4xl lg:text-5xl'>
 							Ready to stop packing boxes?
 						</H>
 						<div className='mb-6'>
