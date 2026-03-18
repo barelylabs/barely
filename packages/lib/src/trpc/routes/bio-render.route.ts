@@ -236,7 +236,7 @@ export const bioRenderRoute = {
 							updatedAt: new Date(),
 						})
 						.onConflictDoUpdate({
-							target: [Fans.email],
+							target: [Fans.email, Fans.workspaceId],
 							set: {
 								updatedAt: new Date(),
 								emailMarketingOptIn: marketingConsent,
