@@ -13,7 +13,7 @@ import { CreateFmPageButton } from '~/app/[handle]/fm/_components/create-fm-page
 import { CreateOrUpdateFmModal } from '~/app/[handle]/fm/_components/create-or-update-fm-modal';
 import { FmFilters } from '~/app/[handle]/fm/_components/fm-filters';
 import { FmHotkeys } from '~/app/[handle]/fm/_components/fm-hotkeys';
-import { HydrateClient, prefetch, trpc } from '~/trpc/server';
+import { HydrateClient } from '~/trpc/server';
 
 export default async function FmPagesPage({
 	params,
@@ -31,12 +31,12 @@ export default async function FmPagesPage({
 	}
 
 	// Prefetch data (not async - don't await)
-	prefetch(
-		trpc.fm.byWorkspace.infiniteQueryOptions({
-			handle: awaitedParams.handle,
-			...parsedFilters.data,
-		}),
-	);
+	// prefetch(
+	// 	trpc.fm.byWorkspace.infiniteQueryOptions({
+	// 		handle: awaitedParams.handle,
+	// 		...parsedFilters.data,
+	// 	}),
+	// );
 
 	return (
 		<HydrateClient>

@@ -11,6 +11,10 @@ export const dbEnv =
 			DATABASE_POOL_URL: 'postgresql://test:test@localhost:5432/test',
 			UPSTASH_REDIS_REST_URL: 'https://test-redis.upstash.io',
 			UPSTASH_REDIS_REST_TOKEN: 'test-redis-token',
+			// Electric SQL Cloud config
+			ELECTRIC_SOURCE_ID: 'test-source-id',
+			ELECTRIC_SECRET: 'test-secret',
+			ELECTRIC_URL: 'https://api.electric-sql.cloud',
 		}
 	:	createEnv({
 			server: {
@@ -18,6 +22,10 @@ export const dbEnv =
 				DATABASE_POOL_URL: z.url(),
 				UPSTASH_REDIS_REST_URL: z.url(),
 				UPSTASH_REDIS_REST_TOKEN: z.string(),
+				// Electric SQL Cloud config
+				ELECTRIC_SOURCE_ID: z.string().optional(),
+				ELECTRIC_SECRET: z.string().optional(),
+				ELECTRIC_URL: z.url().optional().default('https://api.electric-sql.cloud'),
 			},
 			experimental__runtimeEnv: {},
 		});
