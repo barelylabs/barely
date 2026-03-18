@@ -61,8 +61,6 @@ export const createEmailBroadcastWithTemplateSchema = z.object({
 	previewText: z.string().optional(),
 	body: z.string(),
 	type: z.enum(['marketing', 'transactional']).default('marketing'),
-	replyTo: z.email().optional(),
-
 	// Broadcast fields
 	fanGroupId: z.string().nullable(),
 	status: z.enum(['draft', 'scheduled']).default('draft'),

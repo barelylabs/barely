@@ -168,7 +168,7 @@ export const vipSwapRenderRoute = {
 						updatedAt: new Date(),
 					})
 					.onConflictDoUpdate({
-						target: [Fans.email], // Only email is unique, not email+workspace
+						target: [Fans.email, Fans.workspaceId], // Unique on email+workspace
 						set: {
 							updatedAt: new Date(),
 							emailMarketingOptIn: true,

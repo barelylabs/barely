@@ -2,7 +2,7 @@ import { AppBioRender } from '~/app/[handle]/bios/_components/app-bio-render';
 import { BioKeySwitcher } from '~/app/[handle]/bios/_components/bio-key-switcher';
 import { getAllFontClassNames } from '~/lib/fonts';
 
-export default function BioEditLayout({ children }: { children: React.ReactElement }) {
+export default function BioEditLayout({ children }: { children: React.ReactNode }) {
 	// Load all fonts for bio editing pages where users can preview different fonts
 	const allFontClasses = getAllFontClassNames();
 

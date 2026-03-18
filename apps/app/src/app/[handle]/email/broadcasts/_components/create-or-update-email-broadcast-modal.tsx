@@ -167,7 +167,6 @@ export function CreateOrUpdateEmailBroadcastModal({
 			previewText: '',
 			body: '',
 			type: 'marketing',
-			replyTo: '',
 			fanGroupId: null,
 			status: 'draft',
 			scheduledAt: null,

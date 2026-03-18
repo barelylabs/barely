@@ -183,7 +183,6 @@ export const emailBroadcastRoute = {
 				previewText,
 				body,
 				type,
-				replyTo,
 				broadcastOnly,
 				// Broadcast fields
 				fanGroupId,
@@ -204,7 +203,6 @@ export const emailBroadcastRoute = {
 						previewText: previewText ?? null,
 						body,
 						type,
-						replyTo: replyTo ?? null,
 						broadcastOnly, // Hide from templates list if it's a one-off
 					})
 					.returning()
