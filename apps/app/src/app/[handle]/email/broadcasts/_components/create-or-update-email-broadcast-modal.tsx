@@ -197,11 +197,11 @@ export function CreateOrUpdateEmailBroadcastModal({
 					subject: lastSelectedItem.emailTemplate.subject,
 					previewText: lastSelectedItem.emailTemplate.previewText ?? '',
 					body: lastSelectedItem.emailTemplate.body,
-					type: lastSelectedItem.emailTemplate.type ?? 'marketing',
+					type: lastSelectedItem.emailTemplate.type,
 					fanGroupId: lastSelectedItem.fanGroupId ?? 'all',
-					status: (lastSelectedItem.status as 'draft' | 'scheduled') ?? 'draft',
+					status: lastSelectedItem.status as 'draft' | 'scheduled',
 					scheduledAt: lastSelectedItem.scheduledAt ?? null,
-					broadcastOnly: lastSelectedItem.emailTemplate.broadcastOnly ?? false,
+					broadcastOnly: lastSelectedItem.emailTemplate.broadcastOnly,
 				}
 			:	undefined,
 		resetOptions: { keepDirtyValues: true },
@@ -324,6 +324,7 @@ export function CreateOrUpdateEmailBroadcastModal({
 		updateForm,
 		focusGridList,
 		queryClient,
+		trpc.emailBroadcast.byWorkspace,
 		setShowEmailBroadcastModal,
 	]);
 
@@ -358,10 +359,10 @@ export function CreateOrUpdateEmailBroadcastModal({
 				{isSent ?
 					<ModalBody>
 						<div className='flex flex-col items-center justify-center gap-2'>
-							<Text variant='md/semibold'>{lastSelectedItem?.emailTemplate.name}</Text>
+							<Text variant='md/semibold'>{lastSelectedItem.emailTemplate.name}</Text>
 							<div className='flex flex-row items-center justify-center gap-2'>
 								<Icon.send className='h-4 w-4' />
-								<span>Sent @{lastSelectedItem?.sentAt?.toLocaleString()}</span>
+								<span>Sent @{lastSelectedItem.sentAt?.toLocaleString()}</span>
 							</div>
 						</div>
 					</ModalBody>
