@@ -1,5 +1,6 @@
 import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
+import { dbPool } from '@barely/db/pool';
 import { EmailBroadcasts } from '@barely/db/sql/email-broadcast.sql';
 import { EmailTemplates } from '@barely/db/sql/email-template.sql';
 import { sqlAnd } from '@barely/db/utils';
@@ -10,8 +11,10 @@ import {
 	duplicateEmailBroadcastSchema,
 	selectWorkspaceEmailBroadcastsSchema,
 	updateEmailBroadcastSchema,
+	updateEmailBroadcastWithTemplateSchema,
 } from '@barely/validators';
 import { runs, tasks } from '@trigger.dev/sdk/v3';
+import { TRPCError } from '@trpc/server';
 import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
 
 import type { handleEmailBroadcast } from '../../trigger';
@@ -33,6 +36,8 @@ export const emailBroadcastRoute = {
 							previewText: true,
 							body: true,
 							replyTo: true,
+							type: true,
+							broadcastOnly: true,
 						},
 					},
 				},
@@ -239,6 +244,131 @@ export const emailBroadcastRoute = {
 			}
 
 			return { emailBroadcast, emailTemplate };
+		}),
+
+	updateWithTemplate: workspaceProcedure
+		.input(updateEmailBroadcastWithTemplateSchema)
+		.mutation(async ({ input, ctx }) => {
+			const {
+				id,
+				emailTemplateId,
+				// Template fields
+				name,
+				fromId,
+				subject,
+				previewText,
+				body,
+				type,
+				broadcastOnly,
+				// Broadcast fields
+				fanGroupId,
+				status = 'draft',
+				scheduledAt,
+			} = input;
+
+			// Get old broadcast for scheduling diff
+			const oldEmailBroadcast = await dbHttp.query.EmailBroadcasts.findFirst({
+				where: and(
+					eq(EmailBroadcasts.id, id),
+					eq(EmailBroadcasts.workspaceId, ctx.workspace.id),
+				),
+			});
+
+			if (!oldEmailBroadcast) {
+				throw new Error('Email broadcast not found');
+			}
+
+			if (oldEmailBroadcast.status === 'sent' || oldEmailBroadcast.status === 'sending') {
+				throw new TRPCError({
+					code: 'BAD_REQUEST',
+					message: 'Cannot update a broadcast that has already been sent.',
+				});
+			}
+
+			// Update template and broadcast atomically
+			const updatedEmailBroadcast = await dbPool(ctx.pool).transaction(async tx => {
+				const updatedTemplate = (
+					await tx
+						.update(EmailTemplates)
+						.set({
+							name,
+							fromId,
+							subject,
+							previewText: previewText ?? null,
+							body,
+							type,
+							broadcastOnly,
+						})
+						.where(
+							and(
+								eq(EmailTemplates.id, emailTemplateId),
+								eq(EmailTemplates.workspaceId, ctx.workspace.id),
+							),
+						)
+						.returning()
+				)[0];
+
+				if (!updatedTemplate) {
+					throw new TRPCError({
+						code: 'NOT_FOUND',
+						message: 'Email template not found.',
+					});
+				}
+
+				const updatedBroadcast = (
+					await tx
+						.update(EmailBroadcasts)
+						.set({
+							fanGroupId,
+							status,
+							scheduledAt,
+						})
+						.where(
+							and(
+								eq(EmailBroadcasts.id, id),
+								eq(EmailBroadcasts.workspaceId, ctx.workspace.id),
+							),
+						)
+						.returning()
+				)[0];
+
+				if (!updatedBroadcast) {
+					throw new Error('Failed to update email broadcast');
+				}
+
+				return updatedBroadcast;
+			});
+
+			// Handle trigger.dev scheduling
+			if (
+				oldEmailBroadcast.status === 'scheduled' &&
+				updatedEmailBroadcast.status !== 'scheduled'
+			) {
+				await runs.cancel(
+					oldEmailBroadcast.triggerRunId ??
+						raiseTRPCError({ message: 'No trigger run id found.' }),
+				);
+			} else if (
+				updatedEmailBroadcast.status === 'scheduled' &&
+				oldEmailBroadcast.status !== 'scheduled'
+			) {
+				await tasks.trigger<typeof handleEmailBroadcast>('handle-email-broadcast', {
+					id: updatedEmailBroadcast.id,
+				});
+			} else if (
+				updatedEmailBroadcast.status === 'scheduled' &&
+				oldEmailBroadcast.status === 'scheduled'
+			) {
+				await runs.cancel(
+					oldEmailBroadcast.triggerRunId ??
+						raiseTRPCError({ message: 'No trigger run id found.' }),
+				);
+				await tasks.trigger<typeof handleEmailBroadcast>('handle-email-broadcast', {
+					id: updatedEmailBroadcast.id,
+				});
+			}
+
+			return { emailBroadcast: updatedEmailBroadcast };
 		}),
 
 	duplicate: workspaceProcedure

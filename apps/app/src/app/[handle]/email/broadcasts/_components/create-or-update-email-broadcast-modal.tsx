@@ -6,9 +6,11 @@ import { useCreateOrUpdateForm, useWorkspace, useZodForm } from '@barely/hooks';
 import { getEmailAddressFromEmailAddress } from '@barely/utils';
 import {
 	createEmailBroadcastWithTemplateSchema,
+	updateEmailBroadcastWithTemplateSchema,
 	upsertEmailBroadcastSchema,
 } from '@barely/validators';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
@@ -125,13 +127,31 @@ export function CreateOrUpdateEmailBroadcastModal({
 
 	const { mutateAsync: createEmailBroadcastWithTemplate } = useMutation(
 		trpc.emailBroadcast.createWithTemplate.mutationOptions({
-			onSuccess: async () => {
+			onSuccess: async (_, variables) => {
+				toast.success(
+					variables.status === 'draft' ? 'Draft saved'
+					: variables.scheduledAt ? 'Broadcast scheduled'
+					: 'Broadcast sending',
+				);
 				await handleCloseModal();
 			},
 		}),
 	);
 
-	// Form for existing template selection (original functionality)
+	const { mutateAsync: updateEmailBroadcastWithTemplate } = useMutation(
+		trpc.emailBroadcast.updateWithTemplate.mutationOptions({
+			onSuccess: async (_, variables) => {
+				toast.success(
+					variables.status === 'draft' ? 'Draft saved'
+					: variables.scheduledAt ? 'Broadcast scheduled'
+					: 'Broadcast sending',
+				);
+				await handleCloseModal();
+			},
+		}),
+	);
+
+	// Form for existing template selection (original functionality — used in create mode "Use Template" tab)
 	const { form: existingTemplateForm, onSubmit: onSubmitExisting } =
 		useCreateOrUpdateForm({
 			updateItem: mode === 'create' ? null : (lastSelectedItem ?? null),
@@ -172,6 +192,29 @@ export function CreateOrUpdateEmailBroadcastModal({
 			scheduledAt: null,
 			broadcastOnly: false,
 		},
+	});
+
+	// Form for updating an existing broadcast with full template fields
+	const updateForm = useZodForm({
+		schema: updateEmailBroadcastWithTemplateSchema,
+		values:
+			mode === 'update' && lastSelectedItem ?
+				{
+					id: lastSelectedItem.id,
+					emailTemplateId: lastSelectedItem.emailTemplateId,
+					name: lastSelectedItem.emailTemplate.name,
+					fromId: lastSelectedItem.emailTemplate.fromId,
+					subject: lastSelectedItem.emailTemplate.subject,
+					previewText: lastSelectedItem.emailTemplate.previewText ?? '',
+					body: lastSelectedItem.emailTemplate.body,
+					type: lastSelectedItem.emailTemplate.type,
+					fanGroupId: lastSelectedItem.fanGroupId ?? 'all',
+					status: lastSelectedItem.status as 'draft' | 'scheduled',
+					scheduledAt: lastSelectedItem.scheduledAt ?? null,
+					broadcastOnly: lastSelectedItem.emailTemplate.broadcastOnly,
+				}
+			:	undefined,
+		resetOptions: { keepDirtyValues: true },
 	});
 
 	// Handlers for existing template form
@@ -237,26 +280,57 @@ export function CreateOrUpdateEmailBroadcastModal({
 		});
 	};
 
+	// Handlers for update form
+	const handleSaveDraftUpdate = async (
+		data: z.infer<typeof updateEmailBroadcastWithTemplateSchema>,
+	) => {
+		await updateEmailBroadcastWithTemplate({
+			...data,
+			fanGroupId: data.fanGroupId === 'all' ? null : data.fanGroupId,
+			status: 'draft',
+			handle,
+		});
+	};
+
+	const handleScheduleUpdate = async (
+		data: z.infer<typeof updateEmailBroadcastWithTemplateSchema>,
+	) => {
+		const confirmMessage =
+			data.scheduledAt ?
+				`Schedule this email broadcast for ${new Date(data.scheduledAt).toLocaleString()}?`
+			:	'Send this email broadcast now?';
+
+		if (!window.confirm(confirmMessage)) {
+			return;
+		}
+
+		await updateEmailBroadcastWithTemplate({
+			...data,
+			fanGroupId: data.fanGroupId === 'all' ? null : data.fanGroupId,
+			status: 'scheduled',
+			handle,
+		});
+	};
+
 	const showEmailBroadcastModal = mode === 'create' ? showCreateModal : showUpdateModal;
 	const setShowEmailBroadcastModal =
 		mode === 'create' ? setShowCreateModal : setShowUpdateModal;
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
-		await queryClient.invalidateQueries(
-			trpc.emailBroadcast.byWorkspace.queryFilter({ handle }),
-		);
+		await queryClient.invalidateQueries(trpc.emailBroadcast.byWorkspace.pathFilter());
 		existingTemplateForm.reset();
 		createNewForm.reset();
+		updateForm.reset();
 		setActiveTab('create-new');
 		await setShowEmailBroadcastModal(false);
 	}, [
 		existingTemplateForm,
 		createNewForm,
+		updateForm,
 		focusGridList,
 		queryClient,
 		trpc.emailBroadcast.byWorkspace,
-		handle,
 		setShowEmailBroadcastModal,
 	]);
 
@@ -265,119 +339,178 @@ export function CreateOrUpdateEmailBroadcastModal({
 	const submitDisabledExisting =
 		!canEditExisting || (mode === 'update' && !existingTemplateForm.formState.isDirty);
 
-	// For update mode, we only show the existing template tab
+	const canEditUpdate =
+		mode === 'update' &&
+		lastSelectedItem?.status !== 'sent' &&
+		lastSelectedItem?.status !== 'sending';
+	const submitDisabledUpdate = !canEditUpdate || !updateForm.formState.isDirty;
+
+	// For update mode
 	if (mode === 'update') {
+		const isSent =
+			lastSelectedItem?.status === 'sent' || lastSelectedItem?.status === 'sending';
+
 		return (
 			<Modal
 				showModal={showEmailBroadcastModal}
 				setShowModal={setShowEmailBroadcastModal}
-				preventDefaultClose={canEditExisting && existingTemplateForm.formState.isDirty}
+				preventDefaultClose={canEditUpdate && updateForm.formState.isDirty}
 				onClose={handleCloseModal}
 			>
 				<ModalHeader
 					icon='email'
-					title={canEditExisting ? 'Update Email Broadcast' : 'Email Broadcast Sent'}
+					title={isSent ? 'Email Broadcast Sent' : 'Update Email Broadcast'}
 				/>
 
-				<Form form={existingTemplateForm} onSubmit={onSubmitExisting}>
+				{isSent ?
 					<ModalBody>
-						{!canEditExisting && (
-							<div className='flex flex-col items-center justify-center gap-2'>
-								<Text variant='md/semibold'>{lastSelectedItem?.emailTemplate.name}</Text>
-								<div className='flex flex-row items-center justify-center gap-2'>
-									<Icon.send className='h-4 w-4' />
-									<span>Sent @{lastSelectedItem?.sentAt?.toLocaleString()}</span>
-								</div>
+						<div className='flex flex-col items-center justify-center gap-2'>
+							<Text variant='md/semibold'>{lastSelectedItem.emailTemplate.name}</Text>
+							<div className='flex flex-row items-center justify-center gap-2'>
+								<Icon.send className='h-4 w-4' />
+								<span>Sent @{lastSelectedItem.sentAt?.toLocaleString()}</span>
 							</div>
-						)}
-
-						{canEditExisting && (
-							<>
-								<div className='mb-4 flex flex-row justify-end'>
-									<SendTestEmail
-										values={{
-											...existingTemplateForm.getValues(),
-											fromId:
-												lastSelectedItem?.emailTemplate.fromId ??
-												emailAddressOptions[0]?.value ??
-												'',
-											subject: lastSelectedItem?.emailTemplate.subject ?? '',
-											previewText: lastSelectedItem?.emailTemplate.previewText ?? '',
-											body: lastSelectedItem?.emailTemplate.body ?? '',
-											replyTo: lastSelectedItem?.emailTemplate.replyTo ?? '',
-											sendTestEmailTo: '',
-										}}
-									/>
-								</div>
-
-								<SelectField
-									label='Email Template'
-									name='emailTemplateId'
-									control={existingTemplateForm.control}
-									options={emailTemplateOptions}
-								/>
-
-								<SelectField
-									label='From'
-									value={lastSelectedItem?.emailTemplate.fromId ?? ''}
-									disabled
-									name='fromId'
-									// control={existingTemplateForm.control}
-									options={emailAddressOptions}
-								/>
-
-								<SelectField
-									label='To'
-									name='fanGroupId'
-									control={existingTemplateForm.control}
-									options={fanGroupOptions}
-								/>
-
-								<Label>Schedule</Label>
-								<Switch
-									checked={!!existingTemplateForm.watch('scheduledAt')}
-									onCheckedChange={c => {
-										if (c)
-											return existingTemplateForm.setValue('scheduledAt', new Date());
-										return existingTemplateForm.setValue('scheduledAt', null);
+						</div>
+					</ModalBody>
+				:	<Form form={updateForm} onSubmit={handleScheduleUpdate}>
+						<ModalBody className='space-y-4'>
+							<div className='flex flex-row justify-end'>
+								<SendTestEmail
+									values={{
+										...updateForm.getValues(),
+										sendTestEmailTo: '',
 									}}
 								/>
+							</div>
 
-								{existingTemplateForm.watch('scheduledAt') && (
-									<DatetimeField
-										name='scheduledAt'
-										granularity='minute'
-										hourCycle={12}
-										control={existingTemplateForm.control}
-									/>
-								)}
-							</>
-						)}
-					</ModalBody>
+							<TextField
+								label='Template Name'
+								name='name'
+								control={updateForm.control}
+								infoTooltip='The name of the email template. This is for your reference.'
+							/>
 
-					{canEditExisting && (
+							<div className='flex flex-row items-center gap-3'>
+								<Label>Type</Label>
+								<Switch
+									size='sm'
+									checked={updateForm.watch('type') === 'marketing'}
+									onCheckedChange={c => {
+										if (c)
+											return updateForm.setValue('type', 'marketing', {
+												shouldDirty: true,
+											});
+										return updateForm.setValue('type', 'transactional', {
+											shouldDirty: true,
+										});
+									}}
+								/>
+								<Text>
+									{updateForm.watch('type') === 'marketing' ?
+										<div className='flex flex-row items-center gap-2'>
+											<Icon.marketing className='h-4 w-4' />
+											Marketing
+										</div>
+									:	<div className='flex flex-row items-center gap-1'>
+											<Icon.transactional className='h-4 w-4' />
+											Transactional
+										</div>
+									}
+								</Text>
+							</div>
+
+							<SelectField
+								label='From'
+								name='fromId'
+								control={updateForm.control}
+								options={emailAddressOptions}
+							/>
+
+							<SelectField
+								label='To'
+								name='fanGroupId'
+								control={updateForm.control}
+								options={fanGroupOptions}
+							/>
+
+							<TextField label='Subject' name='subject' control={updateForm.control} />
+
+							<TextField
+								label='Preview Text'
+								name='previewText'
+								control={updateForm.control}
+							/>
+
+							<Label>Body</Label>
+							<MDXEditor
+								variables={EMAIL_TEMPLATE_VARIABLES}
+								markdown={updateForm.getValues('body')}
+								onChange={markdown => {
+									if (typeof markdown === 'string') {
+										updateForm.setValue('body', markdown, { shouldDirty: true });
+									}
+								}}
+							/>
+
+							<div className='flex flex-row items-center gap-3'>
+								<Label>Show in Templates</Label>
+								<Switch
+									size='sm'
+									checked={!updateForm.watch('broadcastOnly')}
+									onCheckedChange={c => {
+										updateForm.setValue('broadcastOnly', !c, { shouldDirty: true });
+									}}
+								/>
+								<Text variant='sm/normal'>
+									{updateForm.watch('broadcastOnly') ?
+										'Hidden from templates list'
+									:	'Visible in templates list'}
+								</Text>
+							</div>
+
+							<Label>Schedule</Label>
+							<Switch
+								checked={!!updateForm.watch('scheduledAt')}
+								onCheckedChange={c => {
+									if (c)
+										return updateForm.setValue('scheduledAt', new Date(), {
+											shouldDirty: true,
+										});
+									return updateForm.setValue('scheduledAt', null, { shouldDirty: true });
+								}}
+							/>
+
+							{updateForm.watch('scheduledAt') && (
+								<DatetimeField
+									name='scheduledAt'
+									granularity='minute'
+									hourCycle={12}
+									control={updateForm.control}
+								/>
+							)}
+						</ModalBody>
+
 						<ModalFooter>
 							<div className='flex flex-row items-center justify-end gap-3'>
 								<Button
-									disabled={submitDisabledExisting}
+									disabled={submitDisabledUpdate}
 									look='secondary'
-									onClick={existingTemplateForm.handleSubmit(handleSaveDraftExisting)}
+									onClick={updateForm.handleSubmit(handleSaveDraftUpdate)}
 								>
 									Save Draft
 								</Button>
 
 								<Button
-									onClick={existingTemplateForm.handleSubmit(handleScheduleExisting)}
-									endIcon={
-										existingTemplateForm.watch('scheduledAt') ? 'calendar' : 'send'
-									}
+									disabled={!canEditUpdate}
+									onClick={updateForm.handleSubmit(handleScheduleUpdate)}
+									endIcon={updateForm.watch('scheduledAt') ? 'calendar' : 'send'}
 								>
-									{existingTemplateForm.watch('scheduledAt') ? 'Schedule' : 'Send'}
+									{updateForm.watch('scheduledAt') ? 'Schedule' : 'Send'}
 								</Button>
 							</div>
 						</ModalFooter>
-					)}
-				</Form>
+					</Form>
+				}
 			</Modal>
 		);
 	}
@@ -584,7 +717,11 @@ export function CreateOrUpdateEmailBroadcastModal({
 			<ModalFooter>
 				<div className='flex flex-row items-center justify-end gap-3'>
 					<Button
-						disabled={submitDisabledExisting}
+						disabled={
+							activeTab === 'create-new' ?
+								!createNewForm.formState.isDirty
+							:	submitDisabledExisting
+						}
 						look='secondary'
 						onClick={
 							activeTab === 'create-new' ?
