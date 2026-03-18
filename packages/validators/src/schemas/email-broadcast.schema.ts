@@ -70,6 +70,16 @@ export const createEmailBroadcastWithTemplateSchema = z.object({
 	broadcastOnly: z.boolean().default(false), // If true, template won't show in templates list
 });
 
+// Update broadcast with inline template update
+export const updateEmailBroadcastWithTemplateSchema =
+	createEmailBroadcastWithTemplateSchema.extend({
+		id: z.string(), // broadcast ID
+		emailTemplateId: z.string(), // template ID to update
+	});
+export type UpdateEmailBroadcastWithTemplate = z.infer<
+	typeof updateEmailBroadcastWithTemplateSchema
+>;
+
 // Duplicate broadcast
 export const duplicateEmailBroadcastSchema = z.object({
 	id: z.string(),

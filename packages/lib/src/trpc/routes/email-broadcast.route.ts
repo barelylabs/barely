@@ -10,6 +10,7 @@ import {
 	duplicateEmailBroadcastSchema,
 	selectWorkspaceEmailBroadcastsSchema,
 	updateEmailBroadcastSchema,
+	updateEmailBroadcastWithTemplateSchema,
 } from '@barely/validators';
 import { runs, tasks } from '@trigger.dev/sdk/v3';
 import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
@@ -33,6 +34,8 @@ export const emailBroadcastRoute = {
 							previewText: true,
 							body: true,
 							replyTo: true,
+							type: true,
+							broadcastOnly: true,
 						},
 					},
 				},
@@ -239,6 +242,111 @@ export const emailBroadcastRoute = {
 			}
 
 			return { emailBroadcast, emailTemplate };
+		}),
+
+	updateWithTemplate: workspaceProcedure
+		.input(updateEmailBroadcastWithTemplateSchema)
+		.mutation(async ({ input, ctx }) => {
+			const {
+				id,
+				emailTemplateId,
+				// Template fields
+				name,
+				fromId,
+				subject,
+				previewText,
+				body,
+				type,
+				broadcastOnly,
+				// Broadcast fields
+				fanGroupId,
+				status = 'draft',
+				scheduledAt,
+			} = input;
+
+			// Get old broadcast for scheduling diff
+			const oldEmailBroadcast = await dbHttp.query.EmailBroadcasts.findFirst({
+				where: and(
+					eq(EmailBroadcasts.id, id),
+					eq(EmailBroadcasts.workspaceId, ctx.workspace.id),
+				),
+			});
+
+			if (!oldEmailBroadcast) {
+				throw new Error('Email broadcast not found');
+			}
+
+			// Update the email template
+			await dbHttp
+				.update(EmailTemplates)
+				.set({
+					name,
+					fromId,
+					subject,
+					previewText: previewText ?? null,
+					body,
+					type,
+					broadcastOnly,
+				})
+				.where(
+					and(
+						eq(EmailTemplates.id, emailTemplateId),
+						eq(EmailTemplates.workspaceId, ctx.workspace.id),
+					),
+				);
+
+			// Update the broadcast
+			const updatedEmailBroadcast = (
+				await dbHttp
+					.update(EmailBroadcasts)
+					.set({
+						fanGroupId,
+						status,
+						scheduledAt,
+					})
+					.where(
+						and(
+							eq(EmailBroadcasts.id, id),
+							eq(EmailBroadcasts.workspaceId, ctx.workspace.id),
+						),
+					)
+					.returning()
+			)[0];
+
+			if (!updatedEmailBroadcast) {
+				throw new Error('Failed to update email broadcast');
+			}
+
+			// Handle trigger.dev scheduling
+			if (
+				oldEmailBroadcast.status === 'scheduled' &&
+				updatedEmailBroadcast.status !== 'scheduled'
+			) {
+				await runs.cancel(
+					oldEmailBroadcast.triggerRunId ??
+						raiseTRPCError({ message: 'No trigger run id found.' }),
+				);
+			} else if (
+				updatedEmailBroadcast.status === 'scheduled' &&
+				oldEmailBroadcast.status !== 'scheduled'
+			) {
+				await tasks.trigger<typeof handleEmailBroadcast>('handle-email-broadcast', {
+					id: updatedEmailBroadcast.id,
+				});
+			} else if (
+				updatedEmailBroadcast.status === 'scheduled' &&
+				oldEmailBroadcast.status === 'scheduled'
+			) {
+				await runs.cancel(
+					oldEmailBroadcast.triggerRunId ??
+						raiseTRPCError({ message: 'No trigger run id found.' }),
+				);
+				await tasks.trigger<typeof handleEmailBroadcast>('handle-email-broadcast', {
+					id: updatedEmailBroadcast.id,
+				});
+			}
+
+			return { emailBroadcast: updatedEmailBroadcast };
 		}),
 
 	duplicate: workspaceProcedure

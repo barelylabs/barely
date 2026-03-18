@@ -106,9 +106,7 @@ function EmailBroadcastCard({
 	const { mutate: duplicateBroadcast } = useMutation(
 		trpc.emailBroadcast.duplicate.mutationOptions({
 			onSuccess: async () => {
-				await queryClient.invalidateQueries(
-					trpc.emailBroadcast.byWorkspace.queryFilter({ handle }),
-				);
+				await queryClient.invalidateQueries(trpc.emailBroadcast.byWorkspace.pathFilter());
 				toast.success('Email broadcast duplicated');
 			},
 			onError: error => {
