@@ -14,11 +14,13 @@ const SPAM_PATTERNS = [
 
 export function isSpamRequest(pathname: string): boolean {
 	const lower = pathname.toLowerCase();
-	return SPAM_PATTERNS.some(pattern => lower.includes(pattern));
+	const matched = SPAM_PATTERNS.find(pattern => lower.includes(pattern));
+	if (matched) console.log(`[spam-filter] blocked "${pathname}" (matched: ${matched})`);
+	return !!matched;
 }
 
 export function spamResponse() {
-	return new NextResponse('Nice try. This isn\'t WordPress. Stop fucking with us.', {
+	return new NextResponse('Nice try. Pls go away.', {
 		status: 418,
 	});
 }
