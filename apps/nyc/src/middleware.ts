@@ -1,8 +1,11 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { setVisitorCookies } from '@barely/lib/middleware/request-parsing';
+import { isSpamRequest, spamResponse } from '@barely/lib/middleware/spam-filter';
 
 export async function middleware(req: NextRequest) {
+	if (isSpamRequest(req.nextUrl.pathname)) return spamResponse();
+
 	const res = NextResponse.next();
 
 	// Set visitor cookies to persist tracking parameters (fbclid, sessionId, etc.)
