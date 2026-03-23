@@ -56,6 +56,10 @@
 			"types": "./dist/src/middleware/request-parsing.d.ts",
 			"default": "./src/middleware/request-parsing.ts"
 		},
+		"./middleware/spam-filter": {
+			"types": "./dist/src/middleware/spam-filter.d.ts",
+			"default": "./src/middleware/spam-filter.ts"
+		},
 		"./trigger/*": {
 			"types": "./dist/src/integrations/trigger/*.d.ts",
 			"default": "./src/integrations/trigger/*.ts"

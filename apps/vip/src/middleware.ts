@@ -1,9 +1,12 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { setVisitorCookies } from '@barely/lib/middleware/request-parsing';
+import { isSpamRequest, spamResponse } from '@barely/lib/middleware/spam-filter';
 import { log } from '@barely/lib/utils/log';
 
 export async function middleware(req: NextRequest) {
+	if (isSpamRequest(req.nextUrl.pathname)) return spamResponse();
+
 	const pathname = req.nextUrl.pathname;
 
 	// Parse the VIP URL to extract handle and key

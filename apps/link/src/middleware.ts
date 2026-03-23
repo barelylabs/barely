@@ -8,6 +8,7 @@ import { sqlAnd } from '@barely/db/utils';
 import { recordLinkClick } from '@barely/lib/functions/event.fns';
 import { parseLink } from '@barely/lib/middleware';
 import { parseReqForVisitorInfo } from '@barely/lib/middleware/request-parsing';
+import { isSpamRequest, spamResponse } from '@barely/lib/middleware/spam-filter';
 import { getAbsoluteUrl } from '@barely/utils';
 import { eq } from 'drizzle-orm';
 
@@ -18,6 +19,8 @@ export const config = {
 };
 
 export async function middleware(req: NextRequest, ev: NextFetchEvent) {
+	if (isSpamRequest(req.nextUrl.pathname)) return spamResponse();
+
 	const url = req.nextUrl;
 	const linkProps = parseLink(req);
 

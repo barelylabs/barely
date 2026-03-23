@@ -5,6 +5,7 @@ import {
 	parseReqForVisitorInfo,
 	setVisitorCookies,
 } from '@barely/lib/middleware/request-parsing';
+import { isSpamRequest, spamResponse } from '@barely/lib/middleware/spam-filter';
 import { log } from '@barely/lib/utils/log';
 import { getAbsoluteUrl, isDevelopment, newId } from '@barely/utils';
 
@@ -12,6 +13,8 @@ import type { CreateCartBody } from '~/app/api/cart/create/route';
 import { cartEnv } from '~/env';
 
 export async function middleware(req: NextRequest, ev: NextFetchEvent) {
+	if (isSpamRequest(req.nextUrl.pathname)) return spamResponse();
+
 	const domain = req.headers.get('host');
 	const pathname = req.nextUrl.pathname;
 
