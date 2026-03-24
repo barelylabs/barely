@@ -2,6 +2,7 @@
 
 import type { z } from 'zod/v4';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { MERCH_DIMENSIONS } from '@barely/const';
 import { focusGridList, useWorkspace, useZodForm } from '@barely/hooks';
 import { shipCartOrderSchema } from '@barely/validators';
@@ -20,10 +21,16 @@ import { Text } from '@barely/ui/typography';
 
 import { useCartOrder } from '~/app/[handle]/merch/orders/_components/cart-order-context';
 
+function openLabelForPrint(handle: string, labelUrl: string) {
+	const printPageUrl = `/${handle}/print-label?url=${encodeURIComponent(labelUrl)}`;
+	window.open(printPageUrl, '_blank');
+}
+
 export function ShipOrderModal() {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 	const { workspace } = useWorkspace();
+	const params = useParams<{ handle: string }>();
 
 	const {
 		lastSelectedItem: selectedCartOrder,
@@ -124,8 +131,8 @@ export function ShipOrderModal() {
 				setLabelUrl(data.labelDownloadUrl);
 				setTrackingNumber(data.trackingNumber);
 				labelForCartIdRef.current = selectedCartOrder?.id ?? null;
-				// Auto-open label in new window for printing
-				window.open(data.labelDownloadUrl, '_blank');
+				// Auto-open label in new window with print dialog
+				openLabelForPrint(params.handle, data.labelDownloadUrl);
 
 				await queryClient.invalidateQueries({
 					queryKey: trpc.cartOrder.byWorkspace.queryKey(),
@@ -244,7 +251,10 @@ export function ShipOrderModal() {
 							<Button
 								look='secondary'
 								size='sm'
-								onClick={() => window.open(effectiveLabelUrl, '_blank')}
+								onClick={() =>
+									effectiveLabelUrl &&
+									openLabelForPrint(params.handle, effectiveLabelUrl)
+								}
 								startIcon='externalLink'
 							>
 								{isFromExistingFulfillment ?
