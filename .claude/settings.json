@@ -24,6 +24,19 @@
 		"deny": []
 	},
 	"hooks": {
+		"PreToolUse": [
+			{
+				"matcher": "Bash",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "CMD=$(jq -r '.tool_input.command // \"\"'); if echo \"$CMD\" | grep -qE '(git push|gh pr create|mcp__github__create_pull_request)'; then cd /home/user/barely && pnpm format:fix && pnpm lint:fix && pnpm typecheck; if [ $? -ne 0 ]; then echo '{\"decision\":\"block\",\"reason\":\"Code quality checks failed. Fix format/lint/type errors before pushing.\"}'; exit 2; fi; fi",
+						"timeout": 600,
+						"statusMessage": "Running format, lint, and type checks before push..."
+					}
+				]
+			}
+		],
 		"PostToolUse": [
 			{
 				"matcher": "Edit|Write",
