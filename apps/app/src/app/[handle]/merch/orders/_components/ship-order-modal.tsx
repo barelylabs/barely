@@ -47,13 +47,10 @@ export function ShipOrderModal() {
 
 	// Check if the selected order already has a fulfillment with a label URL
 	const existingFulfillment = useMemo(() => {
-		if (!selectedCartOrder?.fulfillments?.length) return null;
+		if (!selectedCartOrder?.fulfillments.length) return null;
 		// Find the most recent fulfillment that has a valid label
 		const validFulfillment = [...selectedCartOrder.fulfillments]
-			.sort(
-				(a, b) =>
-					new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-			)
+			.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 			.find(
 				f =>
 					f.labelDownloadUrl &&
@@ -211,7 +208,7 @@ export function ShipOrderModal() {
 							description={
 								isFromExistingFulfillment ?
 									'You can reopen the label below to reprint it.'
-								:	'The label has been opened in a new window for printing. If it didn\'t open, check your pop-up blocker settings.'
+								:	"The label has been opened in a new window for printing. If it didn't open, check your pop-up blocker settings."
 							}
 							variant='success'
 						/>
@@ -250,14 +247,16 @@ export function ShipOrderModal() {
 								onClick={() => window.open(effectiveLabelUrl, '_blank')}
 								startIcon='externalLink'
 							>
-								{isFromExistingFulfillment ? 'Reprint Label' : 'Reopen Label for Printing'}
+								{isFromExistingFulfillment ?
+									'Reprint Label'
+								:	'Reopen Label for Printing'}
 							</Button>
 
 							{!isFromExistingFulfillment && (
 								<Text variant='xs/normal' className='text-muted-foreground'>
 									If the label didn&apos;t open automatically, your browser may be
-									blocking pop-ups. Check your pop-up blocker settings and try
-									the button above.
+									blocking pop-ups. Check your pop-up blocker settings and try the button
+									above.
 								</Text>
 							)}
 						</div>
