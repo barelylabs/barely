@@ -1,7 +1,7 @@
 'use client';
 
 import type { z } from 'zod/v4';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MERCH_DIMENSIONS } from '@barely/const';
 import { focusGridList, useWorkspace, useZodForm } from '@barely/hooks';
 import { shipCartOrderSchema } from '@barely/validators';
@@ -33,6 +33,47 @@ export function ShipOrderModal() {
 
 	const [labelUrl, setLabelUrl] = useState<string | null>(null);
 	const [trackingNumber, setTrackingNumber] = useState<string | null>(null);
+	// Track which cart ID the current label state belongs to, to prevent stale state
+	const labelForCartIdRef = useRef<string | null>(null);
+
+	// Reset local label state when the selected order changes
+	useEffect(() => {
+		if (selectedCartOrder?.id !== labelForCartIdRef.current) {
+			setLabelUrl(null);
+			setTrackingNumber(null);
+			labelForCartIdRef.current = null;
+		}
+	}, [selectedCartOrder?.id]);
+
+	// Check if the selected order already has a fulfillment with a label URL
+	const existingFulfillment = useMemo(() => {
+		if (!selectedCartOrder?.fulfillments.length) return null;
+		// Find the most recent fulfillment that has a valid label
+		const validFulfillment = [...selectedCartOrder.fulfillments]
+			.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+			.find(
+				f =>
+					f.labelDownloadUrl &&
+					f.labelStatus !== 'voided' &&
+					(!f.labelExpiresAt || new Date() < new Date(f.labelExpiresAt)),
+			);
+		return validFulfillment ?? null;
+	}, [selectedCartOrder?.fulfillments]);
+
+	// The effective label URL: either from a just-created label or from the persisted fulfillment
+	const effectiveLabelUrl = labelUrl ?? existingFulfillment?.labelDownloadUrl ?? null;
+	const effectiveTrackingNumber =
+		trackingNumber ?? existingFulfillment?.shippingTrackingNumber ?? null;
+
+	// Whether we're showing post-ship state (either just shipped or previously shipped)
+	const isPostShipState = !!effectiveLabelUrl;
+	const isFromExistingFulfillment = !labelUrl && !!existingFulfillment;
+
+	// All products in the order (for showing in post-ship state)
+	const allProducts = useMemo(
+		() => selectedCartOrder?.products ?? [],
+		[selectedCartOrder],
+	);
 
 	// Get products that need to be shipped
 	const unshippedProducts = useMemo(
@@ -82,6 +123,7 @@ export function ShipOrderModal() {
 			onSuccess: async data => {
 				setLabelUrl(data.labelDownloadUrl);
 				setTrackingNumber(data.trackingNumber);
+				labelForCartIdRef.current = selectedCartOrder?.id ?? null;
 				// Auto-open label in new window for printing
 				window.open(data.labelDownloadUrl, '_blank');
 
@@ -120,6 +162,7 @@ export function ShipOrderModal() {
 	const handleCloseModal = useCallback(async () => {
 		setLabelUrl(null);
 		setTrackingNumber(null);
+		labelForCartIdRef.current = null;
 		form.reset();
 
 		await queryClient.invalidateQueries({
@@ -153,35 +196,69 @@ export function ShipOrderModal() {
 			<ModalHeader icon='package' title={`Ship Order #${selectedCartOrder.orderId}`} />
 
 			{
-				labelUrl ?
-					// Success state - label created
+				isPostShipState ?
+					// Success state - label created (or previously shipped)
 					<ModalBody>
 						<Alert
-							title='Shipping label created!'
-							description='The label has been opened in a new window for printing.'
+							title={
+								isFromExistingFulfillment ?
+									'This order has already been shipped.'
+								:	'Shipping label created!'
+							}
+							description={
+								isFromExistingFulfillment ?
+									'You can reopen the label below to reprint it.'
+								:	"The label has been opened in a new window for printing. If it didn't open, check your pop-up blocker settings."
+							}
 							variant='success'
 						/>
 
 						<div className='flex flex-col gap-2 rounded-md border p-4'>
 							<Text variant='sm/medium'>Tracking Number:</Text>
 							<Text variant='md/normal' className='font-mono'>
-								{trackingNumber}
+								{effectiveTrackingNumber}
 							</Text>
 						</div>
 
+						{/* Products in this order */}
+						<div className='flex flex-col gap-2'>
+							<Text variant='sm/medium'>Products in This Order:</Text>
+							{allProducts.map(product => (
+								<div key={product.id} className='flex items-center gap-2'>
+									<Icon.package className='h-4 w-4 text-muted-foreground' />
+									<Text variant='sm/normal'>
+										{product.name}
+										{product.apparelSize && ` (${product.apparelSize})`}
+									</Text>
+								</div>
+							))}
+						</div>
+
 						<div className='flex flex-col gap-3'>
-							<Text variant='sm/normal' className='text-muted-foreground'>
-								A shipping confirmation email has been sent to the customer.
-							</Text>
+							{!isFromExistingFulfillment && (
+								<Text variant='sm/normal' className='text-muted-foreground'>
+									A shipping confirmation email has been sent to the customer.
+								</Text>
+							)}
 
 							<Button
 								look='secondary'
 								size='sm'
-								onClick={() => window.open(labelUrl, '_blank')}
+								onClick={() => window.open(effectiveLabelUrl, '_blank')}
 								startIcon='externalLink'
 							>
-								Reopen Label for Printing
+								{isFromExistingFulfillment ?
+									'Reprint Label'
+								:	'Reopen Label for Printing'}
 							</Button>
+
+							{!isFromExistingFulfillment && (
+								<Text variant='xs/normal' className='text-muted-foreground'>
+									If the label didn&apos;t open automatically, your browser may be
+									blocking pop-ups. Check your pop-up blocker settings and try the button
+									above.
+								</Text>
+							)}
 						</div>
 					</ModalBody>
 					// Form state - create label
