@@ -396,12 +396,12 @@ function CapabilitiesSection() {
 								<>
 									Ship orders yourself with integrated label creation, or let{' '}
 									<a
-										href={getAbsoluteUrl('nyc', '/services/fulfillment')}
+										href={getAbsoluteUrl('nyc', '/services/fulfilled')}
 										className='text-primary underline underline-offset-4 transition-colors hover:text-primary/80'
 										target='_blank'
 										rel='noopener noreferrer'
 									>
-										Barely Fulfillment
+										Barely Fulfilled
 									</a>{' '}
 									handle packing and shipping so you can focus on making music.
 								</>
