@@ -39,7 +39,7 @@ const config = {
 			{
 				source: '/',
 				destination: 'https://www.barely.ai/cart',
-				permanent: false,
+				permanent: true,
 			},
 		];
 	},

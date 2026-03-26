@@ -20,6 +20,7 @@ import {
 	Mail,
 	Package,
 	Ruler,
+	Send,
 	ShieldCheck,
 	TruckIcon,
 } from 'lucide-react';
@@ -183,7 +184,7 @@ function FunnelSection() {
 			number: '03',
 			title: 'Post-Purchase Upsell',
 			description:
-				'After checkout, present an exclusive offer using the saved payment method. One click to buy &mdash; no re-entering card details. This is where order value climbs.',
+				'After checkout, present an exclusive offer using the saved payment method. One click to buy — no re-entering card details. This is where order value climbs.',
 			icon: <Gift className='h-6 w-6' />,
 		},
 		{
@@ -246,7 +247,7 @@ function FunnelSection() {
 
 function FeatureDeepDiveSection() {
 	return (
-		<div className='bg-card py-24'>
+		<section className='bg-card py-24'>
 			<Container>
 				<AnimatedSection animation='fade-up'>
 					<Subheading dark>Features</Subheading>
@@ -267,7 +268,7 @@ function FeatureDeepDiveSection() {
 							icon='cart'
 							eyebrow='Cart Funnels'
 							title='Build focused checkout experiences'
-							description='Create a dedicated funnel for every campaign. Choose your main product, configure an order bump, set up a post-purchase upsell, and customize your success page &mdash; all from one screen.'
+							description='Create a dedicated funnel for every campaign. Choose your main product, configure an order bump, set up a post-purchase upsell, and customize your success page — all from one screen.'
 							graphic={
 								<div className='h-80 bg-[url(/screenshots/cart-builder.png)] bg-[size:851px_851px] bg-[left_-10px_top_-175px] bg-no-repeat' />
 							}
@@ -303,7 +304,7 @@ function FeatureDeepDiveSection() {
 							icon='upsell'
 							eyebrow='Post-Purchase Upsells'
 							title='One-click, no re-entry'
-							description='After the main purchase, present an exclusive product using the saved payment method. Fans buy with one click &mdash; no re-entering card details. A proven way to significantly increase order value.'
+							description='After the main purchase, present an exclusive product using the saved payment method. Fans buy with one click — no re-entering card details. A proven way to significantly increase order value.'
 							graphic={
 								<div className='h-80 bg-[url(/screenshots/cart-upsell.png)] bg-[size:551px_400px] bg-[left_-70px_top_-0px] bg-no-repeat' />
 							}
@@ -330,7 +331,7 @@ function FeatureDeepDiveSection() {
 					</AnimatedSection>
 				</div>
 			</Container>
-		</div>
+		</section>
 	);
 }
 
@@ -375,7 +376,7 @@ function CapabilitiesSection() {
 						<ValueCard
 							icon={<ShieldCheck className='h-6 w-6' />}
 							title='Transparent Pricing'
-							description='barely.cart takes a small percentage of product sales only &mdash; never from shipping, handling, or taxes. You always know exactly what you pay, on top of standard Stripe processing.'
+							description='barely.cart takes a small percentage of product sales only — never from shipping, handling, or taxes. You always know exactly what you pay, on top of standard Stripe processing.'
 						/>
 					</AnimatedSection>
 
@@ -383,7 +384,7 @@ function CapabilitiesSection() {
 						<ValueCard
 							icon={<BarChart3 className='h-6 w-6' />}
 							title='Full-Funnel Analytics'
-							description='Track every step from checkout view to purchase. Bump rates, upsell conversions, email collection, revenue &mdash; know exactly where fans drop off and where they convert.'
+							description='Track every step from checkout view to purchase. Bump rates, upsell conversions, email collection, revenue — know exactly where fans drop off and where they convert.'
 						/>
 					</AnimatedSection>
 
@@ -450,13 +451,13 @@ function IntegrationSection() {
 						<ValueCard
 							icon={<BarChart3 className='h-6 w-6' />}
 							title='Unified Analytics'
-							description='See the full fan journey from link click to email open to purchase &mdash; all in one dashboard. No stitching data across platforms.'
+							description='See the full fan journey from link click to email open to purchase — all in one dashboard. No stitching data across platforms.'
 						/>
 					</AnimatedSection>
 
 					<AnimatedSection animation='fade-up' delay={250}>
 						<ValueCard
-							icon={<Mail className='h-6 w-6' />}
+							icon={<Send className='h-6 w-6' />}
 							title='Post-Sale Campaigns'
 							description='Trigger email flows after purchase. Send follow-ups, request reviews, or promote future drops to fans who already bought.'
 						/>
