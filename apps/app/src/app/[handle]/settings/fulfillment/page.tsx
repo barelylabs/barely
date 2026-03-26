@@ -47,7 +47,7 @@ export default function FulfillmentSettingsPage() {
 					<Card>
 						<H size='5'>Not Available</H>
 						<Text variant='sm/normal' className='mt-2'>
-							Barely Fulfillment is not currently available for your workspace. Please
+							Barely Fulfilled is not currently available for your workspace. Please
 							contact support if you&apos;re interested in partnering with Barely for
 							order fulfillment.
 						</Text>

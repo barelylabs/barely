@@ -149,7 +149,7 @@ function CartOrderCard({
 							</Badge>
 							{cartOrder.fulfilledBy === 'barely' && (
 								<Badge size='xs' variant='info'>
-									Barely Fulfillment
+									Barely Fulfilled
 								</Badge>
 							)}
 						</div>

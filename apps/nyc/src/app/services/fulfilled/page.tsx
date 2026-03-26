@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 
-import { FulfillmentContent } from './fulfillment-content';
+import { FulfilledContent } from './fulfilled-content';
 
 export const metadata: Metadata = {
-	title: 'Merch Fulfillment for Independent Artists | Barely NYC',
+	title: 'Barely Fulfilled — Merch Fulfillment for Independent Artists | Barely NYC',
 	description:
 		'Ship us your inventory and we handle the rest. Pick, pack, and ship from Brooklyn. No minimums, no setup fees. Built into barely.cart.',
 	robots: {
@@ -12,6 +12,6 @@ export const metadata: Metadata = {
 	},
 };
 
-export default function FulfillmentPage() {
-	return <FulfillmentContent />;
+export default function FulfilledPage() {
+	return <FulfilledContent />;
 }

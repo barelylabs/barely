@@ -5,7 +5,7 @@ import { H } from '@barely/ui/typography';
 import { AnimatedSection } from '../../../components/marketing/animated-section';
 import { MarketingButton } from '../../../components/marketing/button';
 
-export function FulfillmentContent() {
+export function FulfilledContent() {
 	return (
 		<main className='pt-16'>
 			{/* Hero Section */}
@@ -29,7 +29,7 @@ export function FulfillmentContent() {
 							business days.
 						</p>
 						<div className='flex flex-col items-center gap-4 sm:flex-row sm:justify-center'>
-							<a href='mailto:adam@barely.nyc?subject=Fulfillment%20Inquiry'>
+							<a href='mailto:adam@barely.nyc?subject=Barely%20Fulfilled%20Inquiry'>
 								<MarketingButton marketingLook='hero-primary' size='lg'>
 									Get Started
 								</MarketingButton>
@@ -74,8 +74,9 @@ export function FulfillmentContent() {
 									Connect Your Storefront
 								</H>
 								<p className='text-white/70'>
-									Fulfillment is integrated directly into barely.cart. Your orders flow in
-									automatically — no manual syncing, no third-party connections to manage.
+									Barely Fulfilled is integrated directly into barely.cart. Your orders
+									flow in automatically — no manual syncing, no third-party connections to
+									manage.
 								</p>
 							</div>
 						</AnimatedSection>
@@ -400,7 +401,7 @@ export function FulfillmentContent() {
 							},
 							{
 								q: 'Do I need to use barely.cart?',
-								a: 'Yes — during the pilot program, fulfillment is exclusively available to barely.cart users. The integration is built directly into the platform: automatic order flow, dynamic packaging fee calculation at checkout, and the option to pass handling costs through to customers. Support for external platforms (Shopify, Bandcamp, etc.) is on the roadmap.',
+								a: 'Yes — during the pilot program, Barely Fulfilled is exclusively available to barely.cart users. The integration is built directly into the platform: automatic order flow, dynamic packaging fee calculation at checkout, and the option to pass handling costs through to customers. Support for external platforms (Shopify, Bandcamp, etc.) is on the roadmap.',
 							},
 							{
 								q: 'What does "handling pass-through" mean?',
@@ -412,7 +413,7 @@ export function FulfillmentContent() {
 							},
 							{
 								q: 'How do I track my inventory and orders?',
-								a: 'Everything is visible in your barely.cart dashboard — stock levels, order status, and fulfillment history.',
+								a: 'Everything is visible in your barely.cart dashboard — stock levels, order status, and order history.',
 							},
 						].map((faq, i) => (
 							<AnimatedSection key={i} animation='fade-up' delay={200 + i * 100}>
@@ -436,7 +437,7 @@ export function FulfillmentContent() {
 							Ready to stop packing boxes?
 						</H>
 						<div className='mb-6'>
-							<a href='mailto:adam@barely.nyc?subject=Fulfillment%20Inquiry'>
+							<a href='mailto:adam@barely.nyc?subject=Barely%20Fulfilled%20Inquiry'>
 								<MarketingButton marketingLook='hero-primary' size='lg'>
 									Get Started
 								</MarketingButton>
