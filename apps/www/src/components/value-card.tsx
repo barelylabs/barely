@@ -3,7 +3,7 @@ import { cn } from '@barely/utils';
 interface ValueCardProps {
 	icon: React.ReactNode;
 	title: string;
-	description: string;
+	description: React.ReactNode;
 	className?: string;
 }
 
