@@ -34,6 +34,16 @@ const config = {
 		],
 	},
 
+	redirects: async () => {
+		return [
+			{
+				source: '/',
+				destination: 'https://www.barely.ai/cart',
+				permanent: true,
+			},
+		];
+	},
+
 	typescript: { ignoreBuildErrors: true },
 	eslint: { ignoreDuringBuilds: true },
 
