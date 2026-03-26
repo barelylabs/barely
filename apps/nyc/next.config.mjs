@@ -32,6 +32,16 @@ const config = {
 		],
 	},
 
+	async redirects() {
+		return [
+			{
+				source: '/services/fulfillment',
+				destination: '/services/fulfilled',
+				permanent: true,
+			},
+		];
+	},
+
 	typescript: { ignoreBuildErrors: true },
 	eslint: { ignoreDuringBuilds: true },
 
