@@ -186,6 +186,13 @@ export function ShipOrderModal() {
 	const carrier = isUK ? 'evri' : 'usps';
 	const CarrierIcon = Icon[carrier];
 
+	// NOTE: Must mirror the backend's getShippingOriginAddress() logic in fulfillment.ts.
+	// Barely-fulfilled orders ship from the US warehouse; artist-fulfilled use workspace address.
+	const shipFromCountry =
+		isBarelyFulfilled ? 'US' : (workspace.shippingAddressCountry?.toUpperCase() ?? 'US');
+	const shipToCountry = selectedCartOrder.shippingAddressCountry?.toUpperCase() ?? 'US';
+	const isInternational = shipFromCountry !== shipToCountry;
+
 	return (
 		<Modal
 			showModal={showModal}
@@ -342,6 +349,14 @@ export function ShipOrderModal() {
 										</div>
 									</div>
 								</div>
+
+								{isInternational && (
+									<Alert
+										title='International shipment'
+										description='A customs declaration will be auto-generated based on the product types and prices in this order.'
+										variant='info'
+									/>
+								)}
 
 								{/* Warning about label purchase */}
 								<Alert
