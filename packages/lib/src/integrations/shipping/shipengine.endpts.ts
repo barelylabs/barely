@@ -430,14 +430,14 @@ export interface CreateShippingLabelProps {
 	customs?: {
 		contents: 'merchandise' | 'gift' | 'documents' | 'sample';
 		nonDelivery: 'return_to_sender' | 'treat_as_abandoned';
-		items: Array<{
+		items: {
 			description: string;
 			quantity: number;
 			valueInCents: number;
 			currency: string;
 			harmonizedTariffCode?: string;
 			countryOfOrigin?: string;
-		}>;
+		}[];
 	};
 }
 

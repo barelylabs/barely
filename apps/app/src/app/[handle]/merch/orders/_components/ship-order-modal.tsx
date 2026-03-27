@@ -186,6 +186,8 @@ export function ShipOrderModal() {
 	const carrier = isUK ? 'evri' : 'usps';
 	const CarrierIcon = Icon[carrier];
 
+	// NOTE: Must mirror the backend's getShippingOriginAddress() logic in fulfillment.ts.
+	// Barely-fulfilled orders ship from the US warehouse; artist-fulfilled use workspace address.
 	const shipFromCountry =
 		isBarelyFulfilled ? 'US' : (workspace.shippingAddressCountry?.toUpperCase() ?? 'US');
 	const shipToCountry = selectedCartOrder.shippingAddressCountry?.toUpperCase() ?? 'US';

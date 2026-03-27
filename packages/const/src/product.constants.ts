@@ -54,7 +54,7 @@ export const MERCH_CUSTOMS_DESCRIPTIONS: Record<MerchType, string> = {
 	digital: 'Digital Product',
 };
 
-export const MERCH_HS_CODES: Record<MerchType, string> = {
+export const MERCH_HS_CODES: Record<MerchType, string | undefined> = {
 	cd: '8523.49',
 	vinyl: '8523.80',
 	cassette: '8523.29',
@@ -63,7 +63,7 @@ export const MERCH_HS_CODES: Record<MerchType, string> = {
 	sticker: '4911.91',
 	poster: '4911.91',
 	print: '4911.91',
-	digital: '',
+	digital: undefined,
 };
 
 export const APPAREL_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'] as const;

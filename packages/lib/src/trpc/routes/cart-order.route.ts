@@ -773,7 +773,7 @@ export const cartOrderRoute = {
 						nonDelivery: 'return_to_sender' as const,
 						items: input.products
 							.filter(p => p.fulfilled)
-							.map(fp => {
+							.flatMap(fp => {
 								let product: Product | null = null;
 								// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 								if (cart.mainProduct && cart.mainProduct.id === fp.id)
@@ -783,17 +783,22 @@ export const cartOrderRoute = {
 								else if (cart.upsellProduct && cart.upsellProduct.id === fp.id)
 									product = cart.upsellProduct;
 
-								return {
-									description:
-										product?.customsDescription ??
-										MERCH_CUSTOMS_DESCRIPTIONS[product?.merchType ?? 'cd'],
-									quantity: 1,
-									valueInCents: product?.price ?? 0,
-									currency: region === 'US' ? 'USD' : 'GBP',
-									harmonizedTariffCode:
-										product?.hsCode ?? MERCH_HS_CODES[product?.merchType ?? 'cd'],
-									countryOfOrigin: product?.countryOfOrigin ?? shipFromCountry,
-								};
+								// Skip unresolved products and digital products (not physical goods)
+								if (!product || product.merchType === 'digital') return [];
+
+								return [
+									{
+										description:
+											product.customsDescription ??
+											MERCH_CUSTOMS_DESCRIPTIONS[product.merchType],
+										quantity: 1,
+										valueInCents: product.price,
+										currency: region === 'US' ? 'USD' : 'GBP',
+										harmonizedTariffCode:
+											product.hsCode ?? MERCH_HS_CODES[product.merchType],
+										countryOfOrigin: product.countryOfOrigin ?? shipFromCountry,
+									},
+								];
 							}),
 					}
 				:	undefined;
