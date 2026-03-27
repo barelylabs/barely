@@ -1,5 +1,6 @@
 import type { ApparelSize, Product } from '@barely/validators';
 import type { TRPCRouterRecord } from '@trpc/server';
+import { MERCH_CUSTOMS_DESCRIPTIONS, MERCH_HS_CODES } from '@barely/const';
 import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
 import {
@@ -760,7 +761,44 @@ export const cartOrderRoute = {
 					},
 				});
 
-			// 6. Create shipping label
+			// 6. Build customs data for international shipments
+			const shipFromCountry = (originAddress.country ?? 'US').toUpperCase();
+			const shipToCountry = (cart.shippingAddressCountry ?? 'US').toUpperCase();
+			const isInternational = shipFromCountry !== shipToCountry;
+
+			const customs =
+				isInternational ?
+					{
+						contents: 'merchandise' as const,
+						nonDelivery: 'return_to_sender' as const,
+						items: input.products
+							.filter(p => p.fulfilled)
+							.map(fp => {
+								let product: Product | null = null;
+								// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+								if (cart.mainProduct && cart.mainProduct.id === fp.id)
+									product = cart.mainProduct;
+								else if (cart.bumpProduct && cart.bumpProduct.id === fp.id)
+									product = cart.bumpProduct;
+								else if (cart.upsellProduct && cart.upsellProduct.id === fp.id)
+									product = cart.upsellProduct;
+
+								return {
+									description:
+										product?.customsDescription ??
+										MERCH_CUSTOMS_DESCRIPTIONS[product?.merchType ?? 'cd'],
+									quantity: 1,
+									valueInCents: product?.price ?? 0,
+									currency: region === 'US' ? 'USD' : 'GBP',
+									harmonizedTariffCode:
+										product?.hsCode ?? MERCH_HS_CODES[product?.merchType ?? 'cd'],
+									countryOfOrigin: product?.countryOfOrigin ?? shipFromCountry,
+								};
+							}),
+					}
+				:	undefined;
+
+			// 7. Create shipping label
 			let labelResult;
 
 			try {
@@ -802,6 +840,7 @@ export const cartOrderRoute = {
 					deliveryConfirmation: input.deliveryConfirmation,
 					insuranceAmount: input.insuranceAmount,
 					region,
+					customs,
 				});
 			} catch (error) {
 				console.error('Failed to create shipping label:', error);

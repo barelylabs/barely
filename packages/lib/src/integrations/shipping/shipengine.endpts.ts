@@ -425,6 +425,20 @@ export interface CreateShippingLabelProps {
 
 	// Region flag
 	region: 'US' | 'UK';
+
+	// Customs (for international shipments)
+	customs?: {
+		contents: 'merchandise' | 'gift' | 'documents' | 'sample';
+		nonDelivery: 'return_to_sender' | 'treat_as_abandoned';
+		items: Array<{
+			description: string;
+			quantity: number;
+			valueInCents: number;
+			currency: string;
+			harmonizedTariffCode?: string;
+			countryOfOrigin?: string;
+		}>;
+	};
 }
 
 export interface CreateShippingLabelResponse {
@@ -515,6 +529,23 @@ export async function createShippingLabel(
 			],
 
 			confirmation: props.deliveryConfirmation ?? 'none',
+
+			...(props.customs && {
+				customs: {
+					contents: props.customs.contents,
+					non_delivery: props.customs.nonDelivery,
+					customs_items: props.customs.items.map(item => ({
+						description: item.description,
+						quantity: item.quantity,
+						value: {
+							amount: item.valueInCents / 100,
+							currency: item.currency,
+						},
+						harmonized_tariff_code: item.harmonizedTariffCode,
+						country_of_origin: item.countryOfOrigin,
+					})),
+				},
+			}),
 		},
 
 		label_format: 'pdf',

@@ -42,6 +42,30 @@ export const MERCH_DIMENSIONS: Record<
 	digital: { weight: 0, width: 0, length: 0, height: 0 },
 };
 
+export const MERCH_CUSTOMS_DESCRIPTIONS: Record<MerchType, string> = {
+	cd: 'Compact Disc',
+	vinyl: 'Vinyl Record',
+	cassette: 'Cassette Tape',
+	tshirt: 'Cotton T-Shirt',
+	sweatshirt: 'Cotton Sweatshirt',
+	sticker: 'Sticker',
+	poster: 'Paper Poster',
+	print: 'Art Print',
+	digital: 'Digital Product',
+};
+
+export const MERCH_HS_CODES: Record<MerchType, string> = {
+	cd: '8523.49',
+	vinyl: '8523.80',
+	cassette: '8523.29',
+	tshirt: '6109.10',
+	sweatshirt: '6110.20',
+	sticker: '4911.91',
+	poster: '4911.91',
+	print: '4911.91',
+	digital: '',
+};
+
 export const APPAREL_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'] as const;
 export type ApparelSize = (typeof APPAREL_SIZES)[number];
 export function isApparelSize(size: string): size is ApparelSize {

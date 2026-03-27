@@ -42,6 +42,11 @@ export const Products = pgTable('Products', {
 	width: integer('width').default(0),
 	length: integer('length').default(0),
 	height: integer('height').default(0),
+
+	// customs (optional overrides — defaults are auto-derived from merchType)
+	customsDescription: varchar('customsDescription', { length: 255 }),
+	hsCode: varchar('hsCode', { length: 15 }),
+	countryOfOrigin: varchar('countryOfOrigin', { length: 2 }),
 });
 
 export const Product_Relations = relations(Products, ({ one, many }) => ({
