@@ -10,6 +10,10 @@ const SPAM_PATTERNS = [
 	'xmlrpc',
 	'.trash',
 	'.env',
+	'phpinfo',
+	'_profiler',
+	'_environment',
+	'.git',
 ];
 
 export function isSpamRequest(pathname: string): boolean {
