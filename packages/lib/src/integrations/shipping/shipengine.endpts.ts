@@ -121,7 +121,7 @@ const createLabelResponseSchema = z.object({
 	form_download: z
 		.object({
 			href: z.string(),
-			type: z.string(),
+			type: z.string().optional(),
 		})
 		.nullish(),
 });
@@ -189,9 +189,9 @@ export async function getShipStationRateEstimates(props: ShippingEstimateProps) 
 	const isUK = shipFrom.countryCode === 'GB';
 
 	const carriers =
-		(props.carriers ?? isUS) ? ['usps', 'ups']
+		(props.carriers ?? isUS) ? ['usps']
 		: isUK ? ['evri', 'dpd']
-		: ['ups'];
+		: ['usps'];
 
 	const carrier_ids = carriers.map(carrier => {
 		switch (carrier) {
