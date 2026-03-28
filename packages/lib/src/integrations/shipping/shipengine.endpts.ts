@@ -121,7 +121,7 @@ const createLabelResponseSchema = z.object({
 	form_download: z
 		.object({
 			href: z.string(),
-			type: z.string(),
+			type: z.string().optional(),
 		})
 		.nullish(),
 });
