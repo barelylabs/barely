@@ -1,4 +1,5 @@
 import { dbPool, makePool } from '@barely/db/pool';
+import type { CART_STAGES } from '@barely/db/sql';
 import { CartFulfillmentProducts, CartFulfillments, Carts } from '@barely/db/sql';
 import { Flow_Runs } from '@barely/db/sql/flow.sql';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
@@ -17,8 +18,10 @@ interface CleanupResult {
 	stripeErrors: number;
 }
 
+type CartStage = (typeof CART_STAGES)[number];
+
 interface CleanupOptions {
-	stages?: (typeof Carts.$inferSelect)['stage'][];
+	stages?: CartStage[];
 	requireNoEmail?: boolean;
 	olderThan: Date;
 }
@@ -81,52 +84,74 @@ async function cleanupCartsByCriteria(
 
 		const cartIds = carts.map(c => c.id);
 
-		// Step 1: Cancel Stripe PaymentIntents (best-effort)
-		for (const cart of carts) {
-			const stripeAccount =
-				isProduction() ?
-					cart.stripeConnectAccountId
-				:	cart.stripeConnectAccountId_devMode;
+		// Step 1: Cancel Stripe PaymentIntents (best-effort, parallelized per batch)
+		const stripeResults = await Promise.allSettled(
+			carts.map(async cart => {
+				const stripeAccount =
+					isProduction() ?
+						cart.stripeConnectAccountId
+					:	cart.stripeConnectAccountId_devMode;
 
-			const checkoutCanceled = await cancelStripePaymentIntent(
-				cart.checkoutStripePaymentIntentId,
-				stripeAccount,
-			);
+				let canceled = false;
+				let errors = 0;
 
-			const upsellCanceled = await cancelStripePaymentIntent(
-				cart.upsellStripePaymentIntentId,
-				stripeAccount,
-			);
+				const checkoutCanceled = await cancelStripePaymentIntent(
+					cart.checkoutStripePaymentIntentId,
+					stripeAccount,
+				);
+				if (checkoutCanceled) {
+					canceled = true;
+				} else if (stripeAccount && cart.checkoutStripePaymentIntentId) {
+					errors++;
+				}
 
-			if (checkoutCanceled || upsellCanceled) {
-				totalStripeCanceled++;
-			} else if (stripeAccount && cart.checkoutStripePaymentIntentId) {
+				const upsellCanceled = await cancelStripePaymentIntent(
+					cart.upsellStripePaymentIntentId,
+					stripeAccount,
+				);
+				if (upsellCanceled) {
+					canceled = true;
+				} else if (stripeAccount && cart.upsellStripePaymentIntentId) {
+					errors++;
+				}
+
+				return { canceled, errors };
+			}),
+		);
+
+		for (const result of stripeResults) {
+			if (result.status === 'fulfilled') {
+				if (result.value.canceled) totalStripeCanceled++;
+				totalStripeErrors += result.value.errors;
+			} else {
 				totalStripeErrors++;
 			}
 		}
 
-		// Step 2: Delete CartFulfillmentProducts for fulfillments belonging to these carts
+		// Step 2: Delete related records and carts in a transaction
 		const fulfillments = await db
 			.select({ id: CartFulfillments.id })
 			.from(CartFulfillments)
 			.where(inArray(CartFulfillments.cartId, cartIds));
 
-		if (fulfillments.length > 0) {
-			const fulfillmentIds = fulfillments.map(f => f.id);
-			await db
-				.delete(CartFulfillmentProducts)
-				.where(inArray(CartFulfillmentProducts.cartFulfillmentId, fulfillmentIds));
-			await db.delete(CartFulfillments).where(inArray(CartFulfillments.cartId, cartIds));
-		}
+		await db.transaction(async tx => {
+			if (fulfillments.length > 0) {
+				const fulfillmentIds = fulfillments.map(f => f.id);
+				await tx
+					.delete(CartFulfillmentProducts)
+					.where(inArray(CartFulfillmentProducts.cartFulfillmentId, fulfillmentIds));
+				await tx
+					.delete(CartFulfillments)
+					.where(inArray(CartFulfillments.cartId, cartIds));
+			}
 
-		// Step 3: Null out Flow_Runs.triggerCartId references
-		await db
-			.update(Flow_Runs)
-			.set({ triggerCartId: null })
-			.where(inArray(Flow_Runs.triggerCartId, cartIds));
+			await tx
+				.update(Flow_Runs)
+				.set({ triggerCartId: null })
+				.where(inArray(Flow_Runs.triggerCartId, cartIds));
 
-		// Step 4: Delete carts
-		await db.delete(Carts).where(inArray(Carts.id, cartIds));
+			await tx.delete(Carts).where(inArray(Carts.id, cartIds));
+		});
 
 		totalDeleted += carts.length;
 	}
@@ -156,6 +181,7 @@ async function cleanupCartsByCriteria(
 export const dailyCartCleanup = schedules.task({
 	id: 'daily-cart-cleanup',
 	cron: { pattern: '0 3 * * *', timezone: 'UTC' },
+	maxDuration: 60 * 10, // 10 minutes
 	run: async () => {
 		const pool = makePool();
 		const startTime = Date.now();
