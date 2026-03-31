@@ -1,6 +1,6 @@
 import { dbPool, makePool } from '@barely/db/pool';
 import { Invoices } from '@barely/db/sql';
-import { schedules } from '@trigger.dev/sdk/v3';
+import { schedules } from '@trigger.dev/sdk';
 import { and, eq, gte, lt, or } from 'drizzle-orm';
 
 import { sendInvoiceReminderEmail } from '../functions/invoice-email.fns';

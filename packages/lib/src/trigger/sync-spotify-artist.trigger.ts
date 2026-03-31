@@ -6,7 +6,7 @@ import { SpotifyLinkedTracks, Tracks } from '@barely/db/sql/track.sql';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
 import { ingestStreamingStat } from '@barely/tb/ingest';
 import { isValidSpotifyId, newId } from '@barely/utils';
-import { task } from '@trigger.dev/sdk/v3';
+import { task } from '@trigger.dev/sdk';
 import { and, eq } from 'drizzle-orm';
 
 import { libEnv } from '../../env';

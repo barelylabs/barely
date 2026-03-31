@@ -2,7 +2,7 @@ import type { EmailDomain } from '@barely/validators';
 import { dbHttp } from '@barely/db/client';
 import { EmailDomains } from '@barely/db/sql';
 import { resend } from '@barely/email';
-import { logger, task, wait } from '@trigger.dev/sdk/v3';
+import { logger, task, wait } from '@trigger.dev/sdk';
 import { eq } from 'drizzle-orm';
 
 export const verifyEmailDomain = task({

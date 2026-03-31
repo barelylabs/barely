@@ -13,7 +13,7 @@ import {
 } from '@barely/email/templates/auth';
 import { getAbsoluteUrl, newId } from '@barely/utils';
 import { acceptInviteSchema, inviteMemberSchema } from '@barely/validators';
-import { tasks } from '@trigger.dev/sdk/v3';
+import { tasks } from '@trigger.dev/sdk';
 import { TRPCError } from '@trpc/server';
 import { and, eq, gt, or } from 'drizzle-orm';
 

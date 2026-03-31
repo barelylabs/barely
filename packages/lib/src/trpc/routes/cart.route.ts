@@ -11,7 +11,7 @@ import {
 	updateCheckoutCartFromCheckoutSchema,
 	updateShippingAddressFromCheckoutSchema,
 } from '@barely/validators';
-import { tasks } from '@trigger.dev/sdk/v3';
+import { tasks } from '@trigger.dev/sdk';
 import { TRPCError } from '@trpc/server';
 import { waitUntil } from '@vercel/functions';
 import { and, eq, notInArray } from 'drizzle-orm';

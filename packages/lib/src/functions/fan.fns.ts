@@ -1,7 +1,7 @@
 import { dbHttp } from '@barely/db/client';
 import { Fans, Flow_Triggers } from '@barely/db/sql';
 import { newId, raise } from '@barely/utils';
-import { tasks } from '@trigger.dev/sdk/v3';
+import { tasks } from '@trigger.dev/sdk';
 import { and, eq } from 'drizzle-orm';
 
 import type { handleFlow } from '../trigger/flow.trigger';

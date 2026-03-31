@@ -24,7 +24,7 @@ import {
 	raise,
 } from '@barely/utils';
 import { neonConfig } from '@neondatabase/serverless';
-import { logger, task, tasks, wait } from '@trigger.dev/sdk/v3';
+import { logger, task, tasks, wait } from '@trigger.dev/sdk';
 import { and, asc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import ws from 'ws';
 

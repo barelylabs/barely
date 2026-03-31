@@ -8,7 +8,7 @@ import type {
 import { dbHttp } from '@barely/db/client';
 // import { db } from '@barely/db';
 import { PressKits } from '@barely/db/sql/press-kit.sql';
-import { tasks, waitUntil } from '@trigger.dev/sdk/v3';
+import { tasks, waitUntil } from '@trigger.dev/sdk';
 import { eq, or, sql } from 'drizzle-orm';
 
 import type { generateFileBlurHash } from '../trigger';

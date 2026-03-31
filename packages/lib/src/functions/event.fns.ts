@@ -41,7 +41,7 @@ import {
 	isDevelopment,
 	newId,
 } from '@barely/utils';
-import { tasks } from '@trigger.dev/sdk/v3';
+import { tasks } from '@trigger.dev/sdk';
 import { eq } from 'drizzle-orm';
 
 import type { MetaEvent } from '../integrations/meta/meta.endpts.event';

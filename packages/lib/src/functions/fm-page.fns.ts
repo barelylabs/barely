@@ -1,6 +1,6 @@
 import { dbHttp } from '@barely/db/client';
 import { FmLinks, FmPages } from '@barely/db/sql';
-import { tasks } from '@trigger.dev/sdk/v3';
+import { tasks } from '@trigger.dev/sdk';
 import { waitUntil } from '@vercel/functions';
 import { and, asc, eq } from 'drizzle-orm';
 

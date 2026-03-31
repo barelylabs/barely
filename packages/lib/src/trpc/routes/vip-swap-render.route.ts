@@ -10,7 +10,7 @@ import {
 	vipSwapDownloadRequestSchema,
 	vipSwapDownloadTokenSchema,
 } from '@barely/validators';
-import { tasks, waitUntil } from '@trigger.dev/sdk/v3';
+import { tasks, waitUntil } from '@trigger.dev/sdk';
 import { TRPCError } from '@trpc/server';
 import { and, eq, isNull } from 'drizzle-orm';
 import { z } from 'zod/v4';

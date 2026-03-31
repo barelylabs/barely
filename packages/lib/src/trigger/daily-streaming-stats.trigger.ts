@@ -1,7 +1,7 @@
 import { dbPool, makePool } from '@barely/db/pool';
 import { ProviderAccounts } from '@barely/db/sql/provider-account.sql';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
-import { schedules, tasks } from '@trigger.dev/sdk/v3';
+import { schedules, tasks } from '@trigger.dev/sdk';
 import { and, eq, isNotNull, ne } from 'drizzle-orm';
 
 import type { syncSpotifyArtist } from './sync-spotify-artist.trigger';

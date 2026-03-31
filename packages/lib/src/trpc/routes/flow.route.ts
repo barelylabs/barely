@@ -13,7 +13,7 @@ import { EmailTemplates, Flow_Triggers, FlowActions, Flows } from '@barely/db/sq
 import { sqlAnd, sqlCount, sqlStringContains } from '@barely/db/utils';
 import { newId, raiseTRPCError } from '@barely/utils';
 import { selectWorkspaceFlowsSchema, updateFlowAndNodesSchema } from '@barely/validators';
-import { tasks } from '@trigger.dev/sdk/v3';
+import { tasks } from '@trigger.dev/sdk';
 import { TRPCError } from '@trpc/server';
 import { and, asc, desc, eq, gt, lt, notInArray, or } from 'drizzle-orm';
 import { z } from 'zod/v4';

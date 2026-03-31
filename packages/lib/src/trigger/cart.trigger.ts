@@ -1,7 +1,7 @@
 import type { UpdateCart } from '@barely/validators';
 import { dbHttp } from '@barely/db/client';
 import { Carts } from '@barely/db/sql';
-import { logger, schedules, task, wait } from '@trigger.dev/sdk/v3';
+import { logger, schedules, task, wait } from '@trigger.dev/sdk';
 import { and, eq, lt } from 'drizzle-orm';
 
 import { funnelWith, sendCartReceiptEmail } from '../functions/cart.fns';
@@ -50,8 +50,8 @@ export const handleAbandonedUpsell = task({
 
 		logger.log('Cart abandoned: ' + cart.id);
 	},
-	handleError: error => {
-		logger.error('Error handling abandoned upsell cart', error);
+	catchError: ({ error }) => {
+		logger.error('Error handling abandoned upsell cart', { error });
 	},
 });
 
