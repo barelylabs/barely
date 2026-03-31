@@ -13,7 +13,7 @@ import {
 	updateEmailBroadcastSchema,
 	updateEmailBroadcastWithTemplateSchema,
 } from '@barely/validators';
-import { runs, tasks } from '@trigger.dev/sdk/v3';
+import { runs, tasks } from '@trigger.dev/sdk';
 import { TRPCError } from '@trpc/server';
 import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
 

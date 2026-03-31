@@ -10,7 +10,7 @@ import {
 	selectWorkspaceEmailDomainsSchema,
 	updateEmailDomainSchema,
 } from '@barely/validators';
-import { tasks } from '@trigger.dev/sdk/v3';
+import { tasks } from '@trigger.dev/sdk';
 import { TRPCError } from '@trpc/server';
 import { and, asc, desc, eq, gt, lt, or } from 'drizzle-orm';
 import { z } from 'zod/v4';

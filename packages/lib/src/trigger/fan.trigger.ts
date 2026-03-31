@@ -7,7 +7,7 @@ import { dbHttp } from '@barely/db/client';
 import { Fans, Files } from '@barely/db/sql';
 import { getFullNameFromFirstAndLast, newId, parseFullName } from '@barely/utils';
 import { insertFanSchema } from '@barely/validators';
-import { task, tasks } from '@trigger.dev/sdk/v3';
+import { task, tasks } from '@trigger.dev/sdk';
 import { parse } from 'csv-parse';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod/v4';

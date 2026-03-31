@@ -13,7 +13,7 @@ import {
 } from '@barely/files';
 import { newId, raiseTRPCError } from '@barely/utils';
 import { selectWorkspaceFilesSchema, uploadFileSchema } from '@barely/validators';
-import { tasks } from '@trigger.dev/sdk/v3';
+import { tasks } from '@trigger.dev/sdk';
 import { TRPCError } from '@trpc/server';
 import { lookup } from '@uploadthing/mime-types';
 import { ALLOWED_FILE_TYPES, getTypeFromFileName } from '@uploadthing/shared';

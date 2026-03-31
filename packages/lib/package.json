@@ -129,7 +129,7 @@
 		"@sindresorhus/slugify": "2.2.1",
 		"@sparticuz/chromium": "^138.0.2",
 		"@t3-oss/env-nextjs": "catalog:",
-		"@trigger.dev/sdk": "3.3.17",
+		"@trigger.dev/sdk": "4.4.3",
 		"@trpc/server": "catalog:",
 		"@trpc/tanstack-react-query": "catalog:",
 		"@uploadthing/mime-types": "0.2.2",
@@ -217,7 +217,7 @@
 		"react": "catalog:react19",
 		"react-dom": "catalog:react19",
 		"react-hook-form": "catalog:",
-		"trigger.dev": "3.3.17",
+		"trigger.dev": "4.4.3",
 		"typescript": "catalog:",
 		"vitest": "catalog:"
 	},

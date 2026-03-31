@@ -1,6 +1,6 @@
 import { dbHttp } from '@barely/db/client';
 import { Invoices, Workspaces } from '@barely/db/sql';
-import { tasks } from '@trigger.dev/sdk/v3';
+import { tasks } from '@trigger.dev/sdk';
 import { and, desc, eq, isNull } from 'drizzle-orm';
 
 import type { sendUsageWarning } from '../trigger';

@@ -18,7 +18,7 @@ import {
 	parseFullName,
 	wait as waitUtil,
 } from '@barely/utils';
-import { task, tasks, wait } from '@trigger.dev/sdk/v3';
+import { task, tasks, wait } from '@trigger.dev/sdk';
 import { eq } from 'drizzle-orm';
 
 import type { sendUsageWarning } from './workspace-usage';

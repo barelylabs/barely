@@ -34,7 +34,7 @@ import {
 	updateBioLinkSchema,
 	updateBioSchema,
 } from '@barely/validators';
-import { tasks } from '@trigger.dev/sdk/v3';
+import { tasks } from '@trigger.dev/sdk';
 import { TRPCError } from '@trpc/server';
 import { waitUntil } from '@vercel/functions';
 import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';

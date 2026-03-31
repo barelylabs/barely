@@ -1,6 +1,6 @@
 import { dbHttp } from '@barely/db/client';
 import { BrandKits, Files } from '@barely/db/sql';
-import { logger, task } from '@trigger.dev/sdk/v3';
+import { logger, task } from '@trigger.dev/sdk';
 import { eq } from 'drizzle-orm';
 
 import { getBlurHash } from '../functions/file.blurhash';

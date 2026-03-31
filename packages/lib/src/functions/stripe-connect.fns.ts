@@ -6,7 +6,7 @@ import { Flow_Triggers } from '@barely/db/sql/flow.sql';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
 import { isProduction, raise } from '@barely/utils';
 import { stripeConnectChargeMetadataSchema } from '@barely/validators/schemas';
-import { tasks } from '@trigger.dev/sdk/v3';
+import { tasks } from '@trigger.dev/sdk';
 import { and, eq, or } from 'drizzle-orm';
 import { Stripe } from 'stripe';
 

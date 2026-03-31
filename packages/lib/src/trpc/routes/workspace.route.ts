@@ -26,7 +26,7 @@ import {
 	workspaceAssetsSchema,
 } from '@barely/validators';
 import { NeonDbError } from '@neondatabase/serverless';
-import { tasks } from '@trigger.dev/sdk/v3';
+import { tasks } from '@trigger.dev/sdk';
 import { TRPCError } from '@trpc/server';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import { z } from 'zod/v4';

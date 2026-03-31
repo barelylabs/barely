@@ -1,6 +1,6 @@
 import { dbHttp } from '@barely/db/client';
 import { Workspaces } from '@barely/db/sql';
-import { logger, schedules, task } from '@trigger.dev/sdk/v3';
+import { logger, schedules, task } from '@trigger.dev/sdk';
 import { eq, or } from 'drizzle-orm';
 
 import type { UsageLimitType } from '../functions/usage.fns';

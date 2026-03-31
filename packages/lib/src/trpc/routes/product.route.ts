@@ -11,7 +11,7 @@ import {
 	selectWorkspaceProductsSchema,
 	updateProductSchema,
 } from '@barely/validators';
-import { tasks, waitUntil } from '@trigger.dev/sdk/v3';
+import { tasks, waitUntil } from '@trigger.dev/sdk';
 import {
 	and,
 	asc,

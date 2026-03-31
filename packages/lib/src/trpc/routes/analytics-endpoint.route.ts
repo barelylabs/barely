@@ -2,7 +2,7 @@ import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { AnalyticsEndpoints } from '@barely/db/sql';
 import { insertAnalyticsEndpointSchema } from '@barely/validators';
-import { tasks } from '@trigger.dev/sdk/v3';
+import { tasks } from '@trigger.dev/sdk';
 import { TRPCError } from '@trpc/server';
 import { and, eq } from 'drizzle-orm';
 

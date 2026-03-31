@@ -13,7 +13,7 @@ import {
 	selectWorkspaceFmPagesSchema,
 	updateFmPageSchema,
 } from '@barely/validators';
-import { tasks, waitUntil } from '@trigger.dev/sdk/v3';
+import { tasks, waitUntil } from '@trigger.dev/sdk';
 import { and, asc, desc, eq, gt, inArray, isNull, lt, notInArray, or } from 'drizzle-orm';
 import { z } from 'zod/v4';
 

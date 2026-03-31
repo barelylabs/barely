@@ -1,7 +1,7 @@
 import { dbPool, makePool } from '@barely/db/pool';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
 import { isProduction } from '@barely/utils';
-import { schedules } from '@trigger.dev/sdk/v3';
+import { schedules } from '@trigger.dev/sdk';
 import { and, eq, isNotNull } from 'drizzle-orm';
 
 import { verifyStripeConnectStatus } from '../functions/stripe-connect.fns';
