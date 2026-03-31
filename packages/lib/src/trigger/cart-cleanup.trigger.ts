@@ -1,5 +1,5 @@
-import { dbPool, makePool } from '@barely/db/pool';
 import type { CART_STAGES } from '@barely/db/sql';
+import { dbPool, makePool } from '@barely/db/pool';
 import { CartFulfillmentProducts, CartFulfillments, Carts } from '@barely/db/sql';
 import { Flow_Runs } from '@barely/db/sql/flow.sql';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
