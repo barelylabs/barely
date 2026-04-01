@@ -30,11 +30,41 @@ export default function Loading() {
 				subtitle='Rearrange and toggle blocks for your bio page'
 			/>
 			<DashContent>
-				<div className='flex flex-col gap-2'>
+				<div className='flex flex-col'>
+					{/* SEO Fields skeleton */}
+					<div className='mb-8 space-y-4'>
+						<div>
+							<div className='mb-1 h-4 w-28 animate-pulse rounded bg-muted' />
+							<div className='h-10 w-full animate-pulse rounded-md bg-muted' />
+							<div className='mt-1 h-3 w-72 animate-pulse rounded bg-muted' />
+						</div>
+						<div>
+							<div className='mb-1 h-4 w-36 animate-pulse rounded bg-muted' />
+							<div className='h-20 w-full animate-pulse rounded-md bg-muted' />
+							<div className='mt-1 h-3 w-72 animate-pulse rounded bg-muted' />
+						</div>
+					</div>
+
+					{/* Add block button skeleton */}
+					<div className='mb-8'>
+						<div className='h-11 w-full animate-pulse rounded-md bg-muted' />
+					</div>
+
+					{/* Header block card (fixed) */}
 					<BlockCardSkeleton />
+
+					{/* Dynamic block cards */}
+					<div className='h-8' />
 					<BlockCardSkeleton />
+					<div className='h-8' />
 					<BlockCardSkeleton />
+					<div className='h-8' />
 					<BlockCardSkeleton />
+
+					{/* Branding block card (fixed) */}
+					<div className='mt-8'>
+						<BlockCardSkeleton />
+					</div>
 				</div>
 			</DashContent>
 		</>
