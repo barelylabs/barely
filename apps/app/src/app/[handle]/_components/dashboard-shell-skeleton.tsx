@@ -3,7 +3,7 @@ import { Logo } from '@barely/ui/logo';
 
 export function DashboardShellSkeleton() {
 	return (
-		<div className='flex h-screen w-screen bg-accent'>
+		<div className='flex h-screen w-full overflow-x-hidden bg-accent'>
 			{/* Product Sidebar Skeleton */}
 			<aside className='fixed left-0 top-0 z-30 flex h-screen w-16 flex-col items-center bg-accent'>
 				<Logo className='mb-3 mt-5 h-7 w-7' />
