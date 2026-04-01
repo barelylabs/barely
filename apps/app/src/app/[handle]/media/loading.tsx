@@ -1,5 +1,5 @@
 import { DashPageSkeleton } from '~/app/[handle]/_components/dash-page-skeleton';
 
 export default function Loading() {
-	return <DashPageSkeleton />;
+	return <DashPageSkeleton title='Media Library' />;
 }
