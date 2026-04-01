@@ -627,13 +627,27 @@ export const invoiceRoute = {
 		}),
 
 	getNextInvoiceNumber: workspaceProcedure.query(async ({ ctx }) => {
-		const [result] = await dbHttp
-			.select({ count: sqlCount })
+		const allInvoices = await dbHttp
+			.select({ invoiceNumber: Invoices.invoiceNumber })
 			.from(Invoices)
 			.where(eq(Invoices.workspaceId, ctx.workspace.id));
 
-		const count = result?.count ?? 0;
-		return `INV-${count + 1}`;
+		if (allInvoices.length === 0) {
+			return 'INV-1';
+		}
+
+		// Find the highest number across all invoice numbers
+		// Handles formats like "INV-38", "INV-HANDLE-000038", etc.
+		let maxNumber = 0;
+		for (const inv of allInvoices) {
+			const parts = inv.invoiceNumber.split('-');
+			const num = parseInt(parts[parts.length - 1] ?? '0');
+			if (!isNaN(num) && num > maxNumber) {
+				maxNumber = num;
+			}
+		}
+
+		return `INV-${maxNumber + 1}`;
 	}),
 
 	downloadPdf: workspaceProcedure
