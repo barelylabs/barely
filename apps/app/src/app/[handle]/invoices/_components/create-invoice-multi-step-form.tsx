@@ -313,7 +313,6 @@ export function CreateInvoiceMultiStepForm() {
 		const { subtotal, total } = calculateTotals();
 		const processedData = {
 			clientId: selectedClientId,
-			invoiceNumber: detailsData.invoiceNumber,
 			poNumber: detailsData.poNumber ?? undefined,
 			lineItems: detailsData.lineItems.map(item => ({
 				description: item.description,
