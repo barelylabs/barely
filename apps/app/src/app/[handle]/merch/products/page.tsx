@@ -3,6 +3,8 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { productSearchParamsSchema } from '@barely/validators';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllProducts } from '~/app/[handle]/merch/products/_components/all-products';
@@ -41,7 +43,7 @@ export default async function ProductsPage({
 			<DashContentHeader title='Products' button={<CreateProductButton />} />
 			<DashContent>
 				<ProductFilters />
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<GridListSkeleton />}>
 					<AllProducts />
 
 					<CreateOrUpdateProductModal mode='create' />

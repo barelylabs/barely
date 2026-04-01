@@ -3,6 +3,7 @@ import { getCampaignById } from '@barely/lib/functions/campaign.fns';
 import { campaignTypeDisplay } from '@barely/utils';
 
 import { InfoCard } from '@barely/ui/card';
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { Icon } from '@barely/ui/icon';
 import { Text } from '@barely/ui/typography';
 
@@ -22,7 +23,7 @@ const LaunchCampaignPage = async ({
 		<>
 			<DashContentHeader title='Launch your campaign' />
 			<DashContent>
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<GridListSkeleton />}>
 					<InfoCard
 						title={campaign.track.name}
 						subtitle={campaign.workspace.name}

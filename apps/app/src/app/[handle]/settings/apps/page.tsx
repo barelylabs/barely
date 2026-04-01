@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { ProviderAccountCard } from '~/app/[handle]/settings/apps/provider-account-card';
 import { DashContent } from '../../_components/dash-content';
 import { DashContentHeader } from '../../_components/dash-content-header';
@@ -14,7 +16,7 @@ const IntegrationsPage = () => {
 		<>
 			<DashContentHeader title='Accounts' subtitle='Connect your external accounts' />
 			<DashContent>
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<GridListSkeleton />}>
 					<ProviderAccountCard provider='mailchimp' />
 					<ProviderAccountCard provider='tiktok' />
 					<ProviderAccountCard provider='spotify' />

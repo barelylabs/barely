@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 import { log } from '@barely/lib/utils/log';
 import { fanGroupSearchParamsSchema } from '@barely/validators';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllFanGroups } from '~/app/[handle]/fan-groups/_components/all-fan-groups';
@@ -49,7 +51,7 @@ export default async function FanGroupsPage({
 			<DashContentHeader title='Fan Groups' button={<CreateFanGroupButton />} />
 			<DashContent>
 				<FanGroupFilters />
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<GridListSkeleton />}>
 					<AllFanGroups />
 				</Suspense>
 

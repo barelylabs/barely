@@ -3,6 +3,8 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { linkStatFiltersSchema } from '@barely/validators';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { StatBarelyReferers } from '~/app/[handle]/_components/stat-barely-referers';
@@ -44,7 +46,7 @@ export default async function LinkStatsPage({
 				<LinkTimeseries />
 
 				<div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-					<Suspense fallback={<div>Loading...</div>}>
+					<Suspense fallback={<GridListSkeleton />}>
 						<StatLocations eventType='link/click' />
 						<StatDevices eventType='link/click' />
 						<StatExternalReferers eventType='link/click' />

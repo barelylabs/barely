@@ -1,5 +1,7 @@
 import { Suspense } from 'react';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 import { DashContent } from '../../_components/dash-content';
 import { DashContentHeader } from '../../_components/dash-content-header';
@@ -23,7 +25,7 @@ export default async function PlaylistPage({
 		<HydrateClient>
 			<DashContentHeader title='Playlist' subtitle='Manage your playlist' />
 			<DashContent>
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<GridListSkeleton />}>
 					<Playlist />
 				</Suspense>
 			</DashContent>

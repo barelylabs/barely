@@ -14,15 +14,13 @@ export default async function HandleLayout({
 	params: Promise<{ handle: string }>;
 	children: React.ReactNode;
 }) {
-	const session = await getSession();
+	const [session, awaitedParams] = await Promise.all([getSession(), params]);
 
 	if (!session) return redirect('/login');
 
 	// Fetch enriched user via tRPC (includes workspaces and profile data)
 	const user = await trpcCaller.user.me();
 	const userWorkspaces = user.workspaces;
-
-	const awaitedParams = await params;
 	const currentWorkspace = userWorkspaces.find(w =>
 		awaitedParams.handle === 'account' ?
 			w.type === 'personal'

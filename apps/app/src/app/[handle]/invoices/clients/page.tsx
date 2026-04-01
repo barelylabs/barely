@@ -3,6 +3,8 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { invoiceClientSearchParamsSchema } from '@barely/validators';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllClients } from '~/app/[handle]/invoices/_components/all-clients';
@@ -43,7 +45,7 @@ export default async function ClientsPage({
 			/>
 			<DashContent>
 				<ClientFilters />
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<GridListSkeleton />}>
 					<AllClients />
 
 					<CreateOrUpdateClientModal mode='create' />

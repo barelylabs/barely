@@ -3,6 +3,8 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { mixtapeFilterParamsSchema } from '@barely/validators';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllMixtapes } from '~/app/[handle]/mixtapes/_components/all-mixtapes';
@@ -40,7 +42,7 @@ export default async function MixtapesPage({
 		<HydrateClient>
 			<DashContentHeader title='Mixtapes' button={<CreateMixtapeButton />} />
 			<DashContent>
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<GridListSkeleton />}>
 					<AllMixtapes />
 
 					<CreateOrUpdateMixtapeModal mode='create' />

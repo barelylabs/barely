@@ -1,5 +1,7 @@
 import { Suspense } from 'react';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { PressKitForm } from '~/app/[handle]/press/_components/press-kit-form';
@@ -28,8 +30,8 @@ export default async function PressKitPage({
 		<HydrateClient>
 			<DashContentHeader title='Press Kit' />
 			<DashContent>
-				<Suspense fallback={<div>Loading...</div>}>
-					<Suspense fallback={'Loading...'}>
+				<Suspense fallback={<GridListSkeleton />}>
+					<Suspense fallback={<GridListSkeleton />}>
 						<PressKitForm />
 					</Suspense>
 				</Suspense>
