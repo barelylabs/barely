@@ -1,5 +1,7 @@
 import { Suspense } from 'react';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AddDomainButton } from '~/app/[handle]/settings/domains/_components/add-web-domain-button';
@@ -33,7 +35,7 @@ export default async function DomainsPage({
 			<DashContent>
 				<DomainsHotKeys />
 				<DomainModal />
-				<Suspense fallback={<p>Loading...</p>}>
+				<Suspense fallback={<GridListSkeleton />}>
 					<AllDomains />
 				</Suspense>
 			</DashContent>

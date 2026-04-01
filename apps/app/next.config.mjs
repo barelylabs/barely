@@ -7,6 +7,11 @@ createJITI(fileURLToPath(import.meta.url))('./src/env');
 /** @type {import("next").NextConfig} */
 const config = {
 	reactStrictMode: true,
+	experimental: {
+		staleTimes: {
+			dynamic: 30, // Cache dynamic route RSC payload for 30s in client router
+		},
+	},
 	devIndicators: {
 		appIsrStatus: false,
 	},

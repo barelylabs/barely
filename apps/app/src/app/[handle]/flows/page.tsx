@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 import { log } from '@barely/lib/utils/log';
 import { flowSearchParamsSchema } from '@barely/validators';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
 import { AllFlows } from '~/app/[handle]/flows/_components/all-flows';
@@ -40,7 +42,7 @@ export default async function FlowsPage({
 		<HydrateClient>
 			<DashContentHeader title='Flows' button={<CreateFlowButton />} />
 			<DashContent>
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<GridListSkeleton />}>
 					<AllFlows />
 				</Suspense>
 			</DashContent>

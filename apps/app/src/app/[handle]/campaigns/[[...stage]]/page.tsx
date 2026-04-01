@@ -2,6 +2,8 @@
 
 import { Suspense } from 'react';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { AllCampaigns } from '~/app/[handle]/campaigns/[[...stage]]/all-campaigns';
 import { CampaignTabs } from '~/app/[handle]/campaigns/[[...stage]]/campaign-tabs';
 import { DashContent } from '../../_components/dash-content';
@@ -16,7 +18,7 @@ export default function CampaignsPage() {
 			/>
 			<DashContent>
 				<CampaignTabs />
-				<Suspense fallback={<div className='w-full'>Loading...</div>}>
+				<Suspense fallback={<GridListSkeleton />}>
 					<AllCampaigns />
 				</Suspense>
 			</DashContent>

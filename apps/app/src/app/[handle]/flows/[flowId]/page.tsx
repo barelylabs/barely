@@ -1,5 +1,7 @@
 import { Suspense } from 'react';
 
+import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
+
 import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { HydrateClient, trpcCaller } from '~/trpc/server';
 import { FlowPage } from './flow-page';
@@ -28,7 +30,7 @@ export default async function FlowsPage({
 	return (
 		<DashContent>
 			<HydrateClient>
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<GridListSkeleton />}>
 					<FlowPage
 						initialFlow={initialFlow}
 						defaultEmailAddress={defaultEmailAddress}
