@@ -46,6 +46,7 @@ export * from './press-kit.sql';
 export * from './product.sql';
 export * from './provider-account.sql';
 export * from './provider-sub-account.sql';
+export * from './spotify-pre-save.sql';
 export * from './stat.sql';
 export * from './tag.sql';
 export * from './track-render.sql';

@@ -52,6 +52,7 @@ import * as pressSql from './sql/press-kit.sql';
 import * as productSql from './sql/product.sql';
 import * as providerAccountSql from './sql/provider-account.sql';
 import * as providerSubAccountSql from './sql/provider-sub-account.sql';
+import * as spotifyPreSaveSql from './sql/spotify-pre-save.sql';
 import * as statSql from './sql/stat.sql';
 import * as tagSql from './sql/tag.sql';
 import * as trackSql from './sql/track.sql';
@@ -114,6 +115,7 @@ export const dbSchema = {
 	...productSql,
 	...providerAccountSql,
 	...providerSubAccountSql,
+	...spotifyPreSaveSql,
 	...statSql,
 	...tagSql,
 	...trackSql,

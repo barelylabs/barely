@@ -15,7 +15,12 @@ export const WEB_EVENT_TYPES__CART = [
 	'cart/viewOrderConfirmation', // not reported to meta
 ] as const;
 
-export const WEB_EVENT_TYPES__FM = ['fm/view', 'fm/linkClick'] as const;
+export const WEB_EVENT_TYPES__FM = [
+	'fm/view',
+	'fm/linkClick',
+	'fm/preSave',
+	'fm/preSaveFulfilled',
+] as const;
 
 export const WEB_EVENT_TYPES__LINK = ['link/click'] as const;
 

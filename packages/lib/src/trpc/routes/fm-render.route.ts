@@ -7,8 +7,10 @@ import { and, eq } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import { recordFmEvent } from '../../functions/event.fns';
+import { fmPreSaveRoute } from './fm-pre-save.route';
 
 export const fmRenderRoute = {
+	...fmPreSaveRoute,
 	log: publicProcedure
 		.input(
 			z.object({

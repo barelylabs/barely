@@ -4,6 +4,8 @@ import { boolean, integer, pgTable, varchar } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../utils';
 import { Files } from './file.sql';
+import { SpotifyPreSaves } from './spotify-pre-save.sql';
+import { Tracks } from './track.sql';
 import { Workspaces } from './workspace.sql';
 
 export const FmPages = pgTable('FmPages', {
@@ -34,6 +36,9 @@ export const FmPages = pgTable('FmPages', {
 	coverArtId: dbId('coverArtId').references(() => Files.id),
 	scheme: varchar('scheme', { length: 255, enum: ['light', 'dark'] }).notNull(),
 	showSocial: boolean('showSocial').default(false).notNull(),
+	// pre-save: optional link to a Track for pre-save functionality
+	trackId: dbId('trackId').references(() => Tracks.id, { onDelete: 'set null' }),
+
 	// remarketing
 	remarketing: boolean('remarketing').default(false).notNull(),
 	views: integer('views').default(0),
@@ -60,7 +65,13 @@ export const FmPagesRelations = relations(FmPages, ({ one, many }) => ({
 		references: [Files.id],
 	}),
 
+	track: one(Tracks, {
+		fields: [FmPages.trackId],
+		references: [Tracks.id],
+	}),
+
 	links: many(FmLinks),
+	preSaves: many(SpotifyPreSaves),
 }));
 
 // FmLinks
