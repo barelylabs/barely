@@ -31,7 +31,7 @@ export function AdminOverviewStats() {
 			/>
 			<StatCard label='MRR' value={formatCurrency(data.mrr)} />
 			<StatCard label='Total Fans' value={nFormatter(data.totalFans)} />
-			<StatCard label='Total Revenue (GMV)' value={formatCurrency(data.totalRevenue)} />
+			<StatCard label='Total Cart Sales' value={formatCurrency(data.totalRevenue)} />
 			<StatCard
 				label='Total Orders'
 				value={nFormatter(data.totalOrders)}

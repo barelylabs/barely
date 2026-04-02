@@ -10,6 +10,7 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Badge } from '@barely/ui/badge';
 import { Button } from '@barely/ui/button';
+import { Icon } from '@barely/ui/icon';
 import { Input } from '@barely/ui/input';
 import { Text } from '@barely/ui/typography';
 
@@ -28,11 +29,16 @@ const planBadgeVariant: Record<string, 'info' | 'success' | 'warning' | 'muted'>
 	'invoice.pro': 'info',
 };
 
+type SortBy = 'createdAt' | 'fanUsage' | 'eventUsage' | 'linkUsage' | 'orders';
+type SortOrder = 'asc' | 'desc';
+
 export function AdminWorkspaceList() {
 	const trpc = useTRPC();
 	const [search, setSearch] = useState('');
 	const [planFilter, setPlanFilter] = useState<PlanType | ''>('');
 	const [cursor, setCursor] = useState(0);
+	const [sortBy, setSortBy] = useState<SortBy>('createdAt');
+	const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 	const limit = 20;
 
 	const { data, isLoading } = useQuery(
@@ -41,8 +47,39 @@ export function AdminWorkspaceList() {
 			limit,
 			search: search || undefined,
 			planFilter: planFilter || undefined,
+			sortBy,
+			sortOrder,
 		}),
 	);
+
+	function handleSort(column: SortBy) {
+		if (sortBy === column) {
+			setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'));
+		} else {
+			setSortBy(column);
+			setSortOrder('desc');
+		}
+		setCursor(0);
+	}
+
+	function SortableHeader({ column, label }: { column: SortBy; label: string }) {
+		const isActive = sortBy === column;
+		return (
+			<th
+				className='cursor-pointer select-none p-3 text-left font-medium hover:text-foreground'
+				onClick={() => handleSort(column)}
+			>
+				<span className='flex items-center gap-1'>
+					{label}
+					{isActive ?
+						sortOrder === 'desc' ?
+							<Icon.sortDescending className='h-3.5 w-3.5' />
+						:	<Icon.sortAscending className='h-3.5 w-3.5' />
+					:	<Icon.chevronsUpDown className='h-3.5 w-3.5 opacity-30' />}
+				</span>
+			</th>
+		);
+	}
 
 	return (
 		<div className='flex flex-col gap-4'>
@@ -81,11 +118,11 @@ export function AdminWorkspaceList() {
 							<th className='p-3 text-left font-medium'>Name</th>
 							<th className='p-3 text-left font-medium'>Handle</th>
 							<th className='p-3 text-left font-medium'>Plan</th>
-							<th className='p-3 text-left font-medium'>Fans</th>
-							<th className='p-3 text-left font-medium'>Events</th>
-							<th className='p-3 text-left font-medium'>Links</th>
-							<th className='p-3 text-left font-medium'>Orders</th>
-							<th className='p-3 text-left font-medium'>Created</th>
+							<SortableHeader column='fanUsage' label='Fans' />
+							<SortableHeader column='eventUsage' label='Events' />
+							<SortableHeader column='linkUsage' label='Links' />
+							<SortableHeader column='orders' label='Orders' />
+							<SortableHeader column='createdAt' label='Created' />
 						</tr>
 					</thead>
 					<tbody>

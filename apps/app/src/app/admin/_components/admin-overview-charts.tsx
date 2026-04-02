@@ -30,7 +30,7 @@ export function AdminOverviewCharts() {
 
 	const revenueData = revenueTimeseries.map(d => ({
 		date: d.date,
-		Revenue: d.revenue / 100,
+		'Cart Sales': d.revenue / 100,
 		Orders: d.orders,
 	}));
 
@@ -65,12 +65,12 @@ export function AdminOverviewCharts() {
 			</Card>
 
 			<Card className='p-4'>
-				<H size='6'>Revenue Over Time</H>
+				<H size='6'>Cart Sales Over Time</H>
 				{revenueData.length > 0 ?
 					<AreaChart
 						data={revenueData}
 						index='date'
-						categories={['Revenue']}
+						categories={['Cart Sales']}
 						className='mt-4 h-48'
 						showLegend={false}
 						valueFormatter={v =>
