@@ -32,6 +32,37 @@ const planBadgeVariant: Record<string, 'info' | 'success' | 'warning' | 'muted'>
 type SortBy = 'createdAt' | 'fanUsage' | 'eventUsage' | 'linkUsage' | 'orders';
 type SortOrder = 'asc' | 'desc';
 
+function SortableHeader({
+	column,
+	label,
+	sortBy,
+	sortOrder,
+	onSort,
+}: {
+	column: SortBy;
+	label: string;
+	sortBy: SortBy;
+	sortOrder: SortOrder;
+	onSort: (column: SortBy) => void;
+}) {
+	const isActive = sortBy === column;
+	return (
+		<th
+			className='cursor-pointer select-none p-3 text-left font-medium hover:text-foreground'
+			onClick={() => onSort(column)}
+		>
+			<span className='flex items-center gap-1'>
+				{label}
+				{isActive ?
+					sortOrder === 'desc' ?
+						<Icon.sortDescending className='h-3.5 w-3.5' />
+					:	<Icon.sortAscending className='h-3.5 w-3.5' />
+				:	<Icon.chevronsUpDown className='h-3.5 w-3.5 opacity-30' />}
+			</span>
+		</th>
+	);
+}
+
 export function AdminWorkspaceList() {
 	const trpc = useTRPC();
 	const [search, setSearch] = useState('');
@@ -60,25 +91,6 @@ export function AdminWorkspaceList() {
 			setSortOrder('desc');
 		}
 		setCursor(0);
-	}
-
-	function SortableHeader({ column, label }: { column: SortBy; label: string }) {
-		const isActive = sortBy === column;
-		return (
-			<th
-				className='cursor-pointer select-none p-3 text-left font-medium hover:text-foreground'
-				onClick={() => handleSort(column)}
-			>
-				<span className='flex items-center gap-1'>
-					{label}
-					{isActive ?
-						sortOrder === 'desc' ?
-							<Icon.sortDescending className='h-3.5 w-3.5' />
-						:	<Icon.sortAscending className='h-3.5 w-3.5' />
-					:	<Icon.chevronsUpDown className='h-3.5 w-3.5 opacity-30' />}
-				</span>
-			</th>
-		);
 	}
 
 	return (
@@ -118,11 +130,41 @@ export function AdminWorkspaceList() {
 							<th className='p-3 text-left font-medium'>Name</th>
 							<th className='p-3 text-left font-medium'>Handle</th>
 							<th className='p-3 text-left font-medium'>Plan</th>
-							<SortableHeader column='fanUsage' label='Fans' />
-							<SortableHeader column='eventUsage' label='Events' />
-							<SortableHeader column='linkUsage' label='Links' />
-							<SortableHeader column='orders' label='Orders' />
-							<SortableHeader column='createdAt' label='Created' />
+							<SortableHeader
+								column='fanUsage'
+								label='Fans'
+								sortBy={sortBy}
+								sortOrder={sortOrder}
+								onSort={handleSort}
+							/>
+							<SortableHeader
+								column='eventUsage'
+								label='Events'
+								sortBy={sortBy}
+								sortOrder={sortOrder}
+								onSort={handleSort}
+							/>
+							<SortableHeader
+								column='linkUsage'
+								label='Links'
+								sortBy={sortBy}
+								sortOrder={sortOrder}
+								onSort={handleSort}
+							/>
+							<SortableHeader
+								column='orders'
+								label='Orders'
+								sortBy={sortBy}
+								sortOrder={sortOrder}
+								onSort={handleSort}
+							/>
+							<SortableHeader
+								column='createdAt'
+								label='Created'
+								sortBy={sortBy}
+								sortOrder={sortOrder}
+								onSort={handleSort}
+							/>
 						</tr>
 					</thead>
 					<tbody>

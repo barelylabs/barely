@@ -6,7 +6,19 @@ import { Fans } from '@barely/db/sql/fan.sql';
 import { _Users_To_Workspaces, Users } from '@barely/db/sql/user.sql';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
 import { sqlAnd, sqlCount, sqlStringContains } from '@barely/db/utils';
-import { asc, count, desc, eq, gte, inArray, isNotNull, lte, ne, or, sql } from 'drizzle-orm';
+import {
+	asc,
+	count,
+	desc,
+	eq,
+	gte,
+	inArray,
+	isNotNull,
+	lte,
+	ne,
+	or,
+	sql,
+} from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import { adminProcedure } from '../trpc';
@@ -300,7 +312,7 @@ export const adminRoute = {
 					})
 					.from(Workspaces)
 					.where(whereClause)
-					.orderBy(orderFn(sortColumn))
+					.orderBy(orderFn(sortColumn), desc(Workspaces.createdAt))
 					.limit(input.limit)
 					.offset(input.cursor),
 
