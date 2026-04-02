@@ -78,6 +78,8 @@ const prefixes = {
 	workflowAction: 'wfa',
 	workflowRun: 'wfr',
 	workflowRunAction: 'wfra',
+	// inventory
+	inventoryAdjustment: 'inv_adj',
 	// vip
 	vipSwap: 'vip_swap',
 	vipSwapAccessLog: 'vip_sal',

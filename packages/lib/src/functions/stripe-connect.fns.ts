@@ -22,6 +22,7 @@ import {
 } from './cart.fns';
 import { recordCartEvent } from './event.fns';
 import { createFan } from './fan.fns';
+import { checkProductAvailability, decrementProductInventory } from './inventory.fns';
 import { sendInvoicePaymentReceivedEmail } from './invoice-email.fns';
 import { checkUsageLimit, incrementUsage } from './usage.fns';
 
@@ -182,6 +183,48 @@ export async function handleStripeConnectChargeSuccess(
 				prevCart.mainProductPrice + (prevCart.bumpProductPrice ?? 0)
 			:	prevCart.mainProductPrice,
 		);
+
+		// decrement inventory for main product
+		const fulfillmentMode = cartFunnel.workspace.barelyFulfillmentMode ?? 'artist_all';
+		const shippingCountry = charge.shipping?.address?.country;
+
+		await decrementProductInventory({
+			productId: cartFunnel.mainProductId,
+			apparelSize: prevCart.mainProductApparelSize,
+			shippingCountry,
+			workspaceFulfillmentMode: fulfillmentMode,
+			orderId: String(updateCart.orderId),
+		});
+
+		// decrement inventory for bump product (if added)
+		if (cartFunnel.bumpProductId && prevCart.addedBump) {
+			await decrementProductInventory({
+				productId: cartFunnel.bumpProductId,
+				apparelSize: prevCart.bumpProductApparelSize,
+				shippingCountry,
+				workspaceFulfillmentMode: fulfillmentMode,
+				orderId: String(updateCart.orderId),
+			});
+		}
+
+		// if funnel has upsell, check if upsell product is available before showing upsell page
+		if (updateCart.stage === 'upsellCreated' && cartFunnel.upsellProductId) {
+			const upsellAvailability = await checkProductAvailability({
+				productId: cartFunnel.upsellProductId,
+				apparelSize: null,
+				shippingCountry,
+				workspaceFulfillmentMode: fulfillmentMode,
+			});
+
+			if (!upsellAvailability.available) {
+				// skip upsell page — mark as checkoutConverted directly
+				updateCart.stage = 'checkoutConverted';
+				await dbHttp
+					.update(Carts)
+					.set({ stage: 'checkoutConverted' })
+					.where(eq(Carts.id, cartId));
+			}
+		}
 
 		if (updateCart.stage === 'upsellCreated') {
 			await tasks.trigger<typeof handleAbandonedUpsell>('handle-abandoned-upsell', {

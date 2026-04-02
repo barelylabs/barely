@@ -32,6 +32,7 @@ export * from './fm.sql';
 export * from './form-response.sql';
 export * from './form.sql';
 export * from './genre.sql';
+export * from './inventory-adjustment.sql';
 export * from './invoice-client.sql';
 export * from './invoice-email.sql';
 export * from './invoice.sql';

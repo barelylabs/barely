@@ -4,6 +4,7 @@ import type { ApparelSize } from '@barely/const';
 import type { PublicFunnel } from '@barely/lib/functions/cart.fns';
 import { useState } from 'react';
 import { APPAREL_SIZES } from '@barely/const';
+import { cn } from '@barely/utils';
 
 import { Button } from '@barely/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@barely/ui/toggle-group';
@@ -39,7 +40,15 @@ export function UpsellButtons({
 			apparelSize,
 		});
 
+	const upsellProduct = publicFunnel.upsellProduct;
+	const upsellSoldOut =
+		upsellProduct?.inventoryEnabled &&
+		!upsellProduct.allowOverselling &&
+		(upsellProduct.stock ?? 0) <= 0 &&
+		(upsellProduct.barelyStock ?? 0) <= 0;
+
 	const convertUpsellDisabled =
+		upsellSoldOut ||
 		// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
 		(upsellSizes && upsellSizes.length > 0 && !apparelSize) ||
 		converting ||
@@ -65,17 +74,31 @@ export function UpsellButtons({
 							setApparelSize(undefined);
 						}}
 					>
-						{upsellSizes.map(size => (
-							<ToggleGroupItem
-								variant='outline'
-								value={size}
-								key={size}
-								aria-label={`Toggle ${size}`}
-								className='hover:bg-brandKit-block/90 data-[state=on]:bg-brandKit-block data-[state=on]:text-brandKit-block-text'
-							>
-								{size}
-							</ToggleGroupItem>
-						))}
+						{upsellSizes.map(size => {
+							const sizeRecord = upsellProduct?._apparelSizes.find(s => s.size === size);
+							const sizeSoldOut =
+								upsellProduct?.inventoryEnabled &&
+								!upsellProduct.allowOverselling &&
+								sizeRecord &&
+								(sizeRecord.stock ?? 0) <= 0 &&
+								(sizeRecord.barelyStock ?? 0) <= 0;
+
+							return (
+								<ToggleGroupItem
+									variant='outline'
+									value={size}
+									key={size}
+									aria-label={`Toggle ${size}`}
+									disabled={!!sizeSoldOut}
+									className={cn(
+										'hover:bg-brandKit-block/90 data-[state=on]:bg-brandKit-block data-[state=on]:text-brandKit-block-text',
+										sizeSoldOut && 'line-through opacity-50',
+									)}
+								>
+									{size}
+								</ToggleGroupItem>
+							);
+						})}
 					</ToggleGroup>
 				</div>
 			)}
@@ -88,7 +111,9 @@ export function UpsellButtons({
 				className='hover:bg-brandKit-block/90 bg-brandKit-block text-brandKit-block-text'
 				fullWidth
 			>
-				{upsellSizes && upsellSizes.length > 0 && !apparelSize ?
+				{upsellSoldOut ?
+					'Sold Out'
+				: upsellSizes && upsellSizes.length > 0 && !apparelSize ?
 					'Select size'
 				:	'Use same payment method'}
 			</Button>
