@@ -720,7 +720,7 @@ export const cartRoute = {
 				productId: upsellProduct.id,
 				apparelSize: cart.upsellProductApparelSize,
 				shippingCountry: cart.shippingAddressCountry,
-				workspaceFulfillmentMode: funnel.workspace.barelyFulfillmentMode ?? 'artist_all',
+				workspaceFulfillmentMode: funnel.workspace.barelyFulfillmentMode,
 			});
 
 			if (!upsellAvailability.available) {
@@ -863,8 +863,7 @@ export const cartRoute = {
 					productId: funnel.upsellProductId,
 					apparelSize: cart.upsellProductApparelSize,
 					shippingCountry: cart.shippingAddressCountry,
-					workspaceFulfillmentMode:
-						funnel.workspace.barelyFulfillmentMode ?? 'artist_all',
+					workspaceFulfillmentMode: funnel.workspace.barelyFulfillmentMode,
 					orderId: String(cart.orderId),
 				});
 			}

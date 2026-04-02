@@ -1,6 +1,8 @@
 import type { ApparelSize } from '@barely/const';
+import type { InferSelectModel } from 'drizzle-orm';
 import { dbHttp } from '@barely/db/client';
 import { ApparelSizes, InventoryAdjustments, Products } from '@barely/db/sql';
+import { newId } from '@barely/utils';
 import { and, eq, sql } from 'drizzle-orm';
 
 import type { FulfillmentMode } from '../utils/fulfillment';
@@ -18,6 +20,7 @@ interface DecrementProductInventoryParams {
  * Decrements inventory for a product after a purchase.
  * Determines the correct pool (workspace vs barely) based on fulfillment responsibility.
  * Uses atomic SQL operations to prevent race conditions.
+ * Only logs an audit entry if stock actually changed.
  */
 export async function decrementProductInventory(params: DecrementProductInventoryParams) {
 	const { productId, apparelSize, shippingCountry, workspaceFulfillmentMode, orderId } =
@@ -49,6 +52,7 @@ export async function decrementProductInventory(params: DecrementProductInventor
 		await decrementProductStock({
 			productId,
 			pool,
+			stockBefore: pool === 'barely' ? (product.barelyStock ?? 0) : (product.stock ?? 0),
 			reason,
 		});
 	}
@@ -57,9 +61,10 @@ export async function decrementProductInventory(params: DecrementProductInventor
 async function decrementProductStock(params: {
 	productId: string;
 	pool: 'workspace' | 'barely';
+	stockBefore: number;
 	reason: string;
 }) {
-	const { productId, pool, reason } = params;
+	const { productId, pool, stockBefore, reason } = params;
 	const column = pool === 'barely' ? Products.barelyStock : Products.stock;
 
 	const result = await dbHttp
@@ -80,11 +85,15 @@ async function decrementProductStock(params: {
 	const stockAfter =
 		pool === 'barely' ? (updated.barelyStock ?? 0) : (updated.stock ?? 0);
 
+	// Compute actual delta — may be 0 if stock was already at 0
+	const actualDelta = stockAfter - stockBefore;
+	if (actualDelta === 0) return;
+
 	await dbHttp.insert(InventoryAdjustments).values({
-		id: crypto.randomUUID(),
+		id: newId('inventoryAdjustment'),
 		productId,
 		pool,
-		delta: -1,
+		delta: actualDelta,
 		stockAfter,
 		reason,
 	});
@@ -99,6 +108,15 @@ async function decrementApparelSizeStock(params: {
 	const { productId, apparelSize: rawApparelSize, pool, reason } = params;
 	const apparelSize = rawApparelSize as ApparelSize;
 	const column = pool === 'barely' ? ApparelSizes.barelyStock : ApparelSizes.stock;
+
+	// Read current stock before decrement for accurate delta calculation
+	const current = await dbHttp.query.ApparelSizes.findFirst({
+		where: and(eq(ApparelSizes.productId, productId), eq(ApparelSizes.size, apparelSize)),
+		columns: { stock: true, barelyStock: true },
+	});
+
+	const stockBefore =
+		pool === 'barely' ? (current?.barelyStock ?? 0) : (current?.stock ?? 0);
 
 	const result = await dbHttp
 		.update(ApparelSizes)
@@ -118,22 +136,33 @@ async function decrementApparelSizeStock(params: {
 	const stockAfter =
 		pool === 'barely' ? (updated.barelyStock ?? 0) : (updated.stock ?? 0);
 
+	// Compute actual delta — may be 0 if stock was already at 0
+	const actualDelta = stockAfter - stockBefore;
+	if (actualDelta === 0) return;
+
 	await dbHttp.insert(InventoryAdjustments).values({
-		id: crypto.randomUUID(),
+		id: newId('inventoryAdjustment'),
 		productId,
 		apparelSize,
 		pool,
-		delta: -1,
+		delta: actualDelta,
 		stockAfter,
 		reason,
 	});
 }
+
+// Types for pre-fetched product data to avoid redundant DB queries
+type ProductWithApparelSizes = InferSelectModel<typeof Products> & {
+	_apparelSizes: InferSelectModel<typeof ApparelSizes>[];
+};
 
 interface CheckProductAvailabilityParams {
 	productId: string;
 	apparelSize?: string | null;
 	shippingCountry?: string | null;
 	workspaceFulfillmentMode: FulfillmentMode;
+	/** Pass a pre-fetched product to avoid a redundant DB query */
+	product?: ProductWithApparelSizes | null;
 }
 
 export interface ProductAvailability {
@@ -146,18 +175,21 @@ export interface ProductAvailability {
 /**
  * Checks whether a product is available for purchase.
  * Returns availability status based on the correct inventory pool.
+ * Accepts an optional pre-fetched product to avoid double DB fetch.
  */
 export async function checkProductAvailability(
 	params: CheckProductAvailabilityParams,
 ): Promise<ProductAvailability> {
 	const { productId, apparelSize, shippingCountry, workspaceFulfillmentMode } = params;
 
-	const product = await dbHttp.query.Products.findFirst({
-		where: eq(Products.id, productId),
-		with: {
-			_apparelSizes: true,
-		},
-	});
+	const product =
+		params.product ??
+		(await dbHttp.query.Products.findFirst({
+			where: eq(Products.id, productId),
+			with: {
+				_apparelSizes: true,
+			},
+		}));
 
 	if (!product) {
 		return { available: false, inventoryEnabled: false, stock: null, pool: 'workspace' };
@@ -182,8 +214,12 @@ export async function checkProductAvailability(
 
 	if (apparelSize) {
 		const sizeRecord = product._apparelSizes.find(s => s.size === apparelSize);
+		if (!sizeRecord) {
+			// Missing size record = unavailable (prevents purchase without decrement)
+			return { available: false, inventoryEnabled: true, stock: 0, pool };
+		}
 		stock =
-			pool === 'barely' ? (sizeRecord?.barelyStock ?? null) : (sizeRecord?.stock ?? null);
+			pool === 'barely' ? (sizeRecord.barelyStock ?? null) : (sizeRecord.stock ?? null);
 	} else {
 		stock = pool === 'barely' ? product.barelyStock : product.stock;
 	}

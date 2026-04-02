@@ -48,7 +48,7 @@ export function UpsellButtons({
 		(upsellProduct.barelyStock ?? 0) <= 0;
 
 	const convertUpsellDisabled =
-		upsellSoldOut ||
+		!!upsellSoldOut ||
 		// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
 		(upsellSizes && upsellSizes.length > 0 && !apparelSize) ||
 		converting ||

@@ -185,7 +185,7 @@ export async function handleStripeConnectChargeSuccess(
 		);
 
 		// decrement inventory for main product
-		const fulfillmentMode = cartFunnel.workspace.barelyFulfillmentMode ?? 'artist_all';
+		const fulfillmentMode = cartFunnel.workspace.barelyFulfillmentMode;
 		const shippingCountry = charge.shipping?.address?.country;
 
 		await decrementProductInventory({

@@ -127,6 +127,7 @@ export const inventoryRoute = {
 		.query(async ({ input }) => {
 			const { productId, apparelSize, fulfillmentCountry } = input;
 
+			// Single query that fetches product + workspace + apparel sizes
 			const product = await dbHttp.query.Products.findFirst({
 				where: eq(Products.id, productId),
 				with: {
@@ -149,11 +150,13 @@ export const inventoryRoute = {
 				};
 			}
 
+			// Pass pre-fetched product to avoid redundant DB query
 			return checkProductAvailability({
 				productId,
 				apparelSize,
 				shippingCountry: fulfillmentCountry,
-				workspaceFulfillmentMode: product.workspace.barelyFulfillmentMode ?? 'artist_all',
+				workspaceFulfillmentMode: product.workspace.barelyFulfillmentMode,
+				product,
 			});
 		}),
 } satisfies TRPCRouterRecord;
@@ -173,24 +176,16 @@ async function adjustProductStock(params: {
 	const columnKey = pool === 'barely' ? 'barelyStock' : 'stock';
 	const column = pool === 'barely' ? Products.barelyStock : Products.stock;
 
-	let delta: number;
-
-	if (type === 'set') {
-		const current = await dbHttp.query.Products.findFirst({
-			where: eq(Products.id, productId),
-			columns: { stock: true, barelyStock: true },
-		});
-		const currentStock = (pool === 'barely' ? current?.barelyStock : current?.stock) ?? 0;
-		delta = value - currentStock;
-	} else {
-		delta = value;
-	}
+	// For "set": use direct assignment to avoid TOCTOU race condition.
+	// For "adjust": use atomic increment/decrement.
+	const setValue =
+		type === 'set' ?
+			sql`GREATEST(${value}, 0)`
+		:	sql`GREATEST(COALESCE(${column}, 0) + ${value}, 0)`;
 
 	const result = await dbHttp
 		.update(Products)
-		.set({
-			[columnKey]: sql`GREATEST(COALESCE(${column}, 0) + ${delta}, 0)`,
-		})
+		.set({ [columnKey]: setValue })
 		.where(eq(Products.id, productId))
 		.returning({
 			stock: Products.stock,
@@ -208,13 +203,16 @@ async function adjustProductStock(params: {
 	const stockAfter =
 		pool === 'barely' ? (updated.barelyStock ?? 0) : (updated.stock ?? 0);
 
+	// For "set" operations, we record delta as the target value since the direct
+	// assignment is atomic and we can't know the exact pre-update value.
+	// The stockAfter field provides the ground truth for reconciliation.
 	await dbHttp.insert(InventoryAdjustments).values({
 		id: newId('inventoryAdjustment'),
 		productId,
 		pool,
-		delta,
+		delta: type === 'adjust' ? value : stockAfter,
 		stockAfter,
-		reason,
+		reason: type === 'set' ? `${reason} (set to ${value})` : reason,
 		adjustedBy,
 	});
 
@@ -235,27 +233,16 @@ async function adjustApparelSizeStock(params: {
 	const columnKey = pool === 'barely' ? 'barelyStock' : 'stock';
 	const column = pool === 'barely' ? ApparelSizes.barelyStock : ApparelSizes.stock;
 
-	let delta: number;
-
-	if (type === 'set') {
-		const current = await dbHttp.query.ApparelSizes.findFirst({
-			where: and(
-				eq(ApparelSizes.productId, productId),
-				eq(ApparelSizes.size, apparelSize),
-			),
-			columns: { stock: true, barelyStock: true },
-		});
-		const currentStock = (pool === 'barely' ? current?.barelyStock : current?.stock) ?? 0;
-		delta = value - currentStock;
-	} else {
-		delta = value;
-	}
+	// For "set": use direct assignment to avoid TOCTOU race condition.
+	// For "adjust": use atomic increment/decrement.
+	const setValue =
+		type === 'set' ?
+			sql`GREATEST(${value}, 0)`
+		:	sql`GREATEST(COALESCE(${column}, 0) + ${value}, 0)`;
 
 	const result = await dbHttp
 		.update(ApparelSizes)
-		.set({
-			[columnKey]: sql`GREATEST(COALESCE(${column}, 0) + ${delta}, 0)`,
-		})
+		.set({ [columnKey]: setValue })
 		.where(and(eq(ApparelSizes.productId, productId), eq(ApparelSizes.size, apparelSize)))
 		.returning({
 			stock: ApparelSizes.stock,
@@ -278,9 +265,9 @@ async function adjustApparelSizeStock(params: {
 		productId,
 		apparelSize,
 		pool,
-		delta,
+		delta: type === 'adjust' ? value : stockAfter,
 		stockAfter,
-		reason,
+		reason: type === 'set' ? `${reason} (set to ${value})` : reason,
 		adjustedBy,
 	});
 
