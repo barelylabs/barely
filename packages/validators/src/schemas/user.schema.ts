@@ -72,6 +72,7 @@ export const newUserContactInfoSchema = z.object({
 		}, phoneNumberInUseMessage)
 		.transform(phone => (!phone.length ? null : formatInternational(phone)))
 		.nullish(),
+	marketingOptIn: z.boolean().default(false),
 });
 
 export const newUserContactInfoSchemaWithRole = newUserContactInfoSchema.extend({

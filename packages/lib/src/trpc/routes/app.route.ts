@@ -7,6 +7,7 @@ import type {
 import { createTRPCRouter } from '../trpc';
 import { adminRoute } from './admin.route';
 import { analyticsEndpointRoute } from './analytics-endpoint.route';
+import { appAnalyticsRoute } from './app-analytics.route';
 import { authRoute } from './auth.route';
 import { bioRoute } from './bio.route';
 import { brandKitRouter } from './brand-kit.route';
@@ -52,6 +53,7 @@ import { workspaceRoute } from './workspace.route';
 export const appRouter = createTRPCRouter({
 	admin: adminRoute,
 	analyticsEndpoint: analyticsEndpointRoute,
+	appAnalytics: appAnalyticsRoute,
 	auth: authRoute,
 	bio: bioRoute,
 	brandKit: brandKitRouter,

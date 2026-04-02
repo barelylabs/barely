@@ -1,0 +1,12 @@
+
+SCHEMA >
+    `userId` String `json:$.userId`,
+    `workspaceId` String `json:$.workspaceId`,
+    `type` String `json:$.type`,
+    `timestamp` DateTime `json:$.timestamp`,
+    `pagePath` String `json:$.pagePath`,
+    `properties` String `json:$.properties`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_SORTING_KEY "timestamp, userId, workspaceId"

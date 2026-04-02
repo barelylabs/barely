@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
+import { CheckboxField } from '@barely/ui/forms/checkbox-field';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { PhoneField } from '@barely/ui/forms/phone-field';
 import { TextField } from '@barely/ui/forms/text-field';
@@ -27,12 +28,20 @@ interface RegisterFormProps extends React.HTMLAttributes<HTMLDivElement> {
 	callbackUrl?: string;
 	inviteToken?: string;
 	prefilledEmail?: string;
+	signupSource?: string;
+	signupMedium?: string;
+	signupCampaign?: string;
+	signupReferrer?: string;
 }
 
 const RegisterUserForm = ({
 	callbackUrl,
 	inviteToken,
 	prefilledEmail,
+	signupSource,
+	signupMedium,
+	signupCampaign,
+	signupReferrer,
 }: RegisterFormProps) => {
 	const trpc = useTRPC();
 	const [identifier, setIdentifier] = useState('');
@@ -45,6 +54,7 @@ const RegisterUserForm = ({
 			fullName: '',
 			email: prefilledEmail ?? '',
 			phone: '',
+			marketingOptIn: false,
 		},
 	});
 
@@ -80,9 +90,18 @@ const RegisterUserForm = ({
 		}),
 	);
 
-	const onSubmit = async (user: z.infer<typeof newUserContactInfoSchema>) => {
+	const onSubmit = async (data: z.infer<typeof newUserContactInfoSchema>) => {
 		setCreatingAccount(true);
-		await createUser({ ...user, inviteToken });
+		const { marketingOptIn, ...user } = data;
+		await createUser({
+			...user,
+			marketing: marketingOptIn,
+			inviteToken,
+			signupSource,
+			signupMedium,
+			signupCampaign,
+			signupReferrer,
+		});
 		return;
 	};
 
@@ -152,6 +171,12 @@ const RegisterUserForm = ({
 								}}
 							/>
 						</div>
+
+						<CheckboxField
+							control={form.control}
+							name='marketingOptIn'
+							label='Keep me updated on new features and tips for growing my audience'
+						/>
 
 						<div className='flex flex-col space-y-4 py-4'>
 							<SubmitButton fullWidth>Create my account 🚀</SubmitButton>

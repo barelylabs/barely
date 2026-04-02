@@ -1,4 +1,5 @@
 import {
+	APP_EVENT_TYPES,
 	BIO_BLOCK_ANIMATION_TYPES,
 	BIO_BLOCK_TYPES,
 	FM_LINK_PLATFORMS,
@@ -188,4 +189,14 @@ export const emailEventIngestSchema = webEventIngestSchema.extend({
 	flowActionId: z.string().nullable(),
 	emailBroadcastId: z.string().nullable(),
 	resendId: z.string().nullable(),
+});
+
+/* app events - authenticated dashboard analytics */
+export const appEventIngestSchema = z.object({
+	userId: z.string(),
+	workspaceId: z.string(),
+	type: z.enum(APP_EVENT_TYPES),
+	timestamp: z.string().datetime(),
+	pagePath: z.string().default(''),
+	properties: z.string().default('{}'),
 });
