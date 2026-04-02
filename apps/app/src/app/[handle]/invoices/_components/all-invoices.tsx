@@ -69,7 +69,7 @@ function InvoiceCard({
 	const router = useRouter();
 	const getStatusColor = (status: string) => {
 		switch (status) {
-			case 'draft':
+			case 'created':
 				return 'secondary';
 			case 'sent':
 				return 'info';
@@ -86,8 +86,8 @@ function InvoiceCard({
 		}
 	};
 
-	// const href = `/${handle}/invoices/${invoice.id}`;
-	const href = getAbsoluteUrl('invoice', `pay/${handle}/${invoice.id}`);
+	const detailHref = `/${handle}/invoices/${invoice.id}`;
+	const paymentHref = getAbsoluteUrl('invoice', `pay/${handle}/${invoice.id}`);
 
 	const subtitleText = `${invoice.client.name} • ${format(new Date(invoice.dueDate), 'MMM dd')}`;
 
@@ -102,8 +102,8 @@ function InvoiceCard({
 			title={invoice.invoiceNumber}
 			subtitle={subtitleText}
 			quickActions={{
-				goToHref: href,
-				copyText: href,
+				goToHref: detailHref,
+				copyText: paymentHref,
 			}}
 			stats={[
 				{
@@ -112,9 +112,13 @@ function InvoiceCard({
 					value: formatMinorToMajorCurrency(invoice.total, currency),
 				},
 			]}
-			statsHref={href}
+			statsHref={detailHref}
 			statusBadge={
-				<Badge variant={getStatusColor(invoice.status)}>{invoice.status}</Badge>
+				<Badge variant={getStatusColor(invoice.status)}>
+					{invoice.status === 'created' ?
+						'Draft'
+					:	invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+				</Badge>
 			}
 		/>
 	);

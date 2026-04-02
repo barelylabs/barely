@@ -3,7 +3,7 @@
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { BadgeProps } from '@barely/ui/badge';
 import { useRouter } from 'next/navigation';
-import { useCopy, useWorkspace } from '@barely/hooks';
+import { useCopy, useWorkspaceWithAll } from '@barely/hooks';
 import { formatMinorToMajorCurrency, getAbsoluteUrl } from '@barely/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -22,6 +22,7 @@ import {
 	DropdownMenuTrigger,
 } from '@barely/ui/dropdown-menu';
 import { Icon } from '@barely/ui/icon';
+import { InvoiceRender } from '@barely/ui/invoice';
 import { Separator } from '@barely/ui/separator';
 import { Text } from '@barely/ui/typography';
 
@@ -37,7 +38,8 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 	const { copyToClipboard } = useCopy();
-	const { currency } = useWorkspace();
+	const workspace = useWorkspaceWithAll();
+	const { currency } = workspace;
 
 	const getStatusColor = (
 		status: Invoice['status'] | 'overdue',
@@ -60,6 +62,11 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 		}
 	};
 
+	const getStatusLabel = (status: Invoice['status']) => {
+		if (status === 'created') return 'Draft';
+		return status.charAt(0).toUpperCase() + status.slice(1);
+	};
+
 	// Mutations
 	const { mutate: sendInvoice, isPending: isSending } = useMutation(
 		trpc.invoice.send.mutationOptions({
@@ -70,7 +77,6 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 				toast.error(error.message || 'Failed to send invoice');
 			},
 			onSettled: async () => {
-				// Invalidate both the individual invoice, list queries, and stats
 				await Promise.all([
 					queryClient.invalidateQueries({
 						queryKey: trpc.invoice.byId.queryKey(),
@@ -95,7 +101,6 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 				toast.error(error.message || 'Failed to mark invoice as paid');
 			},
 			onSettled: async () => {
-				// Invalidate both the individual invoice, list queries, and stats
 				await Promise.all([
 					queryClient.invalidateQueries({
 						queryKey: trpc.invoice.byId.queryKey(),
@@ -133,7 +138,6 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 				toast.error(error.message || 'Failed to delete invoice');
 			},
 			onSettled: async () => {
-				// Invalidate the list query and stats after deletion
 				await Promise.all([
 					queryClient.invalidateQueries({
 						queryKey: trpc.invoice.byWorkspace.queryKey(),
@@ -146,7 +150,6 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 		}),
 	);
 
-	// Get payment URL for this invoice
 	const getPaymentUrl = () => {
 		const baseUrl = getAbsoluteUrl('invoice');
 		return `${baseUrl}/pay/${handle}/${invoice.id}`;
@@ -180,17 +183,40 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 		downloadPdf({ handle, id: invoice.id });
 	};
 
+	// Status timeline events
+	const timelineEvents = [
+		{
+			label: 'Created',
+			date: invoice.createdAt,
+			active: true,
+		},
+		{
+			label: 'Sent',
+			date: invoice.sentAt,
+			active: !!invoice.sentAt,
+		},
+		{
+			label: 'Viewed',
+			date: invoice.viewedAt,
+			active: !!invoice.viewedAt,
+		},
+		{
+			label: 'Paid',
+			date: invoice.paidAt,
+			active: !!invoice.paidAt,
+		},
+	];
+
 	return (
 		<div className='space-y-6'>
 			{/* Actions Bar */}
 			<Card>
-				<div className='flex flex-wrap items-center justify-between gap-4 px-6 py-4'>
+				<div className='flex flex-wrap items-center justify-between gap-3 px-6 py-3'>
 					<Badge variant={getStatusColor(invoice.status)} className='text-sm'>
-						{invoice.status.toUpperCase()}
+						{getStatusLabel(invoice.status)}
 					</Badge>
 
 					<div className='flex flex-wrap items-center gap-2'>
-						{/* Primary Actions */}
 						<Button
 							size='sm'
 							onClick={() => sendInvoice({ handle, id: invoice.id })}
@@ -216,7 +242,6 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 							Copy Link
 						</Button>
 
-						{/* Secondary Actions Dropdown */}
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button size='sm' look='outline' variant='icon'>
@@ -259,116 +284,25 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 				</div>
 			</Card>
 
-			{/* <pre>{JSON.stringify(invoice, null, 2)}</pre> */}
-			{/* Invoice Content */}
+			{/* Main Content: Invoice Render + Sidebar */}
 			<div className='grid gap-6 lg:grid-cols-3'>
-				{/* Main Invoice Details */}
-				<div className='space-y-6 lg:col-span-2'>
-					{/* Invoice Header */}
-					<Card>
-						<div className='p-6 pb-3'>
-							<h3 className='text-lg font-semibold'>Invoice Details</h3>
-						</div>
-						<div className='space-y-4 px-6 pb-6'>
-							<div className='grid gap-4 sm:grid-cols-2'>
-								<div>
-									<Text variant='sm/normal' className='text-muted-foreground'>
-										Invoice Number
-									</Text>
-									<Text variant='md/medium'>{invoice.invoiceNumber}</Text>
-								</div>
-								<div>
-									<Text variant='sm/normal' className='text-muted-foreground'>
-										Issue Date
-									</Text>
-									<Text variant='md/medium'>
-										{format(new Date(invoice.createdAt), 'MMM dd, yyyy')}
-									</Text>
-								</div>
-								<div>
-									<Text variant='sm/normal' className='text-muted-foreground'>
-										Due Date
-									</Text>
-									<Text variant='md/medium'>
-										{format(new Date(invoice.dueDate), 'MMM dd, yyyy')}
-									</Text>
-								</div>
-								{invoice.paidAt && (
-									<div>
-										<Text variant='sm/normal' className='text-muted-foreground'>
-											Paid Date
-										</Text>
-										<Text variant='md/medium'>
-											{format(new Date(invoice.paidAt), 'MMM dd, yyyy')}
-										</Text>
-									</div>
-								)}
-							</div>
-						</div>
-					</Card>
-
-					{/* Client Information */}
-					<Card>
-						<div className='p-6 pb-3'>
-							<h3 className='text-lg font-semibold'>Client Information</h3>
-						</div>
-						<div className='px-6 pb-6'>
-							<div className='space-y-2'>
-								<Text variant='md/medium'>{invoice.client.name}</Text>
-								{invoice.client.company && (
-									<Text variant='sm/normal' className='text-muted-foreground'>
-										{invoice.client.company}
-									</Text>
-								)}
-								<Text variant='sm/normal' className='text-muted-foreground'>
-									{invoice.client.email}
-								</Text>
-								{invoice.client.address && (
-									<Text
-										variant='sm/normal'
-										className='whitespace-pre-line text-muted-foreground'
-									>
-										{invoice.client.address}
-									</Text>
-								)}
-							</div>
-						</div>
-					</Card>
-
-					{/* Line Items */}
-					<Card>
-						<div className='p-6 pb-3'>
-							<h3 className='text-lg font-semibold'>Line Items</h3>
-						</div>
-						<div className='px-6 pb-6'>
-							<div className='space-y-4'>
-								{invoice.lineItems.map((item, index) => (
-									<div key={index}>
-										{index > 0 && <Separator className='my-4' />}
-										<div className='flex justify-between'>
-											<div className='flex-1'>
-												<Text variant='md/medium'>{item.description}</Text>
-												<Text variant='sm/normal' className='text-muted-foreground'>
-													{item.quantity} ×{' '}
-													{formatMinorToMajorCurrency(item.rate, currency)}
-												</Text>
-											</div>
-											<Text variant='md/medium'>
-												{formatMinorToMajorCurrency(item.amount, currency)}
-											</Text>
-										</div>
-									</div>
-								))}
-							</div>
-						</div>
-					</Card>
+				{/* Invoice Document */}
+				<div className='lg:col-span-2'>
+					<div className='overflow-hidden rounded-lg border bg-white shadow-sm'>
+						<InvoiceRender
+							invoice={invoice}
+							workspace={workspace}
+							client={invoice.client}
+						/>
+					</div>
 				</div>
 
-				{/* Invoice Summary */}
-				<div className='lg:col-span-1'>
+				{/* Sidebar */}
+				<div className='space-y-6 lg:col-span-1'>
+					{/* Invoice Summary */}
 					<Card className='sticky top-4'>
 						<div className='p-6 pb-3'>
-							<h3 className='text-lg font-semibold'>Invoice Summary</h3>
+							<h3 className='text-lg font-semibold'>Summary</h3>
 						</div>
 						<div className='px-6 pb-6'>
 							<div className='space-y-2'>
@@ -412,6 +346,49 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 										</div>
 									</>
 								)}
+							</div>
+						</div>
+
+						{/* Status Timeline */}
+						<Separator />
+						<div className='p-6'>
+							<h4 className='mb-4 text-sm font-semibold text-muted-foreground'>
+								Activity
+							</h4>
+							<div className='space-y-3'>
+								{timelineEvents.map((event, index) => (
+									<div key={event.label} className='flex items-start gap-3'>
+										<div className='flex flex-col items-center'>
+											<div
+												className={`h-2.5 w-2.5 rounded-full ${
+													event.active ? 'bg-primary' : 'bg-muted'
+												}`}
+											/>
+											{index < timelineEvents.length - 1 && (
+												<div
+													className={`mt-1 h-5 w-px ${
+														event.active ? 'bg-primary/30' : 'bg-muted'
+													}`}
+												/>
+											)}
+										</div>
+										<div className='-mt-0.5 flex-1'>
+											<Text
+												variant='sm/medium'
+												className={
+													event.active ? 'text-foreground' : 'text-muted-foreground'
+												}
+											>
+												{event.label}
+											</Text>
+											{event.date && (
+												<Text variant='xs/normal' className='text-muted-foreground'>
+													{format(new Date(event.date), 'MMM dd, yyyy h:mm a')}
+												</Text>
+											)}
+										</div>
+									</div>
+								))}
 							</div>
 						</div>
 					</Card>
