@@ -5,6 +5,7 @@ import type {
 } from '@trpc/server';
 
 import { createTRPCRouter } from '../trpc';
+import { adminRoute } from './admin.route';
 import { analyticsEndpointRoute } from './analytics-endpoint.route';
 import { authRoute } from './auth.route';
 import { bioRoute } from './bio.route';
@@ -49,6 +50,7 @@ import { workspaceStripeRoute } from './workspace-stripe.route';
 import { workspaceRoute } from './workspace.route';
 
 export const appRouter = createTRPCRouter({
+	admin: adminRoute,
 	analyticsEndpoint: analyticsEndpointRoute,
 	auth: authRoute,
 	bio: bioRoute,

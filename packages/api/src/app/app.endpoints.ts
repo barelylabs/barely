@@ -1,6 +1,7 @@
 import type { AppRouterKeys } from '@barely/lib/trpc/app.route';
 
 export const APP_ENDPOINTS: AppRouterKeys[] = [
+	'admin',
 	'analyticsEndpoint',
 	'auth',
 	'bio',

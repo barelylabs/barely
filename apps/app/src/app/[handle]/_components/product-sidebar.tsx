@@ -277,6 +277,21 @@ export function ProductSidebar() {
 							{theme === 'system' && <Icon.check className='ml-auto h-4 w-4' />}
 						</DropdownMenuItem>
 
+						{user.admin && (
+							<>
+								<DropdownMenuSeparator />
+								<DropdownMenuItem asChild>
+									<Link
+										href='/admin'
+										className='flex cursor-pointer items-center gap-3 px-3'
+									>
+										<Icon.shield className='h-4 w-4 text-muted-foreground' />
+										<span>Admin</span>
+									</Link>
+								</DropdownMenuItem>
+							</>
+						)}
+
 						<DropdownMenuSeparator />
 
 						<DropdownMenuItem

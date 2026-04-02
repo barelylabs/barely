@@ -21,6 +21,7 @@ export interface EnrichedUser {
 	lastName: string | null;
 	handle: string;
 	avatarImageS3Key: string | undefined;
+	admin: boolean;
 	pitchScreening: boolean;
 	pitchReviewing: boolean;
 	phone: string | null;

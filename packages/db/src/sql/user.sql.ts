@@ -37,6 +37,7 @@ export const Users = pgTable(
 
 		// custom fields
 		...timestamps,
+		admin: boolean('admin').default(false).notNull(),
 		marketing: boolean('marketing').default(false),
 		pitchScreening: boolean('pitchScreening').default(false),
 		pitchReviewing: boolean('pitchReviewing').default(false),
