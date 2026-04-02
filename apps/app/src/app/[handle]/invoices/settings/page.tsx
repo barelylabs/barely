@@ -24,12 +24,69 @@ export default function InvoiceSettingsPage() {
 			workspace.stripeConnectChargesEnabled
 		:	workspace.stripeConnectChargesEnabled_devMode;
 
+	const hasAddress = !!workspace.invoiceAddressLine1;
+	const hasSupportEmail = !!workspace.invoiceSupportEmail;
+	const setupComplete = chargesEnabled && hasAddress && hasSupportEmail;
+
 	return (
 		<>
 			<DashContentHeader title='Invoices' />
 			<DashContent>
 				<InvoiceNav />
 				<div className='mt-6 space-y-6'>
+					{!setupComplete && (
+						<Card>
+							<div className='flex flex-col gap-3 p-4'>
+								<div className='flex flex-row items-center gap-2'>
+									<Icon.checkCircle className='h-5 w-5 text-muted-foreground' />
+									<H size='5'>Setup Checklist</H>
+								</div>
+								<Text variant='sm/normal' className='text-muted-foreground'>
+									Complete these steps to start sending invoices.
+								</Text>
+								<div className='space-y-2'>
+									<div className='flex items-center gap-2'>
+										{chargesEnabled ?
+											<Icon.check className='h-4 w-4 text-green-600' />
+										:	<Icon.x className='h-4 w-4 text-muted-foreground' />}
+										<Text
+											variant='sm/normal'
+											className={
+												chargesEnabled ? 'text-muted-foreground line-through' : ''
+											}
+										>
+											Connect Stripe for payment processing
+										</Text>
+									</div>
+									<div className='flex items-center gap-2'>
+										{hasAddress ?
+											<Icon.check className='h-4 w-4 text-green-600' />
+										:	<Icon.x className='h-4 w-4 text-muted-foreground' />}
+										<Text
+											variant='sm/normal'
+											className={hasAddress ? 'text-muted-foreground line-through' : ''}
+										>
+											Add your company address
+										</Text>
+									</div>
+									<div className='flex items-center gap-2'>
+										{hasSupportEmail ?
+											<Icon.check className='h-4 w-4 text-green-600' />
+										:	<Icon.x className='h-4 w-4 text-muted-foreground' />}
+										<Text
+											variant='sm/normal'
+											className={
+												hasSupportEmail ? 'text-muted-foreground line-through' : ''
+											}
+										>
+											Set an invoice support email
+										</Text>
+									</div>
+								</div>
+							</div>
+						</Card>
+					)}
+
 					<InvoiceCompanyAddressForm />
 
 					<InvoiceSupportEmailForm />

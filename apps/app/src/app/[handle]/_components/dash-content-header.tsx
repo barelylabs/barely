@@ -10,6 +10,7 @@ interface DashContentHeaderProps {
 	subtitle?: string;
 	button?: React.ReactNode;
 	settingsHref?: string;
+	backHref?: string;
 }
 
 const DashContentHeader = (props: DashContentHeaderProps) => {
@@ -20,6 +21,15 @@ const DashContentHeader = (props: DashContentHeaderProps) => {
 					<div className='md:hidden'>
 						<NavButton />
 					</div>
+
+					{props.backHref && (
+						<Link
+							href={props.backHref}
+							className='text-muted-foreground transition-colors hover:text-foreground'
+						>
+							<Icon.chevronLeft className='h-5 w-5' />
+						</Link>
+					)}
 
 					<H size='5'>{props.title}</H>
 					{props.settingsHref && (

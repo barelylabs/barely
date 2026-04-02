@@ -8,11 +8,11 @@ export default async function NewInvoicePage({
 }: {
 	params: Promise<{ handle: string }>;
 }) {
-	await params; // Just await to satisfy Next.js 15 requirements
+	const { handle } = await params;
 
 	return (
 		<HydrateClient>
-			<DashContentHeader title='New Invoice' />
+			<DashContentHeader title='New Invoice' backHref={`/${handle}/invoices`} />
 			<DashContent>
 				<CreateInvoiceMultiStepForm />
 			</DashContent>

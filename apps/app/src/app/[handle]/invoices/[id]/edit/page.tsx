@@ -24,7 +24,10 @@ export default async function EditInvoicePage({
 
 	return (
 		<HydrateClient>
-			<DashContentHeader title={`Edit Invoice ${invoice.invoiceNumber}`} />
+			<DashContentHeader
+				title={`Edit Invoice ${invoice.invoiceNumber}`}
+				backHref={`/${awaitedParams.handle}/invoices/${awaitedParams.id}`}
+			/>
 			<DashContent>
 				<CreateInvoiceMultiStepForm
 					mode='edit'
