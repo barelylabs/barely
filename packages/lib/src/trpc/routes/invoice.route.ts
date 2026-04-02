@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
-import { Invoices, Workspaces } from '@barely/db/sql';
+import { InvoiceClients, Invoices, Workspaces } from '@barely/db/sql';
 import { sqlAnd, sqlCount, sqlStringContains } from '@barely/db/utils';
 import { newId, raise, raiseTRPCError } from '@barely/utils';
 import {
@@ -13,7 +13,7 @@ import {
 	updateInvoiceSchema,
 } from '@barely/validators';
 import { TRPCError } from '@trpc/server';
-import { and, asc, desc, eq, gt, gte, inArray, isNull, lt, or } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, gte, inArray, isNull, lt, or, sql } from 'drizzle-orm';
 import DOMPurify from 'isomorphic-dompurify';
 import { z } from 'zod/v4';
 
@@ -34,7 +34,11 @@ export const invoiceRoute = {
 			const invoices = await dbHttp.query.Invoices.findMany({
 				where: sqlAnd([
 					eq(Invoices.workspaceId, ctx.workspace.id),
-					!!search?.length && sqlStringContains(Invoices.invoiceNumber, search),
+					!!search?.length &&
+						or(
+							sqlStringContains(Invoices.invoiceNumber, search),
+							sql`EXISTS (SELECT 1 FROM ${InvoiceClients} WHERE ${InvoiceClients.id} = ${Invoices.clientId} AND LOWER(${InvoiceClients.name}) LIKE LOWER('%' || ${search} || '%'))`,
+						),
 					!!status && eq(Invoices.status, status),
 					!!clientId && eq(Invoices.clientId, clientId),
 					showArchived ? undefined : isNull(Invoices.archivedAt),

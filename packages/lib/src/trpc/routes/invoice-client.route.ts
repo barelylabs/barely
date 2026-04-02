@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
-import { InvoiceClients } from '@barely/db/sql';
+import { InvoiceClients, Invoices } from '@barely/db/sql';
 import { sqlAnd, sqlCount, sqlStringContains } from '@barely/db/utils';
 import { newId, raise, raiseTRPCError } from '@barely/utils';
 import {
@@ -10,7 +10,7 @@ import {
 	updateInvoiceClientSchema,
 } from '@barely/validators';
 import { TRPCError } from '@trpc/server';
-import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, inArray, isNull, lt, or, sql } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import { getStripeConnectAccountId } from '../../functions/stripe-connect.fns';
@@ -22,7 +22,7 @@ export const invoiceClientRoute = {
 		.input(selectWorkspaceInvoiceClientsSchema)
 		.query(async ({ input, ctx }) => {
 			const { limit, cursor, search, showArchived } = input;
-			const clients = await dbHttp.query.InvoiceClients.findMany({
+			const rawClients = await dbHttp.query.InvoiceClients.findMany({
 				where: sqlAnd([
 					eq(InvoiceClients.workspaceId, ctx.workspace.id),
 					!!search?.length &&
@@ -47,8 +47,8 @@ export const invoiceClientRoute = {
 
 			let nextCursor: typeof cursor | undefined = undefined;
 
-			if (clients.length > limit) {
-				const nextClient = clients.pop();
+			if (rawClients.length > limit) {
+				const nextClient = rawClients.pop();
 				nextCursor =
 					nextClient ?
 						{
@@ -57,6 +57,28 @@ export const invoiceClientRoute = {
 						}
 					:	undefined;
 			}
+
+			// Fetch invoice counts for the returned clients
+			const clientIds = rawClients.map(c => c.id);
+			let invoiceCountMap = new Map<string, number>();
+
+			if (clientIds.length > 0) {
+				const counts = await dbHttp
+					.select({
+						clientId: Invoices.clientId,
+						count: sql<number>`count(*)::int`,
+					})
+					.from(Invoices)
+					.where(and(inArray(Invoices.clientId, clientIds), isNull(Invoices.deletedAt)))
+					.groupBy(Invoices.clientId);
+
+				invoiceCountMap = new Map(counts.map(c => [c.clientId, c.count]));
+			}
+
+			const clients = rawClients.map(client => ({
+				...client,
+				invoiceCount: invoiceCountMap.get(client.id) ?? 0,
+			}));
 
 			return {
 				clients,

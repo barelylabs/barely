@@ -73,7 +73,7 @@ function ClientCard({
 				{
 					icon: 'receipt',
 					name: 'Invoices',
-					value: 0, // TODO: Add invoice count when available from API
+					value: client.invoiceCount,
 				},
 			]}
 		/>

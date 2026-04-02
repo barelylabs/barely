@@ -7,6 +7,7 @@ import { Text } from '@barely/ui/typography';
 
 import { DashContent } from '~/app/[handle]/_components/dash-content';
 import { DashContentHeader } from '~/app/[handle]/_components/dash-content-header';
+import { InvoiceNav } from '~/app/[handle]/invoices/_components/invoice-nav';
 import { HydrateClient, trpcCaller } from '~/trpc/server';
 
 export default async function InvoiceStatsPage({
@@ -25,12 +26,10 @@ export default async function InvoiceStatsPage({
 
 	return (
 		<HydrateClient>
-			<DashContentHeader
-				title='Invoice Statistics'
-				subtitle='Overview of your invoicing performance'
-			/>
+			<DashContentHeader title='Invoices' />
 			<DashContent>
-				<div className='space-y-6'>
+				<InvoiceNav />
+				<div className='mt-6 space-y-6'>
 					{/* Key Metrics */}
 					<div className='grid gap-4 md:grid-cols-4'>
 						<Card>

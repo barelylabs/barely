@@ -78,14 +78,38 @@ const reviewFormSchema = z.object({
 const STEPS = ['client', 'details', 'payment', 'review'] as const;
 type Step = (typeof STEPS)[number];
 
-export function CreateInvoiceMultiStepForm() {
+interface InvoiceMultiStepFormProps {
+	mode?: 'create' | 'edit';
+	existingInvoice?: {
+		id: string;
+		clientId: string;
+		invoiceNumber: string;
+		poNumber: string | null;
+		lineItems: { description: string; quantity: number; rate: number; amount: number }[];
+		tax: number;
+		dueDate: Date;
+		payerMemo: string | null;
+		notes: string | null;
+		type: 'oneTime' | 'recurring' | 'recurringOptional';
+		billingInterval: 'monthly' | 'quarterly' | 'yearly' | null;
+		recurringDiscountPercent: number | null;
+		createdAt: Date;
+	};
+}
+
+export function CreateInvoiceMultiStepForm({
+	mode = 'create',
+	existingInvoice,
+}: InvoiceMultiStepFormProps = {}) {
 	const router = useRouter();
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 	const workspace = useWorkspaceWithAll();
 	const { handle, currency } = workspace;
 
-	const [currentStep, setCurrentStep] = useState<Step>('client');
+	const isEditMode = mode === 'edit';
+
+	const [currentStep, setCurrentStep] = useState<Step>(isEditMode ? 'details' : 'client');
 	const [clientPopoverOpen, setClientPopoverOpen] = useState(false);
 	const { showCreateModal, setShowCreateModal } = useClientSearchParams();
 
@@ -100,17 +124,23 @@ export function CreateInvoiceMultiStepForm() {
 	);
 
 	// Only clientId needs separate state since it's not in any form
-	const [selectedClientId, setSelectedClientId] = useState<string>('');
+	const [selectedClientId, setSelectedClientId] = useState<string>(
+		existingInvoice?.clientId ?? '',
+	);
 
 	// Step 1: Details form
 	const detailsForm = useZodForm({
 		schema: detailsFormSchema,
 		defaultValues: {
-			invoiceNumber: '',
-			poNumber: '',
-			lineItems: [{ description: '', quantity: 1, unitPrice: 0 }],
-			hasTax: false,
-			taxPercentage: 0,
+			invoiceNumber: existingInvoice?.invoiceNumber ?? '',
+			poNumber: existingInvoice?.poNumber ?? '',
+			lineItems: existingInvoice?.lineItems.map(item => ({
+				description: item.description,
+				quantity: item.quantity,
+				unitPrice: item.rate, // rate is already in minor units
+			})) ?? [{ description: '', quantity: 1, unitPrice: 0 }],
+			hasTax: existingInvoice ? existingInvoice.tax > 0 : false,
+			taxPercentage: existingInvoice ? existingInvoice.tax / 100 : 0, // Convert from basis points
 		},
 	});
 
@@ -124,12 +154,12 @@ export function CreateInvoiceMultiStepForm() {
 	const paymentForm = useZodForm({
 		schema: paymentFormSchema,
 		defaultValues: {
-			invoiceDate: today,
-			dueDate: twoDaysFromNow,
-			payerMemo: '',
-			type: 'oneTime' as const,
-			billingInterval: null,
-			recurringDiscountPercent: 0,
+			invoiceDate: existingInvoice?.createdAt ?? today,
+			dueDate: existingInvoice?.dueDate ?? twoDaysFromNow,
+			payerMemo: existingInvoice?.payerMemo ?? '',
+			type: existingInvoice?.type ?? ('oneTime' as const),
+			billingInterval: existingInvoice?.billingInterval ?? null,
+			recurringDiscountPercent: existingInvoice?.recurringDiscountPercent ?? 0,
 		},
 	});
 
@@ -274,6 +304,30 @@ export function CreateInvoiceMultiStepForm() {
 		}),
 	);
 
+	const { mutateAsync: updateInvoice, isPending: isUpdating } = useMutation(
+		trpc.invoice.update.mutationOptions({
+			onSuccess: () => {
+				toast.success('Invoice updated successfully');
+				if (existingInvoice) {
+					router.push(`/${handle}/invoices/${existingInvoice.id}`);
+				}
+			},
+			onError: error => {
+				toast.error(error instanceof Error ? error.message : 'Failed to update invoice');
+			},
+			onSettled: async () => {
+				await Promise.all([
+					queryClient.invalidateQueries({
+						queryKey: trpc.invoice.byWorkspace.queryKey(),
+					}),
+					queryClient.invalidateQueries({
+						queryKey: trpc.invoice.byId.queryKey(),
+					}),
+				]);
+			},
+		}),
+	);
+
 	// Calculate totals
 	const calculateTotals = useCallback(() => {
 		const lineItems = detailsForm.watch('lineItems');
@@ -318,35 +372,57 @@ export function CreateInvoiceMultiStepForm() {
 		const detailsData = detailsForm.getValues();
 		const paymentData = paymentForm.getValues();
 
-		// Final submission - create the invoice
+		// Final submission
 		const { subtotal, total } = calculateTotals();
-		const processedData = {
-			clientId: selectedClientId,
-			poNumber: detailsData.poNumber ?? undefined,
-			lineItems: detailsData.lineItems.map(item => ({
-				description: item.description,
-				quantity: item.quantity,
-				rate: item.unitPrice, // Already in minor units
-				amount: item.quantity * item.unitPrice, // Already in minor units
-			})),
-			subtotal,
-			total,
-			tax: detailsData.hasTax ? (detailsData.taxPercentage ?? 0) * 100 : 0, // Store as basis points
-			invoiceDate: paymentData.invoiceDate,
-			dueDate: paymentData.dueDate,
-			payerMemo: paymentData.payerMemo ?? undefined,
-			type: paymentData.type,
-			billingInterval: paymentData.billingInterval,
-			recurringDiscountPercent: paymentData.recurringDiscountPercent,
-		};
+		const lineItems = detailsData.lineItems.map(item => ({
+			description: item.description,
+			quantity: item.quantity,
+			rate: item.unitPrice, // Already in minor units
+			amount: item.quantity * item.unitPrice, // Already in minor units
+		}));
+		const tax = detailsData.hasTax ? (detailsData.taxPercentage ?? 0) * 100 : 0; // Store as basis points
 
-		void createInvoice({ handle, ...processedData });
+		if (isEditMode && existingInvoice) {
+			void updateInvoice({
+				handle,
+				id: existingInvoice.id,
+				clientId: selectedClientId,
+				poNumber: detailsData.poNumber ?? undefined,
+				lineItems,
+				subtotal,
+				total,
+				tax,
+				dueDate: paymentData.dueDate,
+				payerMemo: paymentData.payerMemo ?? undefined,
+				type: paymentData.type,
+				billingInterval: paymentData.billingInterval,
+				recurringDiscountPercent: paymentData.recurringDiscountPercent,
+			});
+		} else {
+			void createInvoice({
+				handle,
+				clientId: selectedClientId,
+				poNumber: detailsData.poNumber ?? undefined,
+				lineItems,
+				subtotal,
+				total,
+				tax,
+				dueDate: paymentData.dueDate,
+				payerMemo: paymentData.payerMemo ?? undefined,
+				type: paymentData.type,
+				billingInterval: paymentData.billingInterval,
+				recurringDiscountPercent: paymentData.recurringDiscountPercent,
+			});
+		}
 	}, [
 		selectedClientId,
 		detailsForm,
 		paymentForm,
 		calculateTotals,
 		createInvoice,
+		updateInvoice,
+		isEditMode,
+		existingInvoice,
 		handle,
 	]);
 
@@ -530,6 +606,7 @@ export function CreateInvoiceMultiStepForm() {
 											name='invoiceNumber'
 											label='Invoice number'
 											placeholder='INV-54'
+											disabled={isEditMode}
 										/>
 										<TextField
 											control={detailsForm.control}
@@ -770,7 +847,9 @@ export function CreateInvoiceMultiStepForm() {
 					<Form form={reviewForm} onSubmit={handleReviewSubmit}>
 						<Card>
 							<div className='p-6'>
-								<h2 className='mb-6 text-2xl font-bold'>Review and send</h2>
+								<h2 className='mb-6 text-2xl font-bold'>
+									{isEditMode ? 'Review changes' : 'Review and send'}
+								</h2>
 
 								<div className='space-y-6'>
 									<div>
@@ -877,23 +956,30 @@ export function CreateInvoiceMultiStepForm() {
 											reviewForm.setValue('sendEmail', false);
 											void reviewForm.handleSubmit(handleReviewSubmit)();
 										}}
-										loading={isCreating || isSending}
-										loadingText={isSending ? 'Sending...' : 'Creating...'}
+										loading={isCreating || isUpdating || isSending}
+										loadingText={
+											isSending ? 'Sending...'
+											: isUpdating ?
+												'Saving...'
+											:	'Creating...'
+										}
 									>
-										Create Only
+										{isEditMode ? 'Save Changes' : 'Create Only'}
 									</Button>
-									<Button
-										type='button'
-										onClick={() => {
-											reviewForm.setValue('sendEmail', true);
-											void reviewForm.handleSubmit(handleReviewSubmit)();
-										}}
-										loading={isCreating || isSending}
-										loadingText={isSending ? 'Sending...' : 'Creating...'}
-									>
-										Create & Send Email
-										<Icon.chevronRight className='ml-2 h-4 w-4' />
-									</Button>
+									{!isEditMode && (
+										<Button
+											type='button'
+											onClick={() => {
+												reviewForm.setValue('sendEmail', true);
+												void reviewForm.handleSubmit(handleReviewSubmit)();
+											}}
+											loading={isCreating || isSending}
+											loadingText={isSending ? 'Sending...' : 'Creating...'}
+										>
+											Create & Send Email
+											<Icon.chevronRight className='ml-2 h-4 w-4' />
+										</Button>
+									)}
 								</div>
 							:	<Button type='button' onClick={handleNext}>
 									{currentStep === 'payment' ? 'Review' : 'Next'}
