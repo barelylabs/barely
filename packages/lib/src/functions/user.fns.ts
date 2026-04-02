@@ -25,6 +25,7 @@ import { parseForDb } from '@barely/validators/helpers';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 
 import type { EnrichedUser } from '../trpc/types';
+import { log } from '../utils/log';
 import { createStripeWorkspaceCustomer } from './workspace-stripe.fns';
 
 export async function checkEmailExistsOnServer(email: string) {
@@ -153,6 +154,14 @@ export async function createUser(
 		phone: phone,
 		workspaceId: newWorkspace.id,
 	});
+
+	if (newUser.marketing) {
+		await log({
+			type: 'users',
+			message: `New app user + marketing signup: ${newUser.email} (${newUser.fullName})`,
+			location: 'createUser',
+		});
+	}
 
 	// Handle workspace invites
 	let invitedWorkspaceHandle: string | undefined;
