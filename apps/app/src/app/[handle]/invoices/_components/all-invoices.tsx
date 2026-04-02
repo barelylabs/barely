@@ -115,7 +115,9 @@ function InvoiceCard({
 			statsHref={detailHref}
 			statusBadge={
 				<Badge variant={getStatusColor(invoice.status)}>
-					{invoice.status === 'created' ? 'Draft' : invoice.status}
+					{invoice.status === 'created' ?
+						'Draft'
+					:	invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
 				</Badge>
 			}
 		/>

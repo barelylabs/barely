@@ -262,12 +262,14 @@ export function CreateInvoiceMultiStepForm() {
 				toast.error(error instanceof Error ? error.message : 'Failed to create invoice');
 			},
 			onSettled: async () => {
-				await queryClient.invalidateQueries({
-					queryKey: [
-						trpc.invoice.byWorkspace.queryKey(),
-						trpc.invoice.getNextInvoiceNumber.queryKey(),
-					],
-				});
+				await Promise.all([
+					queryClient.invalidateQueries({
+						queryKey: trpc.invoice.byWorkspace.queryKey(),
+					}),
+					queryClient.invalidateQueries({
+						queryKey: trpc.invoice.getNextInvoiceNumber.queryKey(),
+					}),
+				]);
 			},
 		}),
 	);
