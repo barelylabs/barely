@@ -1,7 +1,7 @@
 import { dbHttp } from '@barely/db/client';
 import { Invoices, Workspaces } from '@barely/db/sql';
 import { tasks } from '@trigger.dev/sdk';
-import { and, desc, eq, isNull } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 
 import type { sendUsageWarning } from '../trigger';
 import { libEnv } from '../../env';
@@ -109,33 +109,18 @@ export async function checkInvoiceUsageAndIncrement(workspaceId: string) {
 	await incrementUsage(workspaceId, 'invoices', 1);
 }
 
-export async function generateInvoiceNumber(
-	workspaceId: string,
-	workspacePrefix: string,
-) {
-	// Get the last invoice number for this workspace
-	const lastInvoice = await dbHttp
-		.select({ invoiceNumber: Invoices.invoiceNumber })
+export async function generateInvoiceNumber(workspaceId: string) {
+	// Use DB-side MAX to avoid fetching all invoice rows
+	// Extracts the trailing numeric part from formats like "INV-38" or "INV-HANDLE-000038"
+	const [row] = await dbHttp
+		.select({
+			maxNum: sql<number>`COALESCE(MAX(CAST(SPLIT_PART(${Invoices.invoiceNumber}, '-', -1) AS INTEGER)), 0)`,
+		})
 		.from(Invoices)
-		.where(eq(Invoices.workspaceId, workspaceId))
-		.orderBy(desc(Invoices.createdAt))
-		.limit(1);
+		.where(eq(Invoices.workspaceId, workspaceId));
 
-	let nextNumber = 1;
-
-	if (lastInvoice[0]) {
-		// Extract the number from the last invoice
-		// Format: INV-{workspacePrefix}-{number}
-		const parts = lastInvoice[0].invoiceNumber.split('-');
-		const currentNumber = parseInt(parts[parts.length - 1] ?? '0');
-		if (!isNaN(currentNumber)) {
-			nextNumber = currentNumber + 1;
-		}
-	}
-
-	// Format: INV-{workspacePrefix}-{paddedNumber}
-	const paddedNumber = nextNumber.toString().padStart(6, '0');
-	return `INV-${workspacePrefix.toUpperCase()}-${paddedNumber}`;
+	const maxNumber = row?.maxNum ?? 0;
+	return `INV-${maxNumber + 1}`;
 }
 
 export function calculateInvoiceTotal(
