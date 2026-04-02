@@ -2,11 +2,12 @@
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import { useRouter } from 'next/navigation';
-import { useTRPC } from '@barely/api/app/trpc.react';
 import { useWorkspace } from '@barely/hooks';
 import { getAbsoluteUrl } from '@barely/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';

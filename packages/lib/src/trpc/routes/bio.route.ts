@@ -26,13 +26,13 @@ import {
 	createLinksBlockDataSchema,
 	createMarkdownBlockDataSchema,
 	createTwoPanelBlockDataSchema,
+	duplicateBioSchema,
 	reorderBioBlocksSchema,
 	reorderBioLinksSchema,
 	selectInfiniteBiosSchema,
 	updateBioBlockSchema,
 	updateBioButtonSchema,
 	updateBioLinkSchema,
-	duplicateBioSchema,
 	updateBioSchema,
 } from '@barely/validators';
 import { tasks } from '@trigger.dev/sdk';
