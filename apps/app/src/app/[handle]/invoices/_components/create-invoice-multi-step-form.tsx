@@ -17,13 +17,6 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { Card } from '@barely/ui/card';
-import { CurrencyField } from '@barely/ui/forms/currency-field';
-import { DatetimeField } from '@barely/ui/forms/datetime-field';
-import { Form } from '@barely/ui/forms/form';
-import { NumberField } from '@barely/ui/forms/number-field';
-import { SelectField } from '@barely/ui/forms/select-field';
-import { TextAreaField } from '@barely/ui/forms/text-area-field';
-import { TextField } from '@barely/ui/forms/text-field';
 import {
 	Command,
 	CommandEmpty,
@@ -33,6 +26,13 @@ import {
 	CommandList,
 	CommandSeparator,
 } from '@barely/ui/command';
+import { CurrencyField } from '@barely/ui/forms/currency-field';
+import { DatetimeField } from '@barely/ui/forms/datetime-field';
+import { Form } from '@barely/ui/forms/form';
+import { NumberField } from '@barely/ui/forms/number-field';
+import { SelectField } from '@barely/ui/forms/select-field';
+import { TextAreaField } from '@barely/ui/forms/text-area-field';
+import { TextField } from '@barely/ui/forms/text-field';
 import { Icon } from '@barely/ui/icon';
 import { Input } from '@barely/ui/input';
 import { Label } from '@barely/ui/label';
@@ -390,10 +390,7 @@ export function CreateInvoiceMultiStepForm() {
 							<div className='space-y-4'>
 								<div>
 									<Label htmlFor='client-select'>Client</Label>
-									<Popover
-										open={clientPopoverOpen}
-										onOpenChange={setClientPopoverOpen}
-									>
+									<Popover open={clientPopoverOpen} onOpenChange={setClientPopoverOpen}>
 										<PopoverTrigger asChild>
 											<Button
 												id='client-select'
@@ -417,9 +414,7 @@ export function CreateInvoiceMultiStepForm() {
 															{selectedClientData.email}
 														</span>
 													</div>
-												:	<span className='text-muted-foreground'>
-														Select a client...
-													</span>
+												:	<span className='text-muted-foreground'>Select a client...</span>
 												}
 												<Icon.chevronsUpDown className='ml-auto h-4 w-4 shrink-0 opacity-50' />
 											</Button>
@@ -453,9 +448,7 @@ export function CreateInvoiceMultiStepForm() {
 																			setClientPopoverOpen(false);
 																			handleClientSelect(client.id);
 																		}}
-																		isSelected={
-																			selectedClientId === client.id
-																		}
+																		isSelected={selectedClientId === client.id}
 																	>
 																		<div className='flex items-center gap-3'>
 																			<div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-medium text-blue-700'>
@@ -467,13 +460,10 @@ export function CreateInvoiceMultiStepForm() {
 																					.slice(0, 2)}
 																			</div>
 																			<div className='flex flex-col'>
-																				<span className='font-medium'>
-																					{client.name}
-																				</span>
+																				<span className='font-medium'>{client.name}</span>
 																				<span className='text-xs text-muted-foreground'>
 																					{client.email}
-																					{client.company &&
-																						` \u00b7 ${client.company}`}
+																					{client.company && ` \u00b7 ${client.company}`}
 																				</span>
 																			</div>
 																		</div>
@@ -826,7 +816,6 @@ export function CreateInvoiceMultiStepForm() {
 												type='email'
 												placeholder='Optional'
 											/>
-
 										</div>
 									</div>
 								</div>
