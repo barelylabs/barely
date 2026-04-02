@@ -220,6 +220,13 @@ export async function checkProductAvailability(
 		}
 		stock =
 			pool === 'barely' ? (sizeRecord.barelyStock ?? null) : (sizeRecord.stock ?? null);
+	} else if (product._apparelSizes.length > 0) {
+		// Apparel product without a specific size — check if ANY size has stock
+		const anyAvailable = product._apparelSizes.some(s => {
+			const sizeStock = pool === 'barely' ? (s.barelyStock ?? 0) : (s.stock ?? 0);
+			return sizeStock > 0;
+		});
+		return { available: anyAvailable, inventoryEnabled: true, stock: null, pool };
 	} else {
 		stock = pool === 'barely' ? product.barelyStock : product.stock;
 	}
