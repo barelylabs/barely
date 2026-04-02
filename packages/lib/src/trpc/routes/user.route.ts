@@ -66,6 +66,7 @@ export const userRoute = {
 			lastName: ctx.user.lastName,
 			handle: ctx.user.handle,
 			avatarImageS3Key: ctx.user.avatarImageS3Key,
+			admin: ctx.user.admin,
 			pitchScreening: ctx.user.pitchScreening,
 			pitchReviewing: ctx.user.pitchReviewing,
 			phone: ctx.user.phone,

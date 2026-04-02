@@ -325,6 +325,7 @@ export function getEnrichedUserFromRawUser(user: RawSessionUser): EnrichedUser {
 		lastName: user.lastName,
 		handle: userHandle,
 		avatarImageS3Key: personalWorkspace?.avatarImageS3Key ?? '',
+		admin: user.admin,
 		pitchScreening: user.pitchScreening ?? false,
 		pitchReviewing: user.pitchReviewing ?? false,
 		phone: user.phone,

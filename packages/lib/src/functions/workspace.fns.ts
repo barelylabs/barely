@@ -254,6 +254,7 @@ export interface UserWorkspaceData {
 		fullName: string | null;
 		firstName: string | null;
 		lastName: string | null;
+		admin: boolean;
 		pitchScreening: boolean;
 		pitchReviewing: boolean;
 		phone: string | null;
@@ -276,6 +277,7 @@ export async function getUserWorkspacesById(
 			fullName: true,
 			firstName: true,
 			lastName: true,
+			admin: true,
 			pitchScreening: true,
 			pitchReviewing: true,
 			phone: true,
@@ -399,6 +401,7 @@ export async function getUserWorkspacesById(
 			fullName: dbUser.fullName,
 			firstName: dbUser.firstName,
 			lastName: dbUser.lastName,
+			admin: dbUser.admin,
 			pitchScreening: dbUser.pitchScreening ?? false,
 			pitchReviewing: dbUser.pitchReviewing ?? false,
 			phone: dbUser.phone,

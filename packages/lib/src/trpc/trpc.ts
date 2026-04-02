@@ -197,6 +197,7 @@ export const privateProcedure = t.procedure
 					fullName: userProfile.fullName,
 					firstName: userProfile.firstName,
 					lastName: userProfile.lastName,
+					admin: userProfile.admin,
 					pitchScreening: userProfile.pitchScreening,
 					pitchReviewing: userProfile.pitchReviewing,
 					phone: userProfile.phone,
@@ -212,6 +213,16 @@ export const privateProcedure = t.procedure
 			},
 		});
 	});
+
+export const adminProcedure = privateProcedure.use(async opts => {
+	if (!opts.ctx.user.admin) {
+		throw new TRPCError({
+			code: 'FORBIDDEN',
+			message: 'Admin access required.',
+		});
+	}
+	return opts.next({ ctx: opts.ctx });
+});
 
 /* I believe this was implemented to differentiate workspace queries between different workspaces
     On the server it's not a problem, because the workspace is well defined, 
@@ -287,6 +298,7 @@ export const workspaceProcedure = publicProcedure
 					fullName: userProfile.fullName,
 					firstName: userProfile.firstName,
 					lastName: userProfile.lastName,
+					admin: userProfile.admin,
 					pitchScreening: userProfile.pitchScreening,
 					pitchReviewing: userProfile.pitchReviewing,
 					phone: userProfile.phone,
