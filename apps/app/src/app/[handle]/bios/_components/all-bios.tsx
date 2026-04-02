@@ -2,7 +2,12 @@
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import { useRouter } from 'next/navigation';
+import { useWorkspace } from '@barely/hooks';
 import { getAbsoluteUrl } from '@barely/utils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+
+import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
@@ -65,6 +70,23 @@ function BioPageCard({
 }) {
 	const { setShowArchiveModal, setShowDeleteModal } = useBiosSearchParams();
 	const router = useRouter();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { handle } = useWorkspace();
+
+	const { mutate: duplicateBio } = useMutation(
+		trpc.bio.duplicateBio.mutationOptions({
+			onSuccess: async () => {
+				await queryClient.invalidateQueries(trpc.bio.byWorkspace.pathFilter());
+				toast.success('Bio page duplicated');
+			},
+			onError: error => {
+				toast.error('Failed to duplicate bio page', {
+					description: error.message,
+				});
+			},
+		}),
+	);
 
 	const href = getAbsoluteUrl(
 		'bio',
@@ -82,6 +104,13 @@ function BioPageCard({
 			}
 			setShowArchiveModal={isHomeBio ? undefined : setShowArchiveModal}
 			setShowDeleteModal={isHomeBio ? undefined : setShowDeleteModal}
+			commandItems={[
+				{
+					label: 'Duplicate',
+					icon: 'copy',
+					action: () => duplicateBio({ id: bio.id, handle }),
+				},
+			]}
 			title={bio.key}
 			subtitle={href}
 			quickActions={{

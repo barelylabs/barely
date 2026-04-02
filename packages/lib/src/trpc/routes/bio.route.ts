@@ -26,6 +26,7 @@ import {
 	createLinksBlockDataSchema,
 	createMarkdownBlockDataSchema,
 	createTwoPanelBlockDataSchema,
+	duplicateBioSchema,
 	reorderBioBlocksSchema,
 	reorderBioLinksSchema,
 	selectInfiniteBiosSchema,
@@ -37,7 +38,7 @@ import {
 import { tasks } from '@trigger.dev/sdk';
 import { TRPCError } from '@trpc/server';
 import { waitUntil } from '@vercel/functions';
-import { and, asc, desc, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, inArray, isNull, like, lt, or } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import type { generateFileBlurHash } from '../../trigger/file-blurhash.trigger';
@@ -1467,5 +1468,223 @@ export const bioRoute = {
 				.returning();
 
 			return deletedBios[0] ?? raiseTRPCError({ message: 'Failed to delete bio' });
+		}),
+
+	// Duplicate bio with all blocks, links, and legacy buttons
+	duplicateBio: workspaceProcedure
+		.input(duplicateBioSchema)
+		.mutation(async ({ input, ctx }) => {
+			// 1. Fetch original bio with all relations
+			const originalBio = await dbHttp.query.Bios.findFirst({
+				where: and(eq(Bios.id, input.id), eq(Bios.workspaceId, ctx.workspace.id)),
+				with: {
+					bioBlocks: {
+						with: {
+							bioBlock: {
+								with: {
+									bioLinks: {
+										with: {
+											bioLink: {
+												with: {
+													_image: true,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					bioButtons: {
+						with: {
+							bioButton: true,
+						},
+					},
+				},
+			});
+
+			if (!originalBio) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Bio not found',
+				});
+			}
+
+			// 2. Generate unique copy key
+			const baseCopyKey = `${originalBio.key}-copy`;
+			const existingCopies = await dbHttp.query.Bios.findMany({
+				where: and(
+					eq(Bios.workspaceId, ctx.workspace.id),
+					like(Bios.key, `${baseCopyKey}%`),
+					isNull(Bios.deletedAt),
+				),
+				columns: { key: true },
+			});
+
+			const existingKeys = existingCopies.map(b => b.key);
+			let newKey: string;
+			if (!existingKeys.includes(baseCopyKey)) {
+				newKey = baseCopyKey;
+			} else {
+				let maxNum = 1;
+				for (const key of existingKeys) {
+					if (key === baseCopyKey) continue;
+					const match = new RegExp(
+						`^${baseCopyKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}-(\\d+)$`,
+					).exec(key);
+					if (match?.[1]) {
+						maxNum = Math.max(maxNum, parseInt(match[1], 10));
+					}
+				}
+				const nextNum = maxNum + 1;
+				newKey = `${baseCopyKey}-${String(nextNum).padStart(2, '0')}`;
+			}
+
+			// 3. Create the duplicate bio and all related entities in a transaction
+			const newBioId = newId('bio');
+			await dbPool(ctx.pool).transaction(async tx => {
+				await tx.insert(Bios).values({
+					id: newBioId,
+					workspaceId: ctx.workspace.id,
+					handle: ctx.workspace.handle,
+					key: newKey,
+					imgShape: originalBio.imgShape,
+					socialDisplay: originalBio.socialDisplay,
+					showLocation: originalBio.showLocation,
+					showHeader: originalBio.showHeader,
+					headerStyle: originalBio.headerStyle,
+					showShareButton: originalBio.showShareButton,
+					showSubscribeButton: originalBio.showSubscribeButton,
+					barelyBranding: originalBio.barelyBranding,
+					emailCaptureEnabled: originalBio.emailCaptureEnabled,
+					emailCaptureIncentiveText: originalBio.emailCaptureIncentiveText,
+					hasTwoPanel: originalBio.hasTwoPanel,
+					title: originalBio.title,
+					description: originalBio.description,
+					noindex: originalBio.noindex,
+				});
+
+				// 4. Duplicate blocks, bio links, and join tables
+				for (const blockJoin of originalBio.bioBlocks) {
+					const block = blockJoin.bioBlock;
+					const newBlockId = newId('bioBlock');
+
+					await tx.insert(BioBlocks).values({
+						id: newBlockId,
+						workspaceId: ctx.workspace.id,
+						type: block.type,
+						enabled: block.enabled,
+						styleAsButton: block.styleAsButton,
+						name: block.name,
+						title: block.title,
+						subtitle: block.subtitle,
+						smsCaptureEnabled: block.smsCaptureEnabled,
+						markdown: block.markdown,
+						imageFileId: block.imageFileId,
+						imageCaption: block.imageCaption,
+						imageAltText: block.imageAltText,
+						imageMobileSide: block.imageMobileSide,
+						imageDesktopSide: block.imageDesktopSide,
+						ctaText: block.ctaText,
+						ctaAnimation: block.ctaAnimation,
+						ctaIcon: block.ctaIcon,
+						targetUrl: block.targetUrl,
+						learnMoreText: block.learnMoreText,
+						learnMoreUrl: block.learnMoreUrl,
+						learnMoreBioId:
+							block.learnMoreBioId === originalBio.id ? newBioId : block.learnMoreBioId,
+						targetLinkId: block.targetLinkId,
+						targetBioId:
+							block.targetBioId === originalBio.id ? newBioId : block.targetBioId,
+						targetFmId: block.targetFmId,
+						targetCartFunnelId: block.targetCartFunnelId,
+					});
+
+					// Connect block to new bio
+					await tx.insert(_BioBlocks_To_Bios).values({
+						bioId: newBioId,
+						bioBlockId: newBlockId,
+						lexoRank: blockJoin.lexoRank,
+					});
+
+					// Duplicate bio links within this block
+					for (const linkJoin of block.bioLinks) {
+						const bioLink = linkJoin.bioLink;
+						const newLinkId = newId('bioLink');
+
+						await tx.insert(BioLinks).values({
+							id: newLinkId,
+							workspaceId: ctx.workspace.id,
+							linkId: bioLink.linkId,
+							formId: bioLink.formId,
+							title: bioLink.title,
+							subtitle: bioLink.subtitle,
+							url: bioLink.url,
+							animate: bioLink.animate,
+							text: bioLink.text,
+							buttonColor: bioLink.buttonColor,
+							textColor: bioLink.textColor,
+							email: bioLink.email,
+							phone: bioLink.phone,
+							enabled: bioLink.enabled,
+							startShowingAt: bioLink.startShowingAt,
+							stopShowingAt: bioLink.stopShowingAt,
+						});
+
+						// Connect link to new block
+						await tx.insert(_BioLinks_To_BioBlocks).values({
+							bioBlockId: newBlockId,
+							bioLinkId: newLinkId,
+							lexoRank: linkJoin.lexoRank,
+						});
+
+						// Copy image references
+						for (const imageRef of bioLink._image) {
+							await tx.insert(_Files_To_BioLinks__Images).values({
+								fileId: imageRef.fileId,
+								bioLinkId: newLinkId,
+							});
+						}
+					}
+				}
+
+				// 5. Duplicate legacy bio buttons
+				for (const buttonJoin of originalBio.bioButtons) {
+					const button = buttonJoin.bioButton;
+					const newButtonId = newId('bioButton');
+
+					await tx.insert(BioButtons).values({
+						id: newButtonId,
+						workspaceId: ctx.workspace.id,
+						linkId: button.linkId,
+						formId: button.formId,
+						text: button.text,
+						buttonColor: button.buttonColor,
+						textColor: button.textColor,
+						email: button.email,
+						phone: button.phone,
+					});
+
+					await tx.insert(_BioButtons_To_Bios).values({
+						bioId: newBioId,
+						bioButtonId: newButtonId,
+						lexoRank: buttonJoin.lexoRank,
+					});
+				}
+			});
+
+			const duplicatedBio = await getBioByHandleAndKey({
+				handle: ctx.workspace.handle,
+				key: newKey,
+			});
+
+			if (!duplicatedBio) {
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: 'Failed to retrieve duplicated bio',
+				});
+			}
+
+			return duplicatedBio;
 		}),
 } satisfies TRPCRouterRecord;
