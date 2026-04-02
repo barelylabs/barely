@@ -568,6 +568,11 @@ export const bioEmailCaptureSchema = bioContactCaptureSchema;
 export type BioContactCapture = z.infer<typeof bioContactCaptureSchema>;
 export type BioEmailCapture = BioContactCapture;
 
+// Duplicate bio
+export const duplicateBioSchema = z.object({
+	id: z.string(),
+});
+
 // stat filters
 export const bioStatFiltersSchema = stdWebEventPipeQueryParamsSchema.extend({
 	showViews: z.boolean().optional().default(true),
