@@ -41,6 +41,12 @@ export const Users = pgTable(
 		marketing: boolean('marketing').default(false),
 		pitchScreening: boolean('pitchScreening').default(false),
 		pitchReviewing: boolean('pitchReviewing').default(false),
+
+		// signup attribution
+		signupSource: varchar('signupSource', { length: 255 }),
+		signupMedium: varchar('signupMedium', { length: 255 }),
+		signupCampaign: varchar('signupCampaign', { length: 255 }),
+		signupReferrer: varchar('signupReferrer', { length: 1000 }),
 		personalWorkspaceId: dbId('personalWorkspaceId')
 			.notNull()
 			.references(() => Workspaces.id, {

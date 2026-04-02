@@ -19,10 +19,26 @@ function formatCurrency(cents: number) {
 export function AdminOverviewStats() {
 	const trpc = useTRPC();
 	const { data } = useSuspenseQuery(trpc.admin.overview.queryOptions());
+	const { data: activity } = useSuspenseQuery(trpc.admin.userActivity.queryOptions());
 
 	return (
 		<div className='grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4'>
 			<StatCard label='Total Users' value={nFormatter(data.totalUsers)} />
+			<StatCard
+				label='Active Users'
+				value={nFormatter(activity.activeUsers)}
+				description='Last 30 days'
+			/>
+			<StatCard
+				label='Setup Users'
+				value={nFormatter(activity.setupUsers)}
+				description='Created content'
+			/>
+			<StatCard
+				label='Ghost Users'
+				value={nFormatter(activity.ghostUsers)}
+				description='No activity'
+			/>
 			<StatCard label='Total Workspaces' value={nFormatter(data.totalWorkspaces)} />
 			<StatCard
 				label='Paid Workspaces'
@@ -41,6 +57,7 @@ export function AdminOverviewStats() {
 					:	undefined
 				}
 			/>
+			<StatCard label='Marketing Opt-ins' value={nFormatter(data.marketingOptIns)} />
 		</div>
 	);
 }

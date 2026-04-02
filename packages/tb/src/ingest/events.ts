@@ -2,6 +2,7 @@ import type { z } from 'zod/v4';
 
 import { tinybird } from '../index';
 import {
+	appEventIngestSchema,
 	bioEventIngestSchema,
 	cartEventIngestSchema,
 	emailEventIngestSchema,
@@ -73,4 +74,14 @@ export const ingestEmailEvent = tinybird.buildIngestEndpoint<
 >({
 	datasource: 'email_events',
 	event: emailEventIngestSchema,
+});
+
+/* app events - authenticated dashboard analytics */
+
+export const ingestAppEvent = tinybird.buildIngestEndpoint<
+	z.output<typeof appEventIngestSchema>,
+	z.input<typeof appEventIngestSchema>
+>({
+	datasource: 'app_events',
+	event: appEventIngestSchema,
 });

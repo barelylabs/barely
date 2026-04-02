@@ -8,10 +8,14 @@ import { AdminOverviewStats } from './_components/admin-overview-stats';
 
 export default function AdminOverviewPage() {
 	prefetch(trpc.admin.overview.queryOptions());
+	prefetch(trpc.admin.userActivity.queryOptions());
 	prefetch(trpc.admin.userGrowth.queryOptions({}));
+	prefetch(trpc.admin.userActivityOverTime.queryOptions({}));
 	prefetch(trpc.admin.workspacesByPlan.queryOptions());
 	prefetch(trpc.admin.topWorkspaces.queryOptions({ sortBy: 'events', limit: 10 }));
 	prefetch(trpc.admin.revenueTimeseries.queryOptions({}));
+	prefetch(trpc.admin.signupSources.queryOptions());
+	prefetch(trpc.admin.appAnalytics.queryOptions({}));
 
 	return (
 		<HydrateClient>

@@ -53,3 +53,19 @@ export const WEB_EVENT_TYPES = [
 ] as const;
 
 export type WebEventType = (typeof WEB_EVENT_TYPES)[number];
+
+export const APP_EVENT_TYPES = [
+	'app/pageView',
+	'app/linkCreate',
+	'app/bioCreate',
+	'app/trackCreate',
+	'app/productCreate',
+	'app/fmCreate',
+	'app/fanImport',
+	'app/settingsUpdate',
+	'app/analyticsView',
+	'app/billingView',
+	'app/upgradeView',
+] as const;
+
+export type AppEventType = (typeof APP_EVENT_TYPES)[number];

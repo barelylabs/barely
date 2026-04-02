@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { checkIfWorkspaceHasPendingInviteForUser } from '@barely/lib/functions/workspace.fns';
 
+import { AppAnalyticsTracker } from '~/app/[handle]/_components/app-analytics-tracker';
 import { DashboardLayout } from '~/app/[handle]/_components/dashboard-layout';
 import { NewWorkspaceModal } from '~/app/[handle]/_components/new-workspace-modal';
 import { WorkspaceProviders } from '~/app/[handle]/_components/workspace-providers';
@@ -53,6 +54,7 @@ export default async function HandleLayout({
 	return (
 		<HydrateClient>
 			<WorkspaceProviders user={user} workspace={currentWorkspace}>
+				<AppAnalyticsTracker />
 				<div className='mx-auto flex w-full flex-1 flex-row'>
 					<NewWorkspaceModal />
 					<DashboardLayout>{children}</DashboardLayout>

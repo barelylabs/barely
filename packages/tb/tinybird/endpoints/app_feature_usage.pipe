@@ -1,0 +1,25 @@
+TOKEN "app_feature_usage_endpoint_read" READ
+
+NODE app_features
+SQL >
+
+    %
+        SELECT
+          type,
+          count() as eventCount,
+          uniq(userId) as uniqueUsers
+        FROM app_events
+        WHERE
+            1 = 1
+            {% if defined(start) %} and timestamp >= toDateTime64( {{ DateTime64(start) }}, 3) {% end %}
+            {% if defined(end) %} and timestamp <= toDateTime64( {{ DateTime64(end) }}, 3) {% end %}
+        GROUP BY type
+        ORDER BY eventCount DESC
+
+NODE endpoint
+SQL >
+
+    SELECT *
+    FROM app_features
+
+TYPE endpoint

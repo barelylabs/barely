@@ -1,0 +1,24 @@
+TOKEN "app_daily_active_users_endpoint_read" READ
+
+NODE app_dau
+SQL >
+
+    %
+        SELECT
+          toDate(timestamp) as date,
+          uniq(userId) as activeUsers
+        FROM app_events
+        WHERE
+            type = 'app/pageView'
+            {% if defined(start) %} and timestamp >= toDateTime64( {{ DateTime64(start) }}, 3) {% end %}
+            {% if defined(end) %} and timestamp <= toDateTime64( {{ DateTime64(end) }}, 3) {% end %}
+        GROUP BY date
+        ORDER BY date ASC
+
+NODE endpoint
+SQL >
+
+    SELECT *
+    FROM app_dau
+
+TYPE endpoint

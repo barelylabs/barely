@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getCurrentAppConfig } from '@barely/utils';
@@ -11,12 +12,24 @@ import RegisterUserForm from './register-user-form';
 const RegisterUserPage = async ({
 	searchParams,
 }: {
-	searchParams?: Promise<{ callbackUrl?: string; inviteToken?: string; email?: string }>;
+	searchParams?: Promise<{
+		callbackUrl?: string;
+		inviteToken?: string;
+		email?: string;
+		utm_source?: string;
+		utm_medium?: string;
+		utm_campaign?: string;
+	}>;
 }) => {
 	const awaitedSearchParams = await searchParams;
-	const { callbackUrl, inviteToken, email } = awaitedSearchParams ?? {};
+	const { callbackUrl, inviteToken, email, utm_source, utm_medium, utm_campaign } =
+		awaitedSearchParams ?? {};
 
 	await handleLoggedInOnAuthPage({ callbackUrl });
+
+	// Capture referrer from headers
+	const headersList = await headers();
+	const referrer = headersList.get('referer') ?? undefined;
 
 	const appConfig = getCurrentAppConfig();
 
@@ -40,6 +53,10 @@ const RegisterUserPage = async ({
 					callbackUrl={callbackUrl}
 					inviteToken={inviteToken}
 					prefilledEmail={email}
+					signupSource={utm_source}
+					signupMedium={utm_medium}
+					signupCampaign={utm_campaign}
+					signupReferrer={referrer}
 				/>
 
 				<Text variant={'xs/normal'} subtle>
