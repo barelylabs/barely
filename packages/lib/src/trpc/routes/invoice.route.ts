@@ -371,8 +371,7 @@ export const invoiceRoute = {
 						.values(invoiceData)
 						.returning();
 					const invoice =
-						invoices[0] ??
-						raiseTRPCError({ message: 'Failed to create invoice' });
+						invoices[0] ?? raiseTRPCError({ message: 'Failed to create invoice' });
 
 					return invoice;
 				} catch (error) {
@@ -388,7 +387,10 @@ export const invoiceRoute = {
 			}
 
 			// Unreachable: the loop always returns or throws on the last attempt
-			throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to create invoice' });
+			throw new TRPCError({
+				code: 'INTERNAL_SERVER_ERROR',
+				message: 'Failed to create invoice',
+			});
 		}),
 
 	archive: workspaceProcedure
