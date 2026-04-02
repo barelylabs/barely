@@ -1540,37 +1540,36 @@ export const bioRoute = {
 				newKey = `${baseCopyKey}-${String(nextNum).padStart(2, '0')}`;
 			}
 
-			// 3. Create the duplicate bio
+			// 3. Create the duplicate bio and all related entities in a transaction
 			const newBioId = newId('bio');
-			await dbPool(ctx.pool).insert(Bios).values({
-				id: newBioId,
-				workspaceId: ctx.workspace.id,
-				handle: ctx.workspace.handle,
-				key: newKey,
-				imgShape: originalBio.imgShape,
-				socialDisplay: originalBio.socialDisplay,
-				showLocation: originalBio.showLocation,
-				showHeader: originalBio.showHeader,
-				headerStyle: originalBio.headerStyle,
-				showShareButton: originalBio.showShareButton,
-				showSubscribeButton: originalBio.showSubscribeButton,
-				barelyBranding: originalBio.barelyBranding,
-				emailCaptureEnabled: originalBio.emailCaptureEnabled,
-				emailCaptureIncentiveText: originalBio.emailCaptureIncentiveText,
-				hasTwoPanel: originalBio.hasTwoPanel,
-				title: originalBio.title,
-				description: originalBio.description,
-				noindex: originalBio.noindex,
-			});
+			await dbPool(ctx.pool).transaction(async tx => {
+				await tx.insert(Bios).values({
+					id: newBioId,
+					workspaceId: ctx.workspace.id,
+					handle: ctx.workspace.handle,
+					key: newKey,
+					imgShape: originalBio.imgShape,
+					socialDisplay: originalBio.socialDisplay,
+					showLocation: originalBio.showLocation,
+					showHeader: originalBio.showHeader,
+					headerStyle: originalBio.headerStyle,
+					showShareButton: originalBio.showShareButton,
+					showSubscribeButton: originalBio.showSubscribeButton,
+					barelyBranding: originalBio.barelyBranding,
+					emailCaptureEnabled: originalBio.emailCaptureEnabled,
+					emailCaptureIncentiveText: originalBio.emailCaptureIncentiveText,
+					hasTwoPanel: originalBio.hasTwoPanel,
+					title: originalBio.title,
+					description: originalBio.description,
+					noindex: originalBio.noindex,
+				});
 
-			// 4. Duplicate blocks, bio links, and join tables
-			for (const blockJoin of originalBio.bioBlocks) {
-				const block = blockJoin.bioBlock;
-				const newBlockId = newId('bioBlock');
+				// 4. Duplicate blocks, bio links, and join tables
+				for (const blockJoin of originalBio.bioBlocks) {
+					const block = blockJoin.bioBlock;
+					const newBlockId = newId('bioBlock');
 
-				await dbPool(ctx.pool)
-					.insert(BioBlocks)
-					.values({
+					await tx.insert(BioBlocks).values({
 						id: newBlockId,
 						workspaceId: ctx.workspace.id,
 						type: block.type,
@@ -1601,77 +1600,78 @@ export const bioRoute = {
 						targetCartFunnelId: block.targetCartFunnelId,
 					});
 
-				// Connect block to new bio
-				await dbPool(ctx.pool).insert(_BioBlocks_To_Bios).values({
-					bioId: newBioId,
-					bioBlockId: newBlockId,
-					lexoRank: blockJoin.lexoRank,
-				});
-
-				// Duplicate bio links within this block
-				for (const linkJoin of block.bioLinks) {
-					const bioLink = linkJoin.bioLink;
-					const newLinkId = newId('bioLink');
-
-					await dbPool(ctx.pool).insert(BioLinks).values({
-						id: newLinkId,
-						workspaceId: ctx.workspace.id,
-						linkId: bioLink.linkId,
-						formId: bioLink.formId,
-						title: bioLink.title,
-						subtitle: bioLink.subtitle,
-						url: bioLink.url,
-						animate: bioLink.animate,
-						text: bioLink.text,
-						buttonColor: bioLink.buttonColor,
-						textColor: bioLink.textColor,
-						email: bioLink.email,
-						phone: bioLink.phone,
-						enabled: bioLink.enabled,
-						startShowingAt: bioLink.startShowingAt,
-						stopShowingAt: bioLink.stopShowingAt,
-					});
-
-					// Connect link to new block
-					await dbPool(ctx.pool).insert(_BioLinks_To_BioBlocks).values({
+					// Connect block to new bio
+					await tx.insert(_BioBlocks_To_Bios).values({
+						bioId: newBioId,
 						bioBlockId: newBlockId,
-						bioLinkId: newLinkId,
-						lexoRank: linkJoin.lexoRank,
+						lexoRank: blockJoin.lexoRank,
 					});
 
-					// Copy image references
-					for (const imageRef of bioLink._image) {
-						await dbPool(ctx.pool).insert(_Files_To_BioLinks__Images).values({
-							fileId: imageRef.fileId,
-							bioLinkId: newLinkId,
+					// Duplicate bio links within this block
+					for (const linkJoin of block.bioLinks) {
+						const bioLink = linkJoin.bioLink;
+						const newLinkId = newId('bioLink');
+
+						await tx.insert(BioLinks).values({
+							id: newLinkId,
+							workspaceId: ctx.workspace.id,
+							linkId: bioLink.linkId,
+							formId: bioLink.formId,
+							title: bioLink.title,
+							subtitle: bioLink.subtitle,
+							url: bioLink.url,
+							animate: bioLink.animate,
+							text: bioLink.text,
+							buttonColor: bioLink.buttonColor,
+							textColor: bioLink.textColor,
+							email: bioLink.email,
+							phone: bioLink.phone,
+							enabled: bioLink.enabled,
+							startShowingAt: bioLink.startShowingAt,
+							stopShowingAt: bioLink.stopShowingAt,
 						});
+
+						// Connect link to new block
+						await tx.insert(_BioLinks_To_BioBlocks).values({
+							bioBlockId: newBlockId,
+							bioLinkId: newLinkId,
+							lexoRank: linkJoin.lexoRank,
+						});
+
+						// Copy image references
+						for (const imageRef of bioLink._image) {
+							await tx.insert(_Files_To_BioLinks__Images).values({
+								fileId: imageRef.fileId,
+								bioLinkId: newLinkId,
+							});
+						}
 					}
 				}
-			}
 
-			// 5. Duplicate legacy bio buttons
-			for (const buttonJoin of originalBio.bioButtons) {
-				const button = buttonJoin.bioButton;
-				const newButtonId = newId('bioButton');
+				// 5. Duplicate legacy bio buttons
+				for (const buttonJoin of originalBio.bioButtons) {
+					const button = buttonJoin.bioButton;
+					const newButtonId = newId('bioButton');
 
-				await dbPool(ctx.pool).insert(BioButtons).values({
-					id: newButtonId,
-					workspaceId: ctx.workspace.id,
-					linkId: button.linkId,
-					formId: button.formId,
-					text: button.text,
-					buttonColor: button.buttonColor,
-					textColor: button.textColor,
-					email: button.email,
-					phone: button.phone,
-				});
+					await tx.insert(BioButtons).values({
+						id: newButtonId,
+						workspaceId: ctx.workspace.id,
+						linkId: button.linkId,
+						formId: button.formId,
+						text: button.text,
+						buttonColor: button.buttonColor,
+						textColor: button.textColor,
+						email: button.email,
+						phone: button.phone,
+					});
 
-				await dbPool(ctx.pool).insert(_BioButtons_To_Bios).values({
-					bioId: newBioId,
-					bioButtonId: newButtonId,
-					lexoRank: buttonJoin.lexoRank,
-				});
-			}
+					await tx.insert(_BioButtons_To_Bios).values({
+						bioId: newBioId,
+						bioButtonId: newButtonId,
+						lexoRank: buttonJoin.lexoRank,
+					});
+				}
+			});
 
 			const duplicatedBio = await getBioByHandleAndKey({
 				handle: ctx.workspace.handle,
