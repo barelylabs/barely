@@ -387,7 +387,8 @@ export const invoiceRoute = {
 				}
 			}
 
-			throw raiseTRPCError({ message: 'Failed to create invoice after retries' });
+			// Unreachable: the loop always returns or throws on the last attempt
+			throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to create invoice' });
 		}),
 
 	archive: workspaceProcedure

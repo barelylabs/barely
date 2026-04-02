@@ -1,7 +1,7 @@
 import { dbHttp } from '@barely/db/client';
 import { Invoices, Workspaces } from '@barely/db/sql';
 import { tasks } from '@trigger.dev/sdk';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 
 import type { sendUsageWarning } from '../trigger';
 import { libEnv } from '../../env';
@@ -110,26 +110,16 @@ export async function checkInvoiceUsageAndIncrement(workspaceId: string) {
 }
 
 export async function generateInvoiceNumber(workspaceId: string) {
-	const allInvoices = await dbHttp
-		.select({ invoiceNumber: Invoices.invoiceNumber })
+	// Use DB-side MAX to avoid fetching all invoice rows
+	// Extracts the trailing numeric part from formats like "INV-38" or "INV-HANDLE-000038"
+	const [row] = await dbHttp
+		.select({
+			maxNum: sql<number>`COALESCE(MAX(CAST(SPLIT_PART(${Invoices.invoiceNumber}, '-', -1) AS INTEGER)), 0)`,
+		})
 		.from(Invoices)
 		.where(eq(Invoices.workspaceId, workspaceId));
 
-	if (allInvoices.length === 0) {
-		return 'INV-1';
-	}
-
-	// Find the highest number across all invoice number formats
-	// Handles "INV-38", "INV-HANDLE-000038", etc.
-	let maxNumber = 0;
-	for (const inv of allInvoices) {
-		const parts = inv.invoiceNumber.split('-');
-		const num = parseInt(parts[parts.length - 1] ?? '0');
-		if (!isNaN(num) && num > maxNumber) {
-			maxNumber = num;
-		}
-	}
-
+	const maxNumber = row?.maxNum ?? 0;
 	return `INV-${maxNumber + 1}`;
 }
 
