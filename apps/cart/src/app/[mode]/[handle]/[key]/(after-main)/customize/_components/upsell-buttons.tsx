@@ -44,7 +44,7 @@ export function UpsellButtons({
 	const upsellSoldOut = (() => {
 		if (!upsellProduct?.inventoryEnabled || upsellProduct.allowOverselling) return false;
 		// For apparel, check per-size stock
-		if (upsellProduct._apparelSizes && upsellProduct._apparelSizes.length > 0) {
+		if (upsellProduct._apparelSizes.length > 0) {
 			return upsellProduct._apparelSizes.every(
 				s => (s.stock ?? 0) <= 0 && (s.barelyStock ?? 0) <= 0,
 			);
