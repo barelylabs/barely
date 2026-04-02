@@ -122,21 +122,19 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 
 	/* tracks for pre-save */
 	const { data: tracksData } = useQuery(
-		trpc.track.byWorkspace.queryOptions({ limit: 100 }, { enabled: showFmModal }),
+		trpc.track.byWorkspace.queryOptions({ handle, limit: 100 }, { enabled: showFmModal }),
 	);
 
 	const trackOptions = useMemo(() => {
 		const options: { value: string; label: string }[] = [
 			{ value: '', label: 'None (no pre-save)' },
 		];
-		if (tracksData?.tracks) {
-			for (const track of tracksData.tracks) {
-				const releasedLabel = track.released ? ' (released)' : '';
-				options.push({
-					value: track.id,
-					label: `${track.name}${releasedLabel}`,
-				});
-			}
+		for (const track of tracksData?.tracks ?? []) {
+			const releasedLabel = track.released ? ' (released)' : '';
+			options.push({
+				value: track.id,
+				label: `${track.name}${releasedLabel}`,
+			});
 		}
 		return options;
 	}, [tracksData]);

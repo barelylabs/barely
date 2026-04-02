@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
  * We extract the code and state, then redirect back to the FM page
  * with the code as a query parameter so the client can complete the pre-save.
  */
-export async function GET(request: Request) {
+export function GET(request: Request) {
 	const url = new URL(request.url);
 	const code = url.searchParams.get('code');
 	const state = url.searchParams.get('state');
