@@ -21,7 +21,6 @@ import {
 	eq,
 	gt,
 	gte,
-	inArray,
 	isNotNull,
 	lte,
 	max,
@@ -265,7 +264,7 @@ export const adminRoute = {
 			}
 		}
 
-		const ghostUsers = totalUsers - activeUsers - setupUsers;
+		const ghostUsers = Math.max(0, totalUsers - activeUsers - setupUsers);
 
 		return { activeUsers, setupUsers, ghostUsers, totalUsers };
 	}),
@@ -304,134 +303,138 @@ export const adminRoute = {
 			const thirtyDaysAgo = new Date();
 			thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-			const searchCondition =
-				input.search ?
+			// Build activity classification subqueries
+			const recentSessionSubquery = dbHttp
+				.selectDistinct({ userId: UserSessions.userId })
+				.from(UserSessions)
+				.where(gte(UserSessions.createdAt, thirtyDaysAgo))
+				.as('recent_sessions');
+
+			const contentSubquery = dbHttp
+				.selectDistinct({ userId: _Users_To_Workspaces.userId })
+				.from(_Users_To_Workspaces)
+				.innerJoin(Workspaces, eq(_Users_To_Workspaces.workspaceId, Workspaces.id))
+				.where(
+					and(
+						ne(Workspaces.type, 'personal'),
+						or(
+							gt(Workspaces.linkUsage, 0),
+							gt(Workspaces.fanUsage, 0),
+							gt(Workspaces.eventUsage, 0),
+							gt(Workspaces.emailUsage, 0),
+							gt(Workspaces.fileUsage_total, 0),
+						),
+					),
+				)
+				.as('content_users');
+
+			// Session stats subquery
+			const sessionStatsSubquery = dbHttp
+				.select({
+					userId: UserSessions.userId,
+					loginCount: count().as('login_count'),
+					lastLoginAt: max(UserSessions.createdAt).as('last_login_at'),
+				})
+				.from(UserSessions)
+				.groupBy(UserSessions.userId)
+				.as('session_stats');
+
+			// Workspace count subquery
+			const workspaceCountSubquery = dbHttp
+				.select({
+					userId: _Users_To_Workspaces.userId,
+					wsCount: count().as('ws_count'),
+				})
+				.from(_Users_To_Workspaces)
+				.groupBy(_Users_To_Workspaces.userId)
+				.as('ws_counts');
+
+			// Build the activity status as a SQL CASE expression
+			const activityStatusExpr = sql<string>`CASE
+				WHEN ${recentSessionSubquery.userId} IS NOT NULL THEN 'active'
+				WHEN ${contentSubquery.userId} IS NOT NULL THEN 'setup'
+				ELSE 'ghost'
+			END`.as('activity_status');
+
+			// Build conditions
+			const conditions = [];
+
+			if (input.search) {
+				conditions.push(
 					or(
 						sqlStringContains(Users.email, input.search),
 						sqlStringContains(Users.fullName, input.search),
-					)
-				:	undefined;
+					),
+				);
+			}
 
-			// First, get all users matching search (we need full list for activity filtering)
+			if (input.activityFilter === 'active') {
+				conditions.push(isNotNull(recentSessionSubquery.userId));
+			} else if (input.activityFilter === 'setup') {
+				conditions.push(
+					and(
+						sql`${recentSessionSubquery.userId} IS NULL`,
+						isNotNull(contentSubquery.userId),
+					),
+				);
+			} else if (input.activityFilter === 'ghost') {
+				conditions.push(
+					and(
+						sql`${recentSessionSubquery.userId} IS NULL`,
+						sql`${contentSubquery.userId} IS NULL`,
+					),
+				);
+			}
+
+			const whereClause = sqlAnd(conditions);
+
+			const baseQuery = dbHttp
+				.select({
+					id: Users.id,
+					email: Users.email,
+					fullName: Users.fullName,
+					firstName: Users.firstName,
+					lastName: Users.lastName,
+					createdAt: Users.createdAt,
+					admin: Users.admin,
+					marketing: Users.marketing,
+					signupSource: Users.signupSource,
+					loginCount:
+						sql<number>`COALESCE(${sessionStatsSubquery.loginCount}, 0)`.mapWith(Number),
+					lastLoginAt: sessionStatsSubquery.lastLoginAt,
+					workspaceCount:
+						sql<number>`COALESCE(${workspaceCountSubquery.wsCount}, 0)`.mapWith(Number),
+					activityStatus: activityStatusExpr,
+				})
+				.from(Users)
+				.leftJoin(recentSessionSubquery, eq(Users.id, recentSessionSubquery.userId))
+				.leftJoin(contentSubquery, eq(Users.id, contentSubquery.userId))
+				.leftJoin(sessionStatsSubquery, eq(Users.id, sessionStatsSubquery.userId))
+				.leftJoin(workspaceCountSubquery, eq(Users.id, workspaceCountSubquery.userId))
+				.where(whereClause);
+
 			const [users, totalResult] = await Promise.all([
-				dbHttp
-					.select({
-						id: Users.id,
-						email: Users.email,
-						fullName: Users.fullName,
-						firstName: Users.firstName,
-						lastName: Users.lastName,
-						createdAt: Users.createdAt,
-						admin: Users.admin,
-						marketing: Users.marketing,
-						signupSource: Users.signupSource,
-					})
-					.from(Users)
-					.where(searchCondition)
-					.orderBy(desc(Users.createdAt))
-					.limit(input.activityFilter === 'all' ? input.limit : 500)
-					.offset(input.activityFilter === 'all' ? input.cursor : 0),
+				baseQuery.orderBy(desc(Users.createdAt)).limit(input.limit).offset(input.cursor),
 
 				dbHttp
 					.select({ count: sqlCount })
-					.from(Users)
-					.where(searchCondition)
+					.from(
+						dbHttp
+							.select({ id: Users.id })
+							.from(Users)
+							.leftJoin(recentSessionSubquery, eq(Users.id, recentSessionSubquery.userId))
+							.leftJoin(contentSubquery, eq(Users.id, contentSubquery.userId))
+							.where(whereClause)
+							.as('filtered_users'),
+					)
 					.then(r => r[0]?.count ?? 0),
 			]);
 
-			// Get workspace counts and session data for each user
-			const userIds = users.map(u => u.id);
-
-			const [workspaceCounts, sessionData, usersWithContent] =
-				userIds.length > 0 ?
-					await Promise.all([
-						dbHttp
-							.select({
-								userId: _Users_To_Workspaces.userId,
-								count: count(),
-							})
-							.from(_Users_To_Workspaces)
-							.where(inArray(_Users_To_Workspaces.userId, userIds))
-							.groupBy(_Users_To_Workspaces.userId),
-
-						dbHttp
-							.select({
-								userId: UserSessions.userId,
-								loginCount: count(),
-								lastLoginAt: max(UserSessions.createdAt),
-							})
-							.from(UserSessions)
-							.where(inArray(UserSessions.userId, userIds))
-							.groupBy(UserSessions.userId),
-
-						dbHttp
-							.selectDistinct({ userId: _Users_To_Workspaces.userId })
-							.from(_Users_To_Workspaces)
-							.innerJoin(Workspaces, eq(_Users_To_Workspaces.workspaceId, Workspaces.id))
-							.where(
-								and(
-									inArray(_Users_To_Workspaces.userId, userIds),
-									ne(Workspaces.type, 'personal'),
-									or(
-										gt(Workspaces.linkUsage, 0),
-										gt(Workspaces.fanUsage, 0),
-										gt(Workspaces.eventUsage, 0),
-										gt(Workspaces.emailUsage, 0),
-										gt(Workspaces.fileUsage_total, 0),
-									),
-								),
-							),
-					])
-				:	[[], [], []];
-
-			const workspaceCountMap = new Map(workspaceCounts.map(wc => [wc.userId, wc.count]));
-			const sessionDataMap = new Map(
-				sessionData.map(s => [
-					s.userId,
-					{ loginCount: s.loginCount, lastLoginAt: s.lastLoginAt },
-				]),
-			);
-			const contentUserIds = new Set(usersWithContent.map(r => r.userId));
-
-			const enrichedUsers = users.map(u => {
-				const session = sessionDataMap.get(u.id);
-				const lastLoginAt = session?.lastLoginAt ?? null;
-				const isActive = lastLoginAt ? new Date(lastLoginAt) >= thirtyDaysAgo : false;
-				const hasContent = contentUserIds.has(u.id);
-				const activityStatus =
-					isActive ? 'active'
-					: hasContent ? 'setup'
-					: 'ghost';
-
-				return {
-					...u,
-					workspaceCount: workspaceCountMap.get(u.id) ?? 0,
-					loginCount: session?.loginCount ?? 0,
-					lastLoginAt,
-					activityStatus,
-				};
-			});
-
-			// Apply activity filter
-			const filteredUsers =
-				input.activityFilter === 'all' ?
-					enrichedUsers
-				:	enrichedUsers.filter(u => u.activityStatus === input.activityFilter);
-
-			// If filtering, apply pagination after filtering
-			const paginatedUsers =
-				input.activityFilter === 'all' ?
-					filteredUsers
-				:	filteredUsers.slice(input.cursor, input.cursor + input.limit);
-
-			const filteredTotal =
-				input.activityFilter === 'all' ? totalResult : filteredUsers.length;
-
 			return {
-				users: paginatedUsers,
-				total: filteredTotal,
+				users,
+				total: totalResult,
 				nextCursor:
-					input.cursor + input.limit < filteredTotal ? input.cursor + input.limit : null,
+					input.cursor + input.limit < totalResult ? input.cursor + input.limit : null,
 			};
 		}),
 

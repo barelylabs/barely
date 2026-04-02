@@ -40,11 +40,11 @@ function formatRelativeDate(date: Date | string | null) {
 	return `${Math.floor(diffDays / 365)}y ago`;
 }
 
-const activityBadgeVariant = {
+const activityBadgeVariant: Record<string, 'success' | 'info' | 'muted'> = {
 	active: 'success',
 	setup: 'info',
 	ghost: 'muted',
-} as const;
+};
 
 export function AdminUserList() {
 	const trpc = useTRPC();

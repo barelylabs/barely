@@ -1,3 +1,5 @@
+DESCRIPTION >
+    Authenticated app dashboard events (page views, feature usage, user actions)
 
 SCHEMA >
     `userId` String `json:$.userId`,

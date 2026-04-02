@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getCurrentAppConfig } from '@barely/utils';
@@ -27,7 +28,6 @@ const RegisterUserPage = async ({
 	await handleLoggedInOnAuthPage({ callbackUrl });
 
 	// Capture referrer from headers
-	const { headers } = await import('next/headers');
 	const headersList = await headers();
 	const referrer = headersList.get('referer') ?? undefined;
 
