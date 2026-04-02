@@ -1529,9 +1529,9 @@ export const bioRoute = {
 				let maxNum = 1;
 				for (const key of existingKeys) {
 					if (key === baseCopyKey) continue;
-					const match = key.match(
-						new RegExp(`^${baseCopyKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}-(\\d+)$`),
-					);
+					const match = new RegExp(
+						`^${baseCopyKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}-(\\d+)$`,
+					).exec(key);
 					if (match?.[1]) {
 						maxNum = Math.max(maxNum, parseInt(match[1], 10));
 					}
