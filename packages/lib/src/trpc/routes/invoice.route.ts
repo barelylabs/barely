@@ -334,7 +334,7 @@ export const invoiceRoute = {
 				lineItems,
 				tax,
 				notes,
-				invoiceNumber: providedInvoiceNumber,
+				invoiceNumber: _providedInvoiceNumber,
 				...rest
 			} = input;
 
@@ -347,32 +347,50 @@ export const invoiceRoute = {
 			// Calculate totals
 			const { subtotal, total } = calculateInvoiceTotal(sanitizedLineItems, tax ?? 0);
 
-			// Use provided invoice number or generate one
-			const invoiceNumber =
-				providedInvoiceNumber ??
-				(await generateInvoiceNumber(ctx.workspace.id, ctx.workspace.handle));
+			// Always generate invoice number server-side to prevent race conditions
+			const maxRetries = 3;
+			for (let attempt = 0; attempt < maxRetries; attempt++) {
+				const invoiceNumber = await generateInvoiceNumber(ctx.workspace.id);
 
-			const invoiceData = {
-				...rest,
-				lineItems: sanitizedLineItems,
-				tax,
-				notes: notes ? DOMPurify.sanitize(notes.trim()) : undefined,
-				id: newId('invoice'),
-				workspaceId: ctx.workspace.id,
-				invoiceNumber,
-				subtotal,
-				total,
-				status: 'created' as const,
-			};
+				const invoiceData = {
+					...rest,
+					lineItems: sanitizedLineItems,
+					tax,
+					notes: notes ? DOMPurify.sanitize(notes.trim()) : undefined,
+					id: newId('invoice'),
+					workspaceId: ctx.workspace.id,
+					invoiceNumber,
+					subtotal,
+					total,
+					status: 'created' as const,
+				};
 
-			const invoices = await dbPool(ctx.pool)
-				.insert(Invoices)
-				.values(invoiceData)
-				.returning();
-			const invoice =
-				invoices[0] ?? raiseTRPCError({ message: 'Failed to create invoice' });
+				try {
+					const invoices = await dbPool(ctx.pool)
+						.insert(Invoices)
+						.values(invoiceData)
+						.returning();
+					const invoice =
+						invoices[0] ?? raiseTRPCError({ message: 'Failed to create invoice' });
 
-			return invoice;
+					return invoice;
+				} catch (error) {
+					const isDuplicateKey =
+						error instanceof Error &&
+						'code' in error &&
+						(error as { code: string }).code === '23505';
+					if (isDuplicateKey && attempt < maxRetries - 1) {
+						continue;
+					}
+					throw error;
+				}
+			}
+
+			// Unreachable: the loop always returns or throws on the last attempt
+			throw new TRPCError({
+				code: 'INTERNAL_SERVER_ERROR',
+				message: 'Failed to create invoice',
+			});
 		}),
 
 	archive: workspaceProcedure
@@ -463,10 +481,7 @@ export const invoiceRoute = {
 				})) ?? raise('Invoice not found');
 
 			// Generate new invoice number
-			const invoiceNumber = await generateInvoiceNumber(
-				ctx.workspace.id,
-				ctx.workspace.handle,
-			);
+			const invoiceNumber = await generateInvoiceNumber(ctx.workspace.id);
 
 			// Create new invoice with same data but new number and draft status
 			const newInvoiceData = {
@@ -627,13 +642,7 @@ export const invoiceRoute = {
 		}),
 
 	getNextInvoiceNumber: workspaceProcedure.query(async ({ ctx }) => {
-		const [result] = await dbHttp
-			.select({ count: sqlCount })
-			.from(Invoices)
-			.where(eq(Invoices.workspaceId, ctx.workspace.id));
-
-		const count = result?.count ?? 0;
-		return `INV-${count + 1}`;
+		return generateInvoiceNumber(ctx.workspace.id);
 	}),
 
 	downloadPdf: workspaceProcedure
