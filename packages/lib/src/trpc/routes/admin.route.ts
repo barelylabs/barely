@@ -6,7 +6,19 @@ import { Fans } from '@barely/db/sql/fan.sql';
 import { _Users_To_Workspaces, Users } from '@barely/db/sql/user.sql';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
 import { sqlAnd, sqlCount, sqlStringContains } from '@barely/db/utils';
-import { count, desc, eq, gte, inArray, isNotNull, lte, ne, or, sql } from 'drizzle-orm';
+import {
+	asc,
+	count,
+	desc,
+	eq,
+	gte,
+	inArray,
+	isNotNull,
+	lte,
+	ne,
+	or,
+	sql,
+} from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import { adminProcedure } from '../trpc';
@@ -247,6 +259,10 @@ export const adminRoute = {
 		.input(
 			paginationInput.extend({
 				planFilter: z.enum(WORKSPACE_PLAN_TYPES).optional(),
+				sortBy: z
+					.enum(['createdAt', 'fanUsage', 'eventUsage', 'linkUsage', 'orders'])
+					.default('createdAt'),
+				sortOrder: z.enum(['asc', 'desc']).default('desc'),
 			}),
 		)
 		.query(async ({ input }) => {
@@ -267,6 +283,17 @@ export const adminRoute = {
 
 			const whereClause = sqlAnd(conditions);
 
+			const sortColumnMap = {
+				createdAt: Workspaces.createdAt,
+				fanUsage: Workspaces.fanUsage,
+				eventUsage: Workspaces.eventUsage,
+				linkUsage: Workspaces.linkUsage,
+				orders: Workspaces.orders,
+			} as const;
+
+			const sortColumn = sortColumnMap[input.sortBy];
+			const orderFn = input.sortOrder === 'asc' ? asc : desc;
+
 			const [workspaces, totalResult] = await Promise.all([
 				dbHttp
 					.select({
@@ -285,7 +312,7 @@ export const adminRoute = {
 					})
 					.from(Workspaces)
 					.where(whereClause)
-					.orderBy(desc(Workspaces.createdAt))
+					.orderBy(orderFn(sortColumn), desc(Workspaces.createdAt))
 					.limit(input.limit)
 					.offset(input.cursor),
 

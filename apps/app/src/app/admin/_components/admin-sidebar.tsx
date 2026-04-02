@@ -23,7 +23,7 @@ export function AdminSidebar() {
 				<H size='4'>Admin</H>
 			</div>
 
-			<nav className='flex flex-col gap-1'>
+			<nav className='flex flex-1 flex-col gap-1'>
 				{adminLinks.map(link => {
 					const isActive =
 						link.href === '/admin' ?
@@ -49,6 +49,14 @@ export function AdminSidebar() {
 					);
 				})}
 			</nav>
+
+			<Link
+				href='/'
+				className='flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground'
+			>
+				<Icon.arrowLeft className='h-4 w-4' />
+				Back to App
+			</Link>
 		</aside>
 	);
 }
