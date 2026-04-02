@@ -6,7 +6,7 @@ import { Fans } from '@barely/db/sql/fan.sql';
 import { _Users_To_Workspaces, Users } from '@barely/db/sql/user.sql';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
 import { sqlAnd, sqlCount, sqlStringContains } from '@barely/db/utils';
-import { count, desc, eq, gte, isNotNull, lte, ne, or, sql } from 'drizzle-orm';
+import { count, desc, eq, gte, inArray, isNotNull, lte, ne, or, sql } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import { adminProcedure } from '../trpc';
@@ -70,7 +70,7 @@ export const adminRoute = {
 			const plan = WORKSPACE_PLANS.get(stat.plan);
 			if (plan && stat.plan !== 'free') {
 				paidWorkspaces += stat.count;
-				mrr += plan.price.monthly.amount * stat.count;
+				mrr += plan.price.monthly.amount * 100 * stat.count;
 			}
 		}
 
@@ -226,7 +226,7 @@ export const adminRoute = {
 						count: count(),
 					})
 					.from(_Users_To_Workspaces)
-					.where(sql`${_Users_To_Workspaces.userId} IN ${userIds}`)
+					.where(inArray(_Users_To_Workspaces.userId, userIds))
 					.groupBy(_Users_To_Workspaces.userId)
 			:	[];
 

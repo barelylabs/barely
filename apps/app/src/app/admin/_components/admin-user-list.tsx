@@ -91,7 +91,7 @@ export function AdminUserList() {
 				</table>
 			</div>
 
-			{data && (
+			{data && data.total > 0 && (
 				<div className='flex items-center justify-between'>
 					<Text variant='sm/normal' muted>
 						Showing {cursor + 1}-{Math.min(cursor + limit, data.total)} of {data.total}

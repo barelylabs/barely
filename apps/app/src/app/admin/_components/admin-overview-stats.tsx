@@ -29,7 +29,7 @@ export function AdminOverviewStats() {
 				value={nFormatter(data.paidWorkspaces)}
 				description={`${data.totalWorkspaces > 0 ? Math.round((data.paidWorkspaces / data.totalWorkspaces) * 100) : 0}% conversion`}
 			/>
-			<StatCard label='MRR' value={formatCurrency(data.mrr * 100)} />
+			<StatCard label='MRR' value={formatCurrency(data.mrr)} />
 			<StatCard label='Total Fans' value={nFormatter(data.totalFans)} />
 			<StatCard label='Total Revenue (GMV)' value={formatCurrency(data.totalRevenue)} />
 			<StatCard
