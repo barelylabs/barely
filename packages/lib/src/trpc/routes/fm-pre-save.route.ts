@@ -71,13 +71,13 @@ export const fmPreSaveRoute = {
 				})) ?? raiseTRPCError({ message: 'FM page not found' });
 
 			if (!fmPage.track) {
-				throw raiseTRPCError({
+				return raiseTRPCError({
 					message: 'This FM page is not configured for pre-saves',
 				});
 			}
 
 			if (fmPage.track.released) {
-				throw raiseTRPCError({
+				return raiseTRPCError({
 					message: 'This track has already been released',
 				});
 			}
@@ -149,6 +149,12 @@ export const fmPreSaveRoute = {
 			}
 
 			// 6. Create the pre-save record
+			if (!tokens.refresh_token) {
+				return raiseTRPCError({
+					message: 'Spotify did not provide a refresh token. Please try again.',
+				});
+			}
+
 			await dbHttp.insert(SpotifyPreSaves).values({
 				id: newId('spotifyPreSave'),
 				workspaceId: fmPage.workspace.id,
@@ -158,7 +164,7 @@ export const fmPreSaveRoute = {
 				spotifyAccountId: profile.id,
 				spotifyEmail: profile.email,
 				spotifyAccessToken: tokens.access_token,
-				spotifyRefreshToken: tokens.refresh_token ?? '',
+				spotifyRefreshToken: tokens.refresh_token,
 				spotifyTokenExpiresAt: Math.floor(Date.now() / 1000) + tokens.expires_in,
 				spotifyTokenScope: tokens.scope,
 				emailMarketingOptIn: input.emailMarketingOptIn,

@@ -147,7 +147,7 @@ export const fmRoute = {
 				workspaceId: ctx.workspace.id,
 				handle: ctx.workspace.handle,
 				key: sanitizeKey(data.key),
-				trackId: data.trackId || null,
+				trackId: data.trackId ?? null,
 			};
 
 			const fmPages = await dbPool(ctx.pool)

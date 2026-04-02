@@ -1,12 +1,11 @@
 import { dbPool, makePool } from '@barely/db/pool';
-import { Fans } from '@barely/db/sql/fan.sql';
 import { SpotifyPreSaves } from '@barely/db/sql/spotify-pre-save.sql';
 import { Tracks } from '@barely/db/sql/track.sql';
 import { Workspaces } from '@barely/db/sql/workspace.sql';
 import { sendEmail } from '@barely/email';
 import { ReleaseNotificationEmailTemplate } from '@barely/email/templates/fm/release-notification';
 import { logger, schedules, task, wait } from '@trigger.dev/sdk';
-import { and, eq, isNull, lte, sql } from 'drizzle-orm';
+import { and, eq, isNotNull, isNull, lte, sql } from 'drizzle-orm';
 
 import { refreshFanSpotifyToken } from '../integrations/spotify/spotify.endpts.fan-oauth';
 import {
@@ -136,7 +135,7 @@ export const fulfillPreSaves = task({
 			let fulfilled = 0;
 			let failed = 0;
 
-			for (const preSave of preSaves) {
+			for (const [index, preSave] of preSaves.entries()) {
 				const result = await fulfillSinglePreSave(preSave, track.spotifyId, pool);
 				if (result.success) {
 					fulfilled++;
@@ -145,7 +144,7 @@ export const fulfillPreSaves = task({
 				}
 
 				// Brief pause between saves to respect Spotify rate limits
-				if (preSaves.indexOf(preSave) < preSaves.length - 1) {
+				if (index < preSaves.length - 1) {
 					await wait.for({ seconds: 0.2 });
 				}
 			}
@@ -168,6 +167,7 @@ export const fulfillPreSaves = task({
 				where: and(
 					eq(SpotifyPreSaves.trackId, payload.trackId),
 					eq(SpotifyPreSaves.emailMarketingOptIn, true),
+					isNotNull(SpotifyPreSaves.fulfilledAt),
 				),
 				with: {
 					fan: { columns: { email: true } },

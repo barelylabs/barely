@@ -91,16 +91,25 @@ export async function getFanSpotifyProfile(accessToken: string) {
 		throw new Error(`Failed to fetch Spotify profile: ${res.status}`);
 	}
 
-	const data = (await res.json()) as Record<string, unknown>;
+	const parsed = spotifyProfileSchema.safeParse(await res.json());
+	if (!parsed.success) {
+		throw new Error('Unexpected Spotify profile response shape');
+	}
 
 	return {
-		id: data.id as string,
-		email: (data.email as string) ?? null,
-		displayName: (data.display_name as string) ?? null,
+		id: parsed.data.id,
+		email: parsed.data.email ?? null,
+		displayName: parsed.data.display_name ?? null,
 	};
 }
 
 // schemas
+const spotifyProfileSchema = z.object({
+	id: z.string(),
+	email: z.string().optional().nullable(),
+	display_name: z.string().optional().nullable(),
+});
+
 const spotifyTokenResponseSchema = z.object({
 	access_token: z.string(),
 	token_type: z.string(),

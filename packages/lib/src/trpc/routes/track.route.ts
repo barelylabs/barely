@@ -15,6 +15,7 @@ import {
 	updateTrackSchema,
 } from '@barely/validators';
 import { tasks, waitUntil } from '@trigger.dev/sdk';
+import { TRPCError } from '@trpc/server';
 import {
 	and,
 	asc,
@@ -388,19 +389,24 @@ export const trackRoute = {
 			});
 
 			if (!track) {
-				throw new Error('Track not found');
+				throw new TRPCError({ code: 'NOT_FOUND', message: 'Track not found' });
 			}
 
 			if (!track.spotifyId) {
-				throw new Error(
-					'Track has no Spotify ID. Add the Spotify URI before fulfilling pre-saves.',
-				);
+				throw new TRPCError({
+					code: 'BAD_REQUEST',
+					message:
+						'Track has no Spotify ID. Add the Spotify URI before fulfilling pre-saves.',
+				});
 			}
 
 			if (track.releaseDate) {
 				const today = new Date().toISOString().split('T')[0];
 				if (today && track.releaseDate > today) {
-					throw new Error(`Track release date (${track.releaseDate}) is in the future.`);
+					throw new TRPCError({
+						code: 'BAD_REQUEST',
+						message: `Track release date (${track.releaseDate}) is in the future.`,
+					});
 				}
 			}
 
