@@ -55,15 +55,23 @@ const vatAtom = atom(0);
  * Checks if a product is sold out based on its inventory fields.
  * Since we don't know the fulfillment pool at page load, we check both.
  * A product is only sold out if BOTH pools have zero stock.
+ * For apparel products, stock is tracked per-size, so we check all sizes.
  */
 function isProductSoldOut(product: {
 	inventoryEnabled: boolean;
 	allowOverselling: boolean;
 	stock: number | null;
 	barelyStock: number | null;
+	_apparelSizes?: { stock: number | null; barelyStock: number | null }[];
 }): boolean {
 	if (!product.inventoryEnabled) return false;
 	if (product.allowOverselling) return false;
+	// For apparel products, sold out only if every size is sold out
+	if (product._apparelSizes && product._apparelSizes.length > 0) {
+		return product._apparelSizes.every(
+			s => (s.stock ?? 0) <= 0 && (s.barelyStock ?? 0) <= 0,
+		);
+	}
 	const workspaceStock = product.stock ?? 0;
 	const barelyStock = product.barelyStock ?? 0;
 	return workspaceStock <= 0 && barelyStock <= 0;
