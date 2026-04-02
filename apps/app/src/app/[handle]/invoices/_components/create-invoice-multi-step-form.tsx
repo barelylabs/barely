@@ -24,18 +24,20 @@ import { NumberField } from '@barely/ui/forms/number-field';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { TextAreaField } from '@barely/ui/forms/text-area-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import {
+	Command,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+	CommandList,
+	CommandSeparator,
+} from '@barely/ui/command';
 import { Icon } from '@barely/ui/icon';
 import { Input } from '@barely/ui/input';
 import { Label } from '@barely/ui/label';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@barely/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@barely/ui/popover';
 import { Separator } from '@barely/ui/separator';
-import { Switch } from '@barely/ui/switch';
 import { Text } from '@barely/ui/typography';
 
 import { useClientSearchParams } from './client-context';
@@ -84,6 +86,7 @@ export function CreateInvoiceMultiStepForm() {
 	const { handle, currency } = workspace;
 
 	const [currentStep, setCurrentStep] = useState<Step>('client');
+	const [clientPopoverOpen, setClientPopoverOpen] = useState(false);
 	const { showCreateModal, setShowCreateModal } = useClientSearchParams();
 
 	// Get current date and date 2 days from now
@@ -146,27 +149,22 @@ export function CreateInvoiceMultiStepForm() {
 	// Handle client selection
 	const handleClientSelect = useCallback(
 		(clientId: string) => {
-			if (clientId === 'new-client') {
-				void setShowCreateModal(true);
-			} else {
-				setSelectedClientId(clientId);
+			setSelectedClientId(clientId);
 
-				if (
-					!detailsForm.getValues('invoiceNumber') ||
-					detailsForm.getValues('invoiceNumber') === ''
-				) {
-					if (!nextInvoiceNumber) {
-						toast.error('No next invoice number found');
-						return;
-					}
-					console.log('setting invoice number', nextInvoiceNumber);
-					detailsForm.setValue('invoiceNumber', nextInvoiceNumber);
+			if (
+				!detailsForm.getValues('invoiceNumber') ||
+				detailsForm.getValues('invoiceNumber') === ''
+			) {
+				if (!nextInvoiceNumber) {
+					toast.error('No next invoice number found');
+					return;
 				}
-
-				setCurrentStep('details');
+				detailsForm.setValue('invoiceNumber', nextInvoiceNumber);
 			}
+
+			setCurrentStep('details');
 		},
-		[setShowCreateModal, detailsForm, nextInvoiceNumber],
+		[detailsForm, nextInvoiceNumber],
 	);
 
 	// // Set invoice number when we have data
@@ -224,6 +222,11 @@ export function CreateInvoiceMultiStepForm() {
 		trpc.invoice.send.mutationOptions(),
 	);
 
+	const createAnotherAction = {
+		label: 'Create Another',
+		onClick: () => router.push(`/${handle}/invoices/new`),
+	};
+
 	const { mutateAsync: createInvoice, isPending: isCreating } = useMutation(
 		trpc.invoice.create.mutationOptions({
 			onSuccess: data => {
@@ -235,17 +238,23 @@ export function CreateInvoiceMultiStepForm() {
 						{ id: data.id, handle },
 						{
 							onSuccess: () => {
-								toast.success('Invoice created and sent successfully');
+								toast.success('Invoice created and sent successfully', {
+									action: createAnotherAction,
+								});
 								router.push(`/${handle}/invoices/${data.id}`);
 							},
 							onError: () => {
-								toast.success('Invoice created but failed to send email');
+								toast.success('Invoice created but failed to send email', {
+									action: createAnotherAction,
+								});
 								router.push(`/${handle}/invoices/${data.id}`);
 							},
 						},
 					);
 				} else {
-					toast.success('Invoice created successfully');
+					toast.success('Invoice created successfully', {
+						action: createAnotherAction,
+					});
 					router.push(`/${handle}/invoices/${data.id}`);
 				}
 			},
@@ -259,8 +268,6 @@ export function CreateInvoiceMultiStepForm() {
 						trpc.invoice.getNextInvoiceNumber.queryKey(),
 					],
 				});
-				// Don't reset forms here - we're redirecting on success
-				// and on error the user should keep their data
 			},
 		}),
 	);
@@ -382,39 +389,106 @@ export function CreateInvoiceMultiStepForm() {
 							<h2 className='mb-6 text-2xl font-bold'>Create invoice for</h2>
 							<div className='space-y-4'>
 								<div>
-									<Label htmlFor='client-select'>Name</Label>
-									<Select value={selectedClientId} onValueChange={handleClientSelect}>
-										<SelectTrigger id='client-select' className='mt-1.5'>
-											<SelectValue placeholder='Select a client' />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem
-												value='new-client'
-												className='font-medium text-blue-500'
+									<Label htmlFor='client-select'>Client</Label>
+									<Popover
+										open={clientPopoverOpen}
+										onOpenChange={setClientPopoverOpen}
+									>
+										<PopoverTrigger asChild>
+											<Button
+												id='client-select'
+												look='outline'
+												role='combobox'
+												aria-expanded={clientPopoverOpen}
+												className='mt-1.5 w-full justify-between font-normal'
 											>
-												<div className='flex items-center'>
-													<Icon.plus className='mr-2 h-4 w-4' />
-													Add new client
-												</div>
-											</SelectItem>
-											{clientsData?.clients.length ?
-												<>
-													<Separator className='my-2' />
-													<div className='px-2 py-1.5 text-xs font-semibold text-gray-500'>
-														Clients
+												{selectedClientData ?
+													<div className='flex items-center gap-2'>
+														<div className='flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs font-medium text-blue-700'>
+															{selectedClientData.name
+																.split(' ')
+																.map(n => n[0])
+																.join('')
+																.toUpperCase()
+																.slice(0, 2)}
+														</div>
+														<span>{selectedClientData.name}</span>
+														<span className='text-muted-foreground'>
+															{selectedClientData.email}
+														</span>
 													</div>
-												</>
-											:	null}
-											{clientsData?.clients.map(client => (
-												<SelectItem key={client.id} value={client.id}>
-													<div className='flex flex-col items-start'>
-														<span className='font-medium'>{client.name}</span>
-														<span className='text-xs text-gray-500'>{client.email}</span>
-													</div>
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
+												:	<span className='text-muted-foreground'>
+														Select a client...
+													</span>
+												}
+												<Icon.chevronsUpDown className='ml-auto h-4 w-4 shrink-0 opacity-50' />
+											</Button>
+										</PopoverTrigger>
+										<PopoverContent className='w-[--radix-popover-trigger-width] p-0'>
+											<Command>
+												<CommandInput placeholder='Search clients...' />
+												<CommandList>
+													<CommandEmpty>No clients found.</CommandEmpty>
+													<CommandGroup>
+														<CommandItem
+															onSelect={() => {
+																setClientPopoverOpen(false);
+																void setShowCreateModal(true);
+															}}
+															className='font-medium text-blue-600'
+														>
+															<Icon.plus className='mr-2 h-4 w-4' />
+															Add new client
+														</CommandItem>
+													</CommandGroup>
+													{clientsData?.clients.length ?
+														<>
+															<CommandSeparator />
+															<CommandGroup heading='Clients'>
+																{clientsData.clients.map(client => (
+																	<CommandItem
+																		key={client.id}
+																		value={`${client.name} ${client.email} ${client.company ?? ''}`}
+																		onSelect={() => {
+																			setClientPopoverOpen(false);
+																			handleClientSelect(client.id);
+																		}}
+																		isSelected={
+																			selectedClientId === client.id
+																		}
+																	>
+																		<div className='flex items-center gap-3'>
+																			<div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-medium text-blue-700'>
+																				{client.name
+																					.split(' ')
+																					.map(n => n[0])
+																					.join('')
+																					.toUpperCase()
+																					.slice(0, 2)}
+																			</div>
+																			<div className='flex flex-col'>
+																				<span className='font-medium'>
+																					{client.name}
+																				</span>
+																				<span className='text-xs text-muted-foreground'>
+																					{client.email}
+																					{client.company &&
+																						` \u00b7 ${client.company}`}
+																				</span>
+																			</div>
+																		</div>
+																		{selectedClientId === client.id && (
+																			<Icon.check className='ml-auto h-4 w-4' />
+																		)}
+																	</CommandItem>
+																))}
+															</CommandGroup>
+														</>
+													:	null}
+												</CommandList>
+											</Command>
+										</PopoverContent>
+									</Popover>
 								</div>
 							</div>
 						</div>
@@ -753,17 +827,6 @@ export function CreateInvoiceMultiStepForm() {
 												placeholder='Optional'
 											/>
 
-											<div className='flex items-center justify-between rounded-lg border p-4'>
-												<div>
-													<Label htmlFor='schedule-send' className='cursor-pointer'>
-														Schedule send
-													</Label>
-													<Text className='text-sm text-gray-500'>
-														Set this invoice to be sent at a later date.
-													</Text>
-												</div>
-												<Switch id='schedule-send' disabled />
-											</div>
 										</div>
 									</div>
 								</div>
