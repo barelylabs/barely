@@ -27,15 +27,15 @@ function fillNullsForward<T extends Record<string, unknown>>(
 ): T[] {
 	const lastKnown: Partial<Record<keyof T, unknown>> = {};
 	return data.map(row => {
-		const filled = { ...row };
+		const overrides: Partial<Record<keyof T, unknown>> = {};
 		for (const key of keys) {
-			if (filled[key] !== null && filled[key] !== undefined) {
-				lastKnown[key] = filled[key];
+			if (row[key] !== null && row[key] !== undefined) {
+				lastKnown[key] = row[key];
 			} else if (lastKnown[key] !== undefined) {
-				(filled as Record<keyof T, unknown>)[key] = lastKnown[key];
+				overrides[key] = lastKnown[key];
 			}
 		}
-		return filled;
+		return { ...row, ...overrides };
 	});
 }
 
@@ -168,9 +168,7 @@ function SingleTrackStats({
 
 	// const previousPeriodAvg = previousPeriod?.avgSpotifyPopularity ?? null;
 
-	const filledTimeseries = fillNullsForward(processedTimeseries, [
-		'spotifyPopularity',
-	]);
+	const filledTimeseries = fillNullsForward(processedTimeseries, ['spotifyPopularity']);
 
 	const chartData = filledTimeseries.map(row => ({
 		date: row.date,
@@ -262,9 +260,7 @@ function MultiTrackComparison({
 		);
 
 		// Fill forward null/missing values per track (LOCF)
-		const trackKeys = trackData.map(t =>
-			t.trackName.replace(/[^a-zA-Z0-9]/g, '_'),
-		);
+		const trackKeys = trackData.map(t => t.trackName.replace(/[^a-zA-Z0-9]/g, '_'));
 		for (const key of trackKeys) {
 			let lastVal: number | undefined;
 			for (const row of sortedData) {
@@ -273,9 +269,6 @@ function MultiTrackComparison({
 					lastVal = val;
 				} else if (lastVal !== undefined) {
 					row[key] = lastVal;
-					if (lastVal > max) {
-						max = lastVal;
-					}
 				}
 			}
 		}
