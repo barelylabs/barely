@@ -21,8 +21,11 @@ export function FulfilledContent() {
 							size='1'
 							className='gradient-text mb-6 font-heading text-5xl md:text-6xl lg:text-7xl'
 						>
-							We Ship Your Merch So You Can Make Music
+							Fulfilled
 						</H>
+						<p className='mb-4 text-2xl text-white md:text-3xl'>
+							We Ship Your Merch So You Can Make Music
+						</p>
 						<p className='mb-8 text-lg text-white/70 md:text-xl'>
 							Send us your inventory — vinyl, CDs, apparel, accessories — and we handle
 							pick, pack, and ship from Brooklyn. Every order fulfilled within 1-2
