@@ -20,6 +20,25 @@ import { H, Text } from '@barely/ui/typography';
 
 type TrackTimeSeries = AppRouterOutputs['stat']['spotifyTrackTimeseries'];
 
+/** Fill null values by carrying the last known value forward (LOCF) */
+function fillNullsForward<T extends Record<string, unknown>>(
+	data: T[],
+	keys: (keyof T)[],
+): T[] {
+	const lastKnown: Partial<Record<keyof T, unknown>> = {};
+	return data.map(row => {
+		const filled = { ...row };
+		for (const key of keys) {
+			if (filled[key] !== null && filled[key] !== undefined) {
+				lastKnown[key] = filled[key];
+			} else if (lastKnown[key] !== undefined) {
+				(filled as Record<keyof T, unknown>)[key] = lastKnown[key];
+			}
+		}
+		return filled;
+	});
+}
+
 export function TrackTimeseries() {
 	const { handle } = useWorkspace();
 	const { filters, selectedIds } = useTrackStatSearchParams();
@@ -149,7 +168,11 @@ function SingleTrackStats({
 
 	// const previousPeriodAvg = previousPeriod?.avgSpotifyPopularity ?? null;
 
-	const chartData = processedTimeseries.map(row => ({
+	const filledTimeseries = fillNullsForward(processedTimeseries, [
+		'spotifyPopularity',
+	]);
+
+	const chartData = filledTimeseries.map(row => ({
 		date: row.date,
 		popularity: row.spotifyPopularity,
 	}));
@@ -237,6 +260,25 @@ function MultiTrackComparison({
 		const sortedData = Array.from(dateMap.values()).sort(
 			(a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
 		);
+
+		// Fill forward null/missing values per track (LOCF)
+		const trackKeys = trackData.map(t =>
+			t.trackName.replace(/[^a-zA-Z0-9]/g, '_'),
+		);
+		for (const key of trackKeys) {
+			let lastVal: number | undefined;
+			for (const row of sortedData) {
+				const val = row[key];
+				if (typeof val === 'number') {
+					lastVal = val;
+				} else if (lastVal !== undefined) {
+					row[key] = lastVal;
+					if (lastVal > max) {
+						max = lastVal;
+					}
+				}
+			}
+		}
 
 		// Calculate a nice rounded max value with some padding
 		const calculatedMaxValue = max > 0 ? Math.ceil((max * 1.1) / 10) * 10 : 100;
