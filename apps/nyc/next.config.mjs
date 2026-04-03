@@ -39,6 +39,41 @@ const config = {
 				destination: '/services/fulfilled',
 				permanent: true,
 			},
+			{
+				source: '/cal',
+				destination: 'https://cal.com/barely/nyc',
+				permanent: true,
+			},
+			{
+				source: '/cal/onboarding',
+				destination: 'https://cal.com/barely/onboarding',
+				permanent: true,
+			},
+			{
+				source: '/cal/coaching',
+				destination: 'https://cal.com/barely/coaching',
+				permanent: true,
+			},
+			{
+				source: '/cal/coaching-ad-hoc',
+				destination: 'https://cal.com/barely/coaching-ad-hoc',
+				permanent: true,
+			},
+			{
+				source: '/cal/preferred',
+				destination: 'https://cal.com/barely/preferred',
+				permanent: true,
+			},
+			{
+				source: '/cal/proposal',
+				destination: 'https://cal.com/barely/proposal',
+				permanent: true,
+			},
+			{
+				source: '/cal/monthly',
+				destination: 'https://cal.com/barely/monthly',
+				permanent: true,
+			},
 		];
 	},
 
