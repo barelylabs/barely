@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { H } from '@barely/ui/typography';
 
 import { AnimatedSection } from '../../../components/marketing/animated-section';
@@ -92,7 +94,7 @@ export function SwarmContent() {
 								emoji: '🎯',
 								title: 'Context over impressions',
 								description:
-									"Your music lands inside content people already care about — not interrupting their feed, but enhancing it.",
+									'Your music lands inside content people already care about — not interrupting their feed, but enhancing it.',
 							},
 							{
 								emoji: '📈',
@@ -107,11 +109,7 @@ export function SwarmContent() {
 									'Every creator in the network has a genuine, engaged following. No bots, no fake engagement, no inflated metrics.',
 							},
 						].map((benefit, i) => (
-							<AnimatedSection
-								key={i}
-								animation='fade-up'
-								delay={300 + i * 100}
-							>
+							<AnimatedSection key={i} animation='fade-up' delay={300 + i * 100}>
 								<div className='glass h-full rounded-xl p-6'>
 									<div className='flex items-start gap-4'>
 										<span className='text-2xl'>{benefit.emoji}</span>
@@ -212,34 +210,35 @@ export function SwarmContent() {
 										15-25 creators posting within a 5-7 day window
 									</strong>{' '}
 									is the minimum for a coordinated burst that TikTok and Instagram&apos;s
-									algorithms can detect as a trend forming around a sound. Fewer than that,
-									and each post exists in isolation — no compounding effect, no algorithmic
-									pickup, no &quot;why am I seeing this everywhere?&quot; reaction from
-									listeners.
+									algorithms can detect as a trend forming around a sound. Fewer than
+									that, and each post exists in isolation — no compounding effect, no
+									algorithmic pickup, no &quot;why am I seeing this everywhere?&quot;
+									reaction from listeners.
 								</p>
 								<p className='text-lg leading-relaxed text-white/80'>
-									At typical per-post rates for music-adjacent micro-creators ($50-$150 per
-									TikTok in niches like BookTok, FilmTok, vinyl, and lifestyle accounts),
-									activating 15-25 creators costs $750-$3,750 in creator fees. The $2,000
-									minimum puts you solidly in the range where a campaign can generate real
-									momentum.
+									At typical per-post rates for music-adjacent micro-creators ($50-$150
+									per TikTok in niches like BookTok, FilmTok, vinyl, and lifestyle
+									accounts), activating 15-25 creators costs $750-$3,750 in creator fees.
+									The $2,000 minimum puts you solidly in the range where a campaign can
+									generate real momentum.
 								</p>
 								<p className='text-lg leading-relaxed text-white/80'>
-									Below this threshold, your budget is almost always better spent on direct
-									Meta conversion ads — which is exactly what our Bedroom+, Rising+, and
-									Breakout+ campaigns already handle. Swarm exists specifically for the
-									situations where distributed organic-feeling reach matters more than
-									direct-response advertising: release week energy, playlist pitching
-									support, building the perception that a single is &quot;everywhere.&quot;
+									Below this threshold, your budget is almost always better spent on
+									direct Meta conversion ads — which is exactly what our Bedroom+,
+									Rising+, and Breakout+ campaigns already handle. Swarm exists
+									specifically for the situations where distributed organic-feeling reach
+									matters more than direct-response advertising: release week energy,
+									playlist pitching support, building the perception that a single is
+									&quot;everywhere.&quot;
 								</p>
 								<p className='text-lg leading-relaxed text-white/80'>
 									This is also what makes our{' '}
-									<a
+									<Link
 										href='/services/stan'
 										className='text-purple-300 underline-offset-4 transition-all hover:text-purple-200 hover:underline'
 									>
 										Stan
-									</a>{' '}
+									</Link>{' '}
 									service a compelling complement. Stan is an owned asset — a fan account
 									you control, posting daily, compounding over months. Guaranteed output,
 									guaranteed volume. Swarm is a burst play — renting reach from real
@@ -267,7 +266,7 @@ export function SwarmContent() {
 								step: '1',
 								title: 'Discovery Call (30 min)',
 								description:
-									'We learn about your release, your target listener, and the communities you want to reach. We\'ll discuss timeline, budget, and what success looks like for this campaign.',
+									"We learn about your release, your target listener, and the communities you want to reach. We'll discuss timeline, budget, and what success looks like for this campaign.",
 							},
 							{
 								step: '2',
@@ -315,10 +314,10 @@ export function SwarmContent() {
 							Pricing
 						</H>
 						<p className='mb-12 text-center text-lg text-white/70'>
-							Swarm campaigns use a transparent cost-plus model during the pilot
-							program. You set the creator budget, and Barely adds a 25% coordination
-							fee that covers community mapping, creator sourcing and vetting, briefing,
-							campaign coordination, and reporting.
+							Swarm campaigns use a transparent cost-plus model during the pilot program.
+							You set the creator budget, and Barely adds a 25% coordination fee that
+							covers community mapping, creator sourcing and vetting, briefing, campaign
+							coordination, and reporting.
 						</p>
 					</AnimatedSection>
 
@@ -342,17 +341,13 @@ export function SwarmContent() {
 									</thead>
 									<tbody>
 										<tr className='border-b border-white/5'>
-											<td className='px-6 py-4 text-white/80'>
-												Creator spend
-											</td>
+											<td className='px-6 py-4 text-white/80'>Creator spend</td>
 											<td className='px-6 py-4 text-right font-medium text-white'>
 												You set the budget (minimum $2,000)
 											</td>
 										</tr>
 										<tr className='border-b border-white/5'>
-											<td className='px-6 py-4 text-white/80'>
-												Barely coordination fee
-											</td>
+											<td className='px-6 py-4 text-white/80'>Barely coordination fee</td>
 											<td className='px-6 py-4 text-right font-medium text-white'>
 												25% of creator spend
 											</td>
@@ -402,14 +397,9 @@ export function SwarmContent() {
 												['$3,000', '$750', '$3,750', '20-30 creators'],
 												['$5,000', '$1,250', '$6,250', '30-50 creators'],
 											].map(([budget, fee, total, creators], i) => (
-												<tr
-													key={i}
-													className={i < 2 ? 'border-b border-white/5' : ''}
-												>
+												<tr key={i} className={i < 2 ? 'border-b border-white/5' : ''}>
 													<td className='px-6 py-4 text-white/80'>{budget}</td>
-													<td className='px-6 py-4 text-right text-white/70'>
-														{fee}
-													</td>
+													<td className='px-6 py-4 text-right text-white/70'>{fee}</td>
 													<td className='px-6 py-4 text-right font-medium text-white'>
 														{total}
 													</td>
@@ -426,7 +416,7 @@ export function SwarmContent() {
 					</AnimatedSection>
 
 					<AnimatedSection animation='fade-up' delay={400}>
-						<p className='text-sm text-white/60 italic'>
+						<p className='text-sm italic text-white/60'>
 							Creator counts are estimates based on typical per-post rates in
 							music-adjacent micro-creator communities. Actual numbers depend on the
 							specific niches and creator tiers activated.
@@ -466,7 +456,7 @@ export function SwarmContent() {
 							},
 							{
 								q: 'Do I get to approve the creators?',
-								a: "Yes. You approve the creator list before any outreach or briefing happens. Individual posts are creator-led — the whole point is that the content feels authentic to their audience, not scripted by a brand. During onboarding, we establish your boundaries (tone, topics to avoid, visual guidelines), and creators work within those.",
+								a: 'Yes. You approve the creator list before any outreach or briefing happens. Individual posts are creator-led — the whole point is that the content feels authentic to their audience, not scripted by a brand. During onboarding, we establish your boundaries (tone, topics to avoid, visual guidelines), and creators work within those.',
 							},
 							{
 								q: 'What should I expect in terms of results?',
@@ -474,7 +464,7 @@ export function SwarmContent() {
 							},
 							{
 								q: 'How is this different from hiring a creator marketing agency?',
-								a: 'Most creator agencies are built for brands, not music. They work with large creators at $500-$5,000+ per post, optimize for impressions, and charge retainers that don\'t make sense for indie budgets. Swarm is built specifically for independent music: we work with micro-creators ($50-$150 per post) in genre-specific communities, we price on a transparent cost-plus model, and we optimize for the specific signals that drive music discovery — saves, Shazams, playlist adds — not vanity metrics.',
+								a: "Most creator agencies are built for brands, not music. They work with large creators at $500-$5,000+ per post, optimize for impressions, and charge retainers that don't make sense for indie budgets. Swarm is built specifically for independent music: we work with micro-creators ($50-$150 per post) in genre-specific communities, we price on a transparent cost-plus model, and we optimize for the specific signals that drive music discovery — saves, Shazams, playlist adds — not vanity metrics.",
 							},
 							{
 								q: 'What do you need from me to run a campaign?',
@@ -482,7 +472,7 @@ export function SwarmContent() {
 							},
 							{
 								q: 'Are the creators paid?',
-								a: "Yes. Every creator in a Swarm campaign is compensated. This is a professional media buy, not an unpaid gifting play. Paying creators means we can be intentional about timing, briefing, and coordination — which is the entire point of a burst campaign.",
+								a: 'Yes. Every creator in a Swarm campaign is compensated. This is a professional media buy, not an unpaid gifting play. Paying creators means we can be intentional about timing, briefing, and coordination — which is the entire point of a burst campaign.',
 							},
 							{
 								q: 'Can I run Swarm alongside my existing Barely campaigns?',
@@ -514,10 +504,7 @@ export function SwarmContent() {
 			<section className='px-4 py-24 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-4xl text-center'>
 					<AnimatedSection animation='scale'>
-						<H
-							size='2'
-							className='gradient-text mb-8 text-3xl md:text-4xl lg:text-5xl'
-						>
+						<H size='2' className='gradient-text mb-8 text-3xl md:text-4xl lg:text-5xl'>
 							Ready to try Swarm?
 						</H>
 						<div className='mb-6'>
