@@ -20,6 +20,25 @@ import { H, Text } from '@barely/ui/typography';
 
 type TrackTimeSeries = AppRouterOutputs['stat']['spotifyTrackTimeseries'];
 
+/** Fill null values by carrying the last known value forward (LOCF) */
+function fillNullsForward<T extends Record<string, unknown>>(
+	data: T[],
+	keys: (keyof T)[],
+): T[] {
+	const lastKnown: Partial<Record<keyof T, unknown>> = {};
+	return data.map(row => {
+		const overrides: Partial<Record<keyof T, unknown>> = {};
+		for (const key of keys) {
+			if (row[key] !== null && row[key] !== undefined) {
+				lastKnown[key] = row[key];
+			} else if (lastKnown[key] !== undefined) {
+				overrides[key] = lastKnown[key];
+			}
+		}
+		return { ...row, ...overrides };
+	});
+}
+
 export function TrackTimeseries() {
 	const { handle } = useWorkspace();
 	const { filters, selectedIds } = useTrackStatSearchParams();
@@ -149,7 +168,9 @@ function SingleTrackStats({
 
 	// const previousPeriodAvg = previousPeriod?.avgSpotifyPopularity ?? null;
 
-	const chartData = processedTimeseries.map(row => ({
+	const filledTimeseries = fillNullsForward(processedTimeseries, ['spotifyPopularity']);
+
+	const chartData = filledTimeseries.map(row => ({
 		date: row.date,
 		popularity: row.spotifyPopularity,
 	}));
@@ -237,6 +258,20 @@ function MultiTrackComparison({
 		const sortedData = Array.from(dateMap.values()).sort(
 			(a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
 		);
+
+		// Fill forward null/missing values per track (LOCF)
+		const trackKeys = trackData.map(t => t.trackName.replace(/[^a-zA-Z0-9]/g, '_'));
+		for (const key of trackKeys) {
+			let lastVal: number | undefined;
+			for (const row of sortedData) {
+				const val = row[key];
+				if (typeof val === 'number') {
+					lastVal = val;
+				} else if (lastVal !== undefined) {
+					row[key] = lastVal;
+				}
+			}
+		}
 
 		// Calculate a nice rounded max value with some padding
 		const calculatedMaxValue = max > 0 ? Math.ceil((max * 1.1) / 10) * 10 : 100;
