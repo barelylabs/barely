@@ -22,6 +22,15 @@ export async function getFmPageData({ handle, key }: { handle: string; key: stri
 				orderBy: [asc(FmLinks.index)],
 			},
 			coverArt: true,
+			track: {
+				columns: {
+					id: true,
+					name: true,
+					spotifyId: true,
+					released: true,
+					releaseDate: true,
+				},
+			},
 		},
 	});
 

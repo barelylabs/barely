@@ -60,6 +60,7 @@ const prefixes = {
 	campaign: 'camp',
 	playlistPitchReview: 'plpr',
 	// fm
+	spotifyPreSave: 'fm_ps',
 	fmPage: 'fm',
 	fmLink: 'fml',
 	fmSession: 'fm_sid',

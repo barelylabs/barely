@@ -32,6 +32,7 @@ export * from './landing-page.schema';
 export * from './link.schema';
 export * from './mixtape.schema';
 export * from './next.schema';
+export * from './spotify-pre-save.schema';
 export * from './stat.schema';
 export * from './playlist-pitch-review.schema';
 export * from './playlist-placement.schema';

@@ -15,6 +15,7 @@ import {
 	updateTrackSchema,
 } from '@barely/validators';
 import { tasks, waitUntil } from '@trigger.dev/sdk';
+import { TRPCError } from '@trpc/server';
 import {
 	and,
 	asc,
@@ -32,6 +33,7 @@ import {
 import { z } from 'zod/v4';
 
 import type { generateFileBlurHash } from '../../trigger';
+import type { fulfillPreSaves } from '../../trigger/spotify-pre-save.trigger';
 import {
 	createTrack,
 	getTrackById,
@@ -373,5 +375,45 @@ export const trackRoute = {
 				.where(
 					and(eq(Tracks.workspaceId, ctx.workspace.id), inArray(Tracks.id, input.ids)),
 				);
+		}),
+
+	fulfillPreSaves: workspaceProcedure
+		.input(z.object({ trackId: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			// Verify the track belongs to this workspace
+			const track = await dbHttp.query.Tracks.findFirst({
+				where: and(
+					eq(Tracks.id, input.trackId),
+					eq(Tracks.workspaceId, ctx.workspace.id),
+				),
+			});
+
+			if (!track) {
+				throw new TRPCError({ code: 'NOT_FOUND', message: 'Track not found' });
+			}
+
+			if (!track.spotifyId) {
+				throw new TRPCError({
+					code: 'BAD_REQUEST',
+					message:
+						'Track has no Spotify ID. Add the Spotify URI before fulfilling pre-saves.',
+				});
+			}
+
+			if (track.releaseDate) {
+				const today = new Date().toISOString().split('T')[0];
+				if (today && track.releaseDate > today) {
+					throw new TRPCError({
+						code: 'BAD_REQUEST',
+						message: `Track release date (${track.releaseDate}) is in the future.`,
+					});
+				}
+			}
+
+			await tasks.trigger<typeof fulfillPreSaves>('fulfill-pre-saves', {
+				trackId: input.trackId,
+			});
+
+			return { success: true, message: 'Pre-save fulfillment triggered' };
 		}),
 } satisfies TRPCRouterRecord;

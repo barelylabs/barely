@@ -59,6 +59,10 @@
 		"./templates/www/contact-inquiry": {
 			"types": "./dist/templates/www/contact-inquiry.d.ts",
 			"default": "./src/templates/www/contact-inquiry.tsx"
+		},
+		"./templates/fm/release-notification": {
+			"types": "./dist/templates/fm/release-notification.d.ts",
+			"default": "./src/templates/fm/release-notification.tsx"
 		}
 	},
 	"scripts": {
