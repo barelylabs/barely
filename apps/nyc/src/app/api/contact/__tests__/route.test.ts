@@ -84,7 +84,7 @@ describe('Contact API Route', () => {
 				from: 'noreply@mail.barely.nyc',
 				fromFriendlyName: 'Barely',
 				to: 'hello@barely.nyc',
-				subject: 'New Contact Form Submission - Bedroom+',
+				subject: 'New Contact Form Submission - Test Artist - Bedroom+',
 				react: expect.any(Object) as unknown,
 				type: 'transactional',
 				replyTo: 'john@example.com',
@@ -251,7 +251,7 @@ describe('Contact API Route', () => {
 			expect(response.status).toBe(200);
 			expect(mockSendEmail).toHaveBeenCalledWith(
 				expect.objectContaining({
-					subject: 'New Contact Form Submission - General Inquiry',
+					subject: 'New Contact Form Submission - John Doe - General Inquiry',
 				}),
 			);
 		});

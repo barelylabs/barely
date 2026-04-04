@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 			from: 'noreply@mail.barely.nyc',
 			fromFriendlyName: 'Barely',
 			to: 'hello@barely.nyc',
-			subject: `New Contact Form Submission - ${formatServiceForSubject(validatedData.service, validatedData.stanAddon)}`,
+			subject: `New Contact Form Submission - ${validatedData.artistName ?? validatedData.name} - ${formatServiceForSubject(validatedData.service, validatedData.stanAddon)}`,
 			react: ContactInquiryEmail({
 				name: validatedData.name,
 				email: validatedData.email,
