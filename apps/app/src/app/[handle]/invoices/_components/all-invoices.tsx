@@ -89,6 +89,11 @@ function InvoiceCard({
 	const detailHref = `/${handle}/invoices/${invoice.id}`;
 	const paymentHref = getAbsoluteUrl('invoice', `pay/${handle}/${invoice.id}`);
 
+	const isOverdue =
+		(invoice.status === 'sent' || invoice.status === 'viewed') &&
+		new Date(invoice.dueDate) < new Date();
+	const displayStatus = isOverdue ? 'overdue' : invoice.status;
+
 	const subtitleText = `${invoice.client.name} • ${format(new Date(invoice.dueDate), 'MMM dd')}`;
 
 	return (
@@ -114,8 +119,10 @@ function InvoiceCard({
 			]}
 			statsHref={detailHref}
 			statusBadge={
-				<Badge variant={getStatusColor(invoice.status)}>
-					{invoice.status === 'created' ?
+				<Badge variant={getStatusColor(displayStatus)}>
+					{isOverdue ?
+						'Overdue'
+					: invoice.status === 'created' ?
 						'Draft'
 					:	invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
 				</Badge>

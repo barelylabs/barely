@@ -2,6 +2,7 @@
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 import type { BadgeProps } from '@barely/ui/badge';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCopy, useWorkspaceWithAll } from '@barely/hooks';
 import { formatMinorToMajorCurrency, getAbsoluteUrl } from '@barely/utils';
@@ -11,6 +12,16 @@ import { toast } from 'sonner';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
+import {
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogRoot,
+	AlertDialogTitle,
+} from '@barely/ui/alert-dialog';
 import { Badge } from '@barely/ui/badge';
 import { Button } from '@barely/ui/button';
 import { Card } from '@barely/ui/card';
@@ -40,6 +51,13 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 	const { copyToClipboard } = useCopy();
 	const workspace = useWorkspaceWithAll();
 	const { currency } = workspace;
+	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+	const isDraft = invoice.status === 'created';
+	const isOverdue =
+		(invoice.status === 'sent' || invoice.status === 'viewed') &&
+		new Date(invoice.dueDate) < new Date();
+	const displayStatus = isOverdue ? 'overdue' : invoice.status;
 
 	const getStatusColor = (
 		status: Invoice['status'] | 'overdue',
@@ -212,19 +230,37 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 			{/* Actions Bar */}
 			<Card>
 				<div className='flex flex-wrap items-center justify-between gap-3 px-6 py-3'>
-					<Badge variant={getStatusColor(invoice.status)} className='text-sm'>
-						{getStatusLabel(invoice.status)}
+					<Badge variant={getStatusColor(displayStatus)} className='text-sm'>
+						{isOverdue ? 'Overdue' : getStatusLabel(invoice.status)}
 					</Badge>
 
 					<div className='flex flex-wrap items-center gap-2'>
-						<Button
-							size='sm'
-							onClick={() => sendInvoice({ handle, id: invoice.id })}
-							disabled={isSending}
-							startIcon='send'
-						>
-							{isSending ? 'Sending...' : 'Send Invoice'}
-						</Button>
+						{isDraft && (
+							<Button
+								size='sm'
+								look='outline'
+								startIcon='edit'
+								href={`/${handle}/invoices/${invoice.id}/edit`}
+							>
+								Edit
+							</Button>
+						)}
+
+						{invoice.status !== 'paid' && invoice.status !== 'voided' && (
+							<Button
+								size='sm'
+								look={isDraft ? undefined : 'outline'}
+								onClick={() => sendInvoice({ handle, id: invoice.id })}
+								disabled={isSending}
+								startIcon='send'
+							>
+								{isSending ?
+									'Sending...'
+								: invoice.sentAt ?
+									'Resend Invoice'
+								:	'Send Invoice'}
+							</Button>
+						)}
 
 						{(invoice.status === 'sent' || invoice.status === 'viewed') && (
 							<Button
@@ -269,7 +305,7 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 									<>
 										<DropdownMenuSeparator />
 										<DropdownMenuItem
-											onClick={() => deleteInvoice({ handle, ids: [invoice.id] })}
+											onClick={() => setShowDeleteConfirm(true)}
 											disabled={isDeleting}
 											className='cursor-pointer text-destructive focus:text-destructive'
 										>
@@ -394,6 +430,27 @@ export function InvoiceDetail({ invoice, handle }: InvoiceDetailProps) {
 					</Card>
 				</div>
 			</div>
+
+			{/* Delete Confirmation Dialog */}
+			<AlertDialogRoot open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Delete Invoice</AlertDialogTitle>
+						<AlertDialogDescription>
+							Are you sure you want to delete invoice {invoice.invoiceNumber}? This action
+							cannot be undone.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Cancel</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={() => deleteInvoice({ handle, ids: [invoice.id] })}
+						>
+							Delete
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialogRoot>
 		</div>
 	);
 }
