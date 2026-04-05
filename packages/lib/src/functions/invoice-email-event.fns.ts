@@ -41,7 +41,13 @@ export async function handleInvoiceEmailEvent(event: InvoiceEmailEvent) {
 				invoice: {
 					with: {
 						client: true,
-						workspace: true,
+						workspace: {
+							columns: {
+								id: true,
+								name: true,
+								handle: true,
+							},
+						},
 					},
 				},
 			},

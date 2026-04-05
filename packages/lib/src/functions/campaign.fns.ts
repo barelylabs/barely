@@ -5,8 +5,8 @@ import type {
 	CampaignWithTeamAndTrack,
 	CampaignWithTrackAndGenres,
 	CampaignWithWorkspaceAndTrackAndGenres,
+	CampaignWorkspace,
 	InsertCampaign,
-	Workspace,
 } from '@barely/validators/schemas';
 import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
@@ -43,7 +43,7 @@ import { createStripeWorkspaceCustomer } from './workspace-stripe.fns';
 
 export async function createPitchCheckoutLink(props: {
 	user: EnrichedUser;
-	workspace: Workspace;
+	workspace: CampaignWorkspace;
 	campaign: CampaignWithWorkspaceAndTrackAndGenres;
 }) {
 	if (!props.campaign.curatorReach) {
@@ -127,7 +127,16 @@ export async function getCampaignById(campaignId: string) {
 	const campaign = await dbHttp.query.Campaigns.findFirst({
 		where: eq(Campaigns.id, campaignId),
 		with: {
-			workspace: true,
+			workspace: {
+				columns: {
+					id: true,
+					name: true,
+					handle: true,
+					stripeCustomerId: true,
+					stripeCustomerId_devMode: true,
+					currency: true,
+				},
+			},
 			track: {
 				with: {
 					_genres: {
@@ -172,6 +181,14 @@ export async function getCampaignsByUserId(
 			_workspaces: {
 				with: {
 					workspace: {
+						columns: {
+							id: true,
+							name: true,
+							handle: true,
+							stripeCustomerId: true,
+							stripeCustomerId_devMode: true,
+							currency: true,
+						},
 						with: {
 							tracks: {
 								with: {

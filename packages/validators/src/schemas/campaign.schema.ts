@@ -30,13 +30,18 @@ export type UpsertCampaign = z.infer<typeof upsertCampaignSchema>;
 export type SelectCampaign = z.infer<typeof selectCampaignSchema>;
 
 // queries
+export type CampaignWorkspace = Pick<
+	Workspace,
+	'id' | 'name' | 'handle' | 'stripeCustomerId' | 'stripeCustomerId_devMode' | 'currency'
+>;
+
 export interface CampaignWithTeamAndTrack extends Campaign {
-	workspace: Workspace;
+	workspace: CampaignWorkspace;
 	track: InsertTrack;
 }
 
 export interface CampaignWithWorkspaceAndTrackAndGenres extends Campaign {
-	workspace: Workspace;
+	workspace: CampaignWorkspace;
 	track: InsertTrack & { genres: Genre[] };
 }
 
