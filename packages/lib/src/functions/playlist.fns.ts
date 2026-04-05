@@ -67,7 +67,13 @@ const getPlaylistsByUserId = async (userId: string, pool: NeonPool) => {
 						with: {
 							playlists: {
 								with: {
-									workspace: true,
+									workspace: {
+										columns: {
+											id: true,
+											handle: true,
+											name: true,
+										},
+									},
 									_genres: {
 										with: {
 											genre: true,
