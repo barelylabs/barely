@@ -18,6 +18,7 @@ import { and, eq, notInArray } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import type { generateFileBlurHash } from '../../trigger/file-blurhash.trigger';
+import type { FulfillmentFeeProduct } from '../../utils/fulfillment';
 import { getBrandKit } from '../../functions/brand-kit.fns';
 import {
 	convertShippingAmountIfNeeded,
@@ -39,7 +40,11 @@ import {
 	getFeeAmountForCheckout,
 	getVatRateForCheckout,
 } from '../../utils/cart';
-import { getShippingOriginAddress } from '../../utils/fulfillment';
+import {
+	calculateDynamicFulfillmentFee,
+	getShippingOriginAddress,
+	getWorkspaceFulfillmentOverrides,
+} from '../../utils/fulfillment';
 import { log } from '../../utils/log';
 
 export const cartRoute = {
@@ -403,11 +408,36 @@ export const cartRoute = {
 				vat,
 			);
 
+			// Recalculate fulfillment fees based on current products
+			const fulfillmentProducts: FulfillmentFeeProduct[] = [
+				{
+					merchType: funnel.mainProduct.merchType,
+					quantity: updateCart.mainProductQuantity ?? cart.mainProductQuantity,
+				},
+			];
+			const addedBump = update.addedBump ?? cart.addedBump;
+			if (addedBump && funnel.bumpProduct) {
+				fulfillmentProducts.push({
+					merchType: funnel.bumpProduct.merchType,
+					quantity: updateCart.bumpProductQuantity ?? cart.bumpProductQuantity ?? 1,
+				});
+			}
+
+			const fulfillmentBreakdown = calculateDynamicFulfillmentFee({
+				fulfilledBy: cart.fulfilledBy,
+				products: fulfillmentProducts,
+				workspaceOverrides: getWorkspaceFulfillmentOverrides(funnel.workspace),
+			});
+
 			const carts = await dbPool(ctx.pool)
 				.update(Carts)
 				.set({
 					...update,
 					...amounts,
+					barelyFulfillmentFee: fulfillmentBreakdown.totalFee,
+					barelyHandlingFee: fulfillmentBreakdown.handlingFee,
+					barelyPackagingFee: fulfillmentBreakdown.packagingFee,
+					barelyPickFee: fulfillmentBreakdown.pickFee,
 				})
 				.where(
 					and(
@@ -433,7 +463,7 @@ export const cartRoute = {
 						productAmount: amounts.orderProductAmount,
 						vatAmount: amounts.orderVatAmount,
 						shippingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
-						barelyFulfillmentFee: cart.barelyFulfillmentFee,
+						barelyFulfillmentFee: fulfillmentBreakdown.totalFee,
 						workspace: funnel.workspace,
 					}),
 				},

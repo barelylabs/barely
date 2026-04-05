@@ -203,7 +203,10 @@ export const Carts = pgTable(
 		})
 			.default('artist')
 			.notNull(),
-		barelyFulfillmentFee: integer('barelyFulfillmentFee').default(0).notNull(), // in cents
+		barelyFulfillmentFee: integer('barelyFulfillmentFee').default(0).notNull(), // in cents (total of handling + packaging + pick)
+		barelyHandlingFee: integer('barelyHandlingFee').default(0).notNull(), // in cents
+		barelyPackagingFee: integer('barelyPackagingFee').default(0).notNull(), // in cents
+		barelyPickFee: integer('barelyPickFee').default(0).notNull(), // in cents
 
 		shippingCarrier: varchar('shippingCarrier', { length: 255 }),
 		shippingTrackingNumber: varchar('shippingTrackingNumber', { length: 255 }),
