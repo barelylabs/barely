@@ -25,6 +25,7 @@ export * from './flow.ui.schema';
 export * from './fm.schema';
 export * from './form-response.schema';
 export * from './genre.schema';
+export * from './inventory-adjustment.schema';
 export * from './invoice-client.schema';
 export * from './invoice-email.schema';
 export * from './invoice.schema';

@@ -38,6 +38,7 @@ import * as fmSql from './sql/fm.sql';
 import * as formResponseSql from './sql/form-response.sql';
 import * as formSql from './sql/form.sql';
 import * as genreSql from './sql/genre.sql';
+import * as inventoryAdjustmentSql from './sql/inventory-adjustment.sql';
 import * as invoiceClientSql from './sql/invoice-client.sql';
 import * as invoiceEmailSql from './sql/invoice-email.sql';
 import * as invoiceSql from './sql/invoice.sql';
@@ -100,6 +101,7 @@ export const dbSchema = {
 	...formResponseSql,
 	...funnelSql,
 	...genreSql,
+	...inventoryAdjustmentSql,
 	...invoiceClientSql,
 	...invoiceEmailSql,
 	...invoiceSql,

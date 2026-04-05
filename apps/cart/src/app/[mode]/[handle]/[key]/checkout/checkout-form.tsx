@@ -51,6 +51,46 @@ const isFetchingRatesAtom = atomWithToggle(false);
 const shippingErrorAtom = atom<string | null>(null);
 const vatAtom = atom(0);
 
+/**
+ * Checks if a product is sold out based on its inventory fields.
+ * Since we don't know the fulfillment pool at page load, we check both.
+ * A product is only sold out if BOTH pools have zero stock.
+ * For apparel products, stock is tracked per-size, so we check all sizes.
+ */
+function isProductSoldOut(product: {
+	inventoryEnabled: boolean;
+	allowOverselling: boolean;
+	stock: number | null;
+	barelyStock: number | null;
+	_apparelSizes?: { stock: number | null; barelyStock: number | null }[];
+}): boolean {
+	if (!product.inventoryEnabled) return false;
+	if (product.allowOverselling) return false;
+	// For apparel products, sold out only if every size is sold out
+	if (product._apparelSizes && product._apparelSizes.length > 0) {
+		return product._apparelSizes.every(
+			s => (s.stock ?? 0) <= 0 && (s.barelyStock ?? 0) <= 0,
+		);
+	}
+	const workspaceStock = product.stock ?? 0;
+	const barelyStock = product.barelyStock ?? 0;
+	return workspaceStock <= 0 && barelyStock <= 0;
+}
+
+/**
+ * Checks if a specific apparel size is sold out.
+ */
+function isSizeSoldOut(
+	product: { inventoryEnabled: boolean; allowOverselling: boolean },
+	sizeRecord: { stock: number | null; barelyStock: number | null },
+): boolean {
+	if (!product.inventoryEnabled) return false;
+	if (product.allowOverselling) return false;
+	const workspaceStock = sizeRecord.stock ?? 0;
+	const barelyStock = sizeRecord.barelyStock ?? 0;
+	return workspaceStock <= 0 && barelyStock <= 0;
+}
+
 export function CheckoutForm({
 	mode,
 	handle,
@@ -380,7 +420,7 @@ export function CheckoutForm({
 					<StripePaymentElement cartId={cartId} handle={handle} cartKey={cartKey} />
 				</Suspense>
 
-				<SubmitButton mode={mode} />
+				<SubmitButton mode={mode} handle={handle} cartKey={cartKey} />
 			</div>
 		</Form>
 	);
@@ -402,20 +442,33 @@ function MainProduct({
 
 	const mainProductImageS3Key = mainProduct._images[0]?.file.s3Key;
 	const mainProductBlurDataUrl = mainProduct._images[0]?.file.blurDataUrl;
+	const mainProductSoldOut = isProductSoldOut(mainProduct);
 
 	return (
 		<div className='flex flex-col gap-2'>
 			<div className='mb-4 flex w-full flex-col gap-6 sm:flex-row'>
 				{mainProductImageS3Key && (
-					<Img
-						alt={mainProduct.name}
-						s3Key={mainProductImageS3Key}
-						blurDataURL={mainProductBlurDataUrl ?? undefined}
-						width={208}
-						height={208}
-						className='h-auto w-[208px] rounded-md bg-neutral-600'
-						priority
-					/>
+					<div className='relative'>
+						<Img
+							alt={mainProduct.name}
+							s3Key={mainProductImageS3Key}
+							blurDataURL={mainProductBlurDataUrl ?? undefined}
+							width={208}
+							height={208}
+							className={cn(
+								'h-auto w-[208px] rounded-md bg-neutral-600',
+								mainProductSoldOut && 'opacity-50',
+							)}
+							priority
+						/>
+						{mainProductSoldOut && (
+							<div className='absolute inset-0 flex items-center justify-center'>
+								<span className='rounded-md bg-red-600 px-3 py-1 text-sm font-bold text-white'>
+									Sold Out
+								</span>
+							</div>
+						)}
+					</div>
 				)}
 				<Suspense fallback={<div>Loading...</div>}>
 					<MainProductPrice cartId={cartId} handle={handle} cartKey={cartKey} />
@@ -614,10 +667,38 @@ function BumpProduct({
 	if (!bumpProduct) return null;
 
 	const bumpHasSizes = !!bumpProduct._apparelSizes.length;
+	const bumpSoldOut = isProductSoldOut(bumpProduct);
 
 	const bumpProductImageS3Key = bumpProduct._images[0]?.file.s3Key;
 	const bumpProductBlurDataUrl = bumpProduct._images[0]?.file.blurDataUrl;
 	const bumpNormalPrice = bumpProduct.price;
+
+	if (bumpSoldOut) {
+		return (
+			<div className='relative grid grid-cols-1 gap-4 rounded-md border-3 border-dashed border-brandKit-block bg-brandKit-bg p-6 opacity-50 sm:grid-cols-[4fr_5fr]'>
+				<div className='absolute inset-0 z-10 flex items-center justify-center'>
+					<span className='rounded-md bg-red-600 px-3 py-1 text-sm font-bold text-white'>
+						Sold Out
+					</span>
+				</div>
+				{bumpProductImageS3Key && (
+					<Img
+						s3Key={bumpProductImageS3Key}
+						blurDataURL={bumpProductBlurDataUrl ?? undefined}
+						alt={bumpProduct.name}
+						width={208}
+						height={208}
+						className='w-fit rounded-md bg-neutral-600'
+					/>
+				)}
+				<div className='flex flex-col gap-3'>
+					<Text variant='2xl/bold' className='-mt-1 !leading-normal text-brandKit-block'>
+						{publicFunnel.bumpProductHeadline}
+					</Text>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className='grid grid-cols-1 gap-4 rounded-md border-3 border-dashed border-brandKit-block bg-brandKit-bg p-6 sm:grid-cols-[4fr_5fr]'>
@@ -843,17 +924,26 @@ function BumpProductSizes({
 					});
 				}}
 			>
-				{bumpSizes.map(size => (
-					<ToggleGroupItem
-						variant='outline'
-						value={size}
-						key={size}
-						aria-label={`Toggle ${size}`}
-						className='hover:bg-brandKit-block/90 data-[state=on]:bg-brandKit-block data-[state=on]:text-brandKit-block-text'
-					>
-						{size}
-					</ToggleGroupItem>
-				))}
+				{bumpSizes.map(size => {
+					const sizeRecord = bumpProduct._apparelSizes.find(s => s.size === size);
+					const sizeSoldOut = sizeRecord ? isSizeSoldOut(bumpProduct, sizeRecord) : false;
+
+					return (
+						<ToggleGroupItem
+							variant='outline'
+							value={size}
+							key={size}
+							aria-label={`Toggle ${size}`}
+							disabled={sizeSoldOut}
+							className={cn(
+								'hover:bg-brandKit-block/90 data-[state=on]:bg-brandKit-block data-[state=on]:text-brandKit-block-text',
+								sizeSoldOut && 'line-through opacity-50',
+							)}
+						>
+							{size}
+						</ToggleGroupItem>
+					);
+				})}
 			</ToggleGroup>
 		</div>
 	);
@@ -969,13 +1059,26 @@ function StripePaymentElement({
 }
 
 // SUBMIT BUTTON
-function SubmitButton({ mode }: { mode: 'preview' | 'live' }) {
+function SubmitButton({
+	mode,
+	handle,
+	cartKey,
+}: {
+	mode: 'preview' | 'live';
+	handle: string;
+	cartKey: string;
+}) {
 	const router = useRouter();
 	const [isFetchingRates] = useAtom(isFetchingRatesAtom);
+	const {
+		publicFunnel: { mainProduct },
+	} = usePublicFunnel({ handle, key: cartKey });
 
 	const form = useFormContext<z.infer<typeof updateCheckoutCartFromCheckoutSchema>>();
 
-	const isDisabled = mode === 'live' && isFetchingRates;
+	const mainProductSoldOut = isProductSoldOut(mainProduct);
+	const isDisabled = (mode === 'live' && isFetchingRates) || mainProductSoldOut;
+
 	return (
 		<Button
 			type={mode === 'live' ? 'submit' : 'button'}
@@ -991,7 +1094,7 @@ function SubmitButton({ mode }: { mode: 'preview' | 'live' }) {
 				}
 			}}
 		>
-			Complete Order
+			{mainProductSoldOut ? 'Sold Out' : 'Complete Order'}
 		</Button>
 	);
 }
