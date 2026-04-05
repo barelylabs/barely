@@ -152,12 +152,12 @@ export interface FulfillmentFeeOverrides {
 	packagingFees?: Partial<Record<MailerType, number | null>>;
 }
 
-const ZERO_BREAKDOWN: FulfillmentFeeBreakdown = {
+const ZERO_BREAKDOWN: FulfillmentFeeBreakdown = Object.freeze({
 	handlingFee: 0,
 	packagingFee: 0,
 	pickFee: 0,
 	totalFee: 0,
-};
+});
 
 /**
  * Extracts fulfillment fee override settings from a workspace record.
@@ -260,7 +260,7 @@ export function calculateDynamicFulfillmentFee(params: {
 	}
 
 	// Pick fee: first unit free, $0.25 per additional unit
-	const totalQuantity = products.reduce((sum, p) => sum + p.quantity, 0);
+	const totalQuantity = physicalProducts.reduce((sum, p) => sum + p.quantity, 0);
 	const extraItems = Math.max(totalQuantity - 1, 0);
 	const pickFeePerItem =
 		typeof workspaceOverrides?.pickFeePerExtraItem === 'number' ?

@@ -35,6 +35,19 @@ describe('calculateDynamicFulfillmentFee', () => {
 		});
 	});
 
+	it('1 vinyl + 1 digital = no pick fee for the digital item', () => {
+		const result = calculateDynamicFulfillmentFee({
+			fulfilledBy: 'barely',
+			products: [
+				{ merchType: 'vinyl', quantity: 1 },
+				{ merchType: 'digital', quantity: 1 },
+			],
+		});
+		// Only 1 physical item; first unit is free → pick fee should be 0
+		expect(result.pickFee).toBe(0);
+		expect(result.totalFee).toBe(450); // $2.50 handling + $2.00 lp_single
+	});
+
 	// Example orders from the pricing page:
 
 	it('1 CD = $3.00 (handling $2.50 + packaging $0.50)', () => {
