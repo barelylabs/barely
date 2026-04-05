@@ -415,7 +415,40 @@ export async function getCartById(id: string, handle?: string, funnelKey?: strin
 		with: {
 			fan: true,
 			funnel: { with: funnelWith },
-			workspace: true,
+			workspace: {
+				columns: {
+					id: true,
+					handle: true,
+					name: true,
+					type: true,
+					currency: true,
+					plan: true,
+					stripeConnectAccountId: true,
+					stripeConnectAccountId_devMode: true,
+					cartSupportEmail: true,
+					cartFeePercentageOverride: true,
+					// shipping origin
+					shippingAddressPhone: true,
+					shippingAddressLine1: true,
+					shippingAddressLine2: true,
+					shippingAddressCity: true,
+					shippingAddressState: true,
+					shippingAddressPostalCode: true,
+					shippingAddressCountry: true,
+					// fulfillment
+					barelyFulfillmentEligible: true,
+					barelyFulfillmentMode: true,
+					barelyFulfillmentFlatFeePerOrder: true,
+					barelyFulfillmentPercentageFeePerOrder: true,
+					barelyFulfillmentHandlingFeeOverride: true,
+					barelyFulfillmentPickFeeOverride: true,
+					barelyFulfillmentPackagingCdCassetteFeeOverride: true,
+					barelyFulfillmentPackagingPolyBagFeeOverride: true,
+					barelyFulfillmentPackagingPosterTubeFeeOverride: true,
+					barelyFulfillmentPackagingLpSingleFeeOverride: true,
+					barelyFulfillmentPackagingLpDoubleFeeOverride: true,
+				},
+			},
 		},
 	});
 
