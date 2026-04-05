@@ -25,7 +25,7 @@ export const createEmailTemplateGroupSchema = insertEmailTemplateGroupSchema
 		workspaceId: true,
 	})
 	.extend({
-		emailTemplates: z.array(emailTemplateSchema),
+		emailTemplates: z.array(emailTemplateSchema).default([]),
 	});
 
 export const upsertEmailTemplateGroupSchema = insertEmailTemplateGroupSchema
@@ -33,7 +33,7 @@ export const upsertEmailTemplateGroupSchema = insertEmailTemplateGroupSchema
 		id: true,
 		workspaceId: true,
 	})
-	.extend({ emailTemplates: z.array(emailTemplateSchema) });
+	.extend({ emailTemplates: z.array(emailTemplateSchema).default([]) });
 
 export const updateEmailTemplateGroupSchema = insertEmailTemplateGroupSchema
 	.partial()
@@ -41,7 +41,7 @@ export const updateEmailTemplateGroupSchema = insertEmailTemplateGroupSchema
 		id: true,
 	})
 	.extend({
-		emailTemplates: z.array(emailTemplateSchema),
+		emailTemplates: z.array(emailTemplateSchema).default([]),
 	});
 
 export type InsertEmailTemplateGroup = z.infer<typeof insertEmailTemplateGroupSchema>;
