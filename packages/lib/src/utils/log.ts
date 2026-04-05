@@ -39,6 +39,11 @@ export const log = async ({
 		return console.log(`>> ${location ? `loc :: ${location} // ` : ''}`, message);
 	}
 
+	// Always log errors/alerts to console so they appear in Vercel logs
+	if (type === 'errors' || type === 'alerts') {
+		console.error(`[${type}] ${location}: ${message}`);
+	}
+
 	const HOOK = logTypeToEnv[type];
 	if (!HOOK) {
 		console.warn(
@@ -50,12 +55,41 @@ export const log = async ({
 	const mentionUser = libEnv.BARELY_SLACK_NOTIFY_USER ?? null;
 	const prefix = `${mention && mentionUser ? `<@${mentionUser}>\n` : ''}${TYPE_ICONS[type]} *${location}*\n`;
 
-	// Slack block text limit is 3000 chars — truncate message to fit
-	const maxMessageLength = 2900 - prefix.length;
-	const truncatedMessage =
-		message.length > maxMessageLength ?
-			message.slice(0, maxMessageLength) + '... [truncated]'
-		:	message;
+	// Slack block text limit is 3000 chars per block.
+	// Split long messages across multiple blocks to avoid truncation.
+	const SLACK_BLOCK_LIMIT = 2900; // leave buffer under the 3000 hard limit
+	const firstBlockMaxLength = SLACK_BLOCK_LIMIT - prefix.length;
+
+	const blocks: { type: 'section'; text: { type: 'mrkdwn'; text: string } }[] = [];
+
+	if (message.length <= firstBlockMaxLength) {
+		blocks.push({
+			type: 'section',
+			text: { type: 'mrkdwn', text: `${prefix}${message}` },
+		});
+	} else {
+		// First block includes the prefix
+		blocks.push({
+			type: 'section',
+			text: {
+				type: 'mrkdwn',
+				text: `${prefix}${message.slice(0, firstBlockMaxLength)}`,
+			},
+		});
+
+		// Remaining message in continuation blocks (max 50 blocks per Slack message)
+		let offset = firstBlockMaxLength;
+		while (offset < message.length && blocks.length < 50) {
+			blocks.push({
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text: message.slice(offset, offset + SLACK_BLOCK_LIMIT),
+				},
+			});
+			offset += SLACK_BLOCK_LIMIT;
+		}
+	}
 
 	try {
 		const res = await fetch(HOOK, {
@@ -63,17 +97,7 @@ export const log = async ({
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({
-				blocks: [
-					{
-						type: 'section',
-						text: {
-							type: 'mrkdwn',
-							text: `${prefix}${truncatedMessage}`,
-						},
-					},
-				],
-			}),
+			body: JSON.stringify({ blocks }),
 		});
 
 		if (!res.ok) {

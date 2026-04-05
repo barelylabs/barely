@@ -52,12 +52,15 @@ export const publicRenderHandler =
 					pool,
 				}),
 			onError({ error, path }) {
+				// Always log the full error to Vercel logs
+				console.error(`>>> tRPC Error on '${path}'`, error);
+
 				log({
 					location: `${app}: api/trpc/${path}/[trpc]/route.ts`,
 					message: `tRPC Error on '${path}' :: ${error.message}`,
 					type: 'errors',
 				}).catch(() => {
-					console.error(`>>> tRPC Error on '${path}'`, error);
+					// Slack logging failed — already logged to console above
 				});
 			},
 		}).catch(async err => {
