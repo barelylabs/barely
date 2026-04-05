@@ -164,6 +164,7 @@ export async function getUsageCount(
  */
 export function getUsageLimit(
 	workspace: {
+		handle?: string | null;
 		plan: PlanType;
 		fanUsageLimitOverride?: number | null;
 		memberUsageLimitOverride?: number | null;
@@ -178,7 +179,7 @@ export function getUsageLimit(
 ): number {
 	const plan = WORKSPACE_PLANS.get(workspace.plan);
 	if (!plan) {
-		throw new Error(`Invalid workspace plan: ${workspace.plan}`);
+		throw new Error(`Invalid workspace plan: ${workspace.plan} (handle: ${workspace.handle ?? 'unknown'})`);
 	}
 
 	// Check for override first
@@ -278,6 +279,7 @@ export async function checkUsageLimit(
 		where: eq(Workspaces.id, workspaceId),
 		columns: {
 			id: true,
+			handle: true,
 			plan: true,
 			billingCycleStart: true,
 			usageWarnings: true,
