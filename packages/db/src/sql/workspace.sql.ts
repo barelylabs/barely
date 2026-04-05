@@ -209,10 +209,29 @@ export const Workspaces = pgTable(
 		})
 			.default('artist_all')
 			.notNull(),
-		barelyFulfillmentFlatFeePerOrder: integer('barelyFulfillmentFlatFeePerOrder'), // in cents
+		barelyFulfillmentFlatFeePerOrder: integer('barelyFulfillmentFlatFeePerOrder'), // in cents (legacy)
 		barelyFulfillmentPercentageFeePerOrder: integer(
 			'barelyFulfillmentPercentageFeePerOrder',
-		), // percentage × 100 (e.g., 500 = 5%)
+		), // percentage × 100 (e.g., 500 = 5%) (legacy)
+
+		// dynamic fulfillment fee overrides (null = use defaults from @barely/const)
+		barelyFulfillmentHandlingFeeOverride: integer('barelyFulfillmentHandlingFeeOverride'), // cents per order
+		barelyFulfillmentPickFeeOverride: integer('barelyFulfillmentPickFeeOverride'), // cents per extra item
+		barelyFulfillmentPackagingCdCassetteFeeOverride: integer(
+			'barelyFulfillmentPackagingCdCassetteFeeOverride',
+		), // cents
+		barelyFulfillmentPackagingPolyBagFeeOverride: integer(
+			'barelyFulfillmentPackagingPolyBagFeeOverride',
+		), // cents
+		barelyFulfillmentPackagingPosterTubeFeeOverride: integer(
+			'barelyFulfillmentPackagingPosterTubeFeeOverride',
+		), // cents
+		barelyFulfillmentPackagingLpSingleFeeOverride: integer(
+			'barelyFulfillmentPackagingLpSingleFeeOverride',
+		), // cents
+		barelyFulfillmentPackagingLpDoubleFeeOverride: integer(
+			'barelyFulfillmentPackagingLpDoubleFeeOverride',
+		), // cents
 
 		/* vip */
 		vipSupportEmail: varchar('vipSupportEmail', { length: 255 }),

@@ -55,5 +55,8 @@ export * from './trigger.constants';
 // Workspace
 export * from './workspace-plans.constants';
 
+// Fulfillment
+export * from './fulfillment.constants';
+
 // NYC
 export * from './nyc.constants';

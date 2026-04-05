@@ -44,8 +44,9 @@ import {
 	getVatRateForCheckout,
 } from '../utils/cart';
 import {
-	calculateBarelyFulfillmentFee,
+	calculateDynamicFulfillmentFee,
 	determineFulfillmentResponsibility,
+	getWorkspaceFulfillmentOverrides,
 } from '../utils/fulfillment';
 
 /* get funnel */
@@ -93,6 +94,13 @@ export const funnelWith = {
 			barelyFulfillmentMode: true,
 			barelyFulfillmentFlatFeePerOrder: true,
 			barelyFulfillmentPercentageFeePerOrder: true,
+			barelyFulfillmentHandlingFeeOverride: true,
+			barelyFulfillmentPickFeeOverride: true,
+			barelyFulfillmentPackagingCdCassetteFeeOverride: true,
+			barelyFulfillmentPackagingPolyBagFeeOverride: true,
+			barelyFulfillmentPackagingPosterTubeFeeOverride: true,
+			barelyFulfillmentPackagingLpSingleFeeOverride: true,
+			barelyFulfillmentPackagingLpDoubleFeeOverride: true,
 		},
 	},
 	mainProduct: {
@@ -174,6 +182,13 @@ export async function getFunnelByParams(handle: string, key: string) {
 					barelyFulfillmentMode: true,
 					barelyFulfillmentFlatFeePerOrder: true,
 					barelyFulfillmentPercentageFeePerOrder: true,
+					barelyFulfillmentHandlingFeeOverride: true,
+					barelyFulfillmentPickFeeOverride: true,
+					barelyFulfillmentPackagingCdCassetteFeeOverride: true,
+					barelyFulfillmentPackagingPolyBagFeeOverride: true,
+					barelyFulfillmentPackagingPosterTubeFeeOverride: true,
+					barelyFulfillmentPackagingLpSingleFeeOverride: true,
+					barelyFulfillmentPackagingLpDoubleFeeOverride: true,
 				},
 			},
 			// key: true,
@@ -316,13 +331,13 @@ export async function createMainCartFromFunnel({
 		vat,
 	);
 
-	// Step 3: Calculate fulfillment fee
-	const barelyFulfillmentFee = calculateBarelyFulfillmentFee({
+	// Step 3: Calculate itemized fulfillment fees
+	const fulfillmentBreakdown = calculateDynamicFulfillmentFee({
 		fulfilledBy,
-		productAmountInCents: amounts.mainProductAmount,
-		flatFeeInCents: funnel.workspace.barelyFulfillmentFlatFeePerOrder,
-		percentageFee: funnel.workspace.barelyFulfillmentPercentageFeePerOrder,
+		products: [{ merchType: funnel.mainProduct.merchType, quantity: 1 }],
+		workspaceOverrides: getWorkspaceFulfillmentOverrides(funnel.workspace),
 	});
+	const barelyFulfillmentFee = fulfillmentBreakdown.totalFee;
 
 	const metadata: z.infer<typeof stripeConnectChargeMetadataSchema> = {
 		paymentType: 'cart',
@@ -377,6 +392,9 @@ export async function createMainCartFromFunnel({
 		// fulfillment
 		fulfilledBy,
 		barelyFulfillmentFee,
+		barelyHandlingFee: fulfillmentBreakdown.handlingFee,
+		barelyPackagingFee: fulfillmentBreakdown.packagingFee,
+		barelyPickFee: fulfillmentBreakdown.pickFee,
 	};
 
 	// Shipping is calculated post-page-load via calculateInitialShipping mutation
