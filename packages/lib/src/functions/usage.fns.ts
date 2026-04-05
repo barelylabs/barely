@@ -179,7 +179,9 @@ export function getUsageLimit(
 ): number {
 	const plan = WORKSPACE_PLANS.get(workspace.plan);
 	if (!plan) {
-		throw new Error(`Invalid workspace plan: ${workspace.plan} (handle: ${workspace.handle ?? 'unknown'})`);
+		throw new Error(
+			`Invalid workspace plan: ${workspace.plan} (handle: ${workspace.handle ?? 'unknown'})`,
+		);
 	}
 
 	// Check for override first
