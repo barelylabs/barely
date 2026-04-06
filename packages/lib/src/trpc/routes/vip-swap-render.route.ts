@@ -36,7 +36,11 @@ export const vipSwapRenderRoute = {
 				with: {
 					coverImage: true,
 					file: true,
-					workspace: true,
+					workspace: {
+						columns: {
+							name: true,
+						},
+					},
 				},
 			});
 
@@ -91,7 +95,15 @@ export const vipSwapRenderRoute = {
 					isNull(VipSwaps.deletedAt),
 				),
 				with: {
-					workspace: true,
+					workspace: {
+						columns: {
+							id: true,
+							name: true,
+							plan: true,
+							eventUsage: true,
+							eventUsageLimitOverride: true,
+						},
+					},
 				},
 			});
 
@@ -335,7 +347,13 @@ export const vipSwapRenderRoute = {
 						with: {
 							file: true,
 							coverImage: true,
-							workspace: true,
+							workspace: {
+								columns: {
+									id: true,
+									name: true,
+									handle: true,
+								},
+							},
 						},
 					},
 				},
@@ -410,7 +428,14 @@ export const vipSwapRenderRoute = {
 						with: {
 							file: true,
 							coverImage: true,
-							workspace: true,
+							workspace: {
+								columns: {
+									id: true,
+									plan: true,
+									eventUsage: true,
+									eventUsageLimitOverride: true,
+								},
+							},
 						},
 					},
 				},
@@ -512,7 +537,14 @@ export const vipSwapRenderRoute = {
 			const vipSwap = await dbHttp.query.VipSwaps.findFirst({
 				where: and(eq(VipSwaps.id, input.vipSwapId), eq(VipSwaps.isActive, true)),
 				with: {
-					workspace: true,
+					workspace: {
+						columns: {
+							id: true,
+							plan: true,
+							eventUsage: true,
+							eventUsageLimitOverride: true,
+						},
+					},
 				},
 			});
 

@@ -11,7 +11,7 @@ import {
 	varchar,
 } from 'drizzle-orm/pg-core';
 
-import { dbId, primaryId, timestamps } from '../utils';
+import { primaryId, timestamps } from '../utils';
 import { AdCreatives } from './ad-creative.sql';
 import { Albums } from './album.sql';
 import { AnalyticsEndpoints } from './analytics-endpoint.sql';
@@ -66,11 +66,6 @@ export const Workspaces = pgTable(
 		brandHue: integer('brandHue').notNull().default(30),
 		brandAccentHue: integer('brandAccentHue').notNull().default(200),
 
-		// feature flags
-		feature__tracks: boolean('feature__tracks').default(false).notNull(),
-		feature__mixtapes: boolean('feature__mixtapes').default(false).notNull(),
-		feature__pressKits: boolean('feature__pressKits').default(false).notNull(),
-
 		// artist specific
 		spotifyArtistId: varchar('spotifyArtistId', { length: 255 }),
 		youtubeChannelId: varchar('youtubeChannelId', { length: 255 }),
@@ -107,7 +102,6 @@ export const Workspaces = pgTable(
 		).default(false),
 
 		// Stripe Connect status tracking
-		stripeConnectOnboardingStartedAt: timestamp('stripeConnectOnboardingStartedAt'),
 		stripeConnectDetailsSubmitted: boolean('stripeConnectDetailsSubmitted').default(
 			false,
 		),
@@ -209,11 +203,6 @@ export const Workspaces = pgTable(
 		})
 			.default('artist_all')
 			.notNull(),
-		barelyFulfillmentFlatFeePerOrder: integer('barelyFulfillmentFlatFeePerOrder'), // in cents (legacy)
-		barelyFulfillmentPercentageFeePerOrder: integer(
-			'barelyFulfillmentPercentageFeePerOrder',
-		), // percentage × 100 (e.g., 500 = 5%) (legacy)
-
 		// dynamic fulfillment fee overrides (null = use defaults from @barely/const)
 		barelyFulfillmentHandlingFeeOverride: integer('barelyFulfillmentHandlingFeeOverride'), // cents per order
 		barelyFulfillmentPickFeeOverride: integer('barelyFulfillmentPickFeeOverride'), // cents per extra item
@@ -245,13 +234,6 @@ export const Workspaces = pgTable(
 		shippingAddressPostalCode: varchar('shippingAddressPostalCode', { length: 255 }),
 		shippingAddressCountry: varchar('shippingAddressCountry', { length: 255 }),
 
-		// relations
-		bioRootId: dbId('bioRootId'),
-		defaultMetaAdAccountId: varchar('defaultMetaAdAccountId', { length: 255 }),
-		defaultSpotifyAccountId: varchar('defaultSpotifyAccountId', {
-			length: 255,
-		}),
-
 		/* balance & payments */
 		balance: integer('balance').default(0).notNull(), // in minor units (cents) - used for credits, refunds, and failed transfer fallbacks
 		orders: integer('orders').default(0).notNull(),
@@ -270,19 +252,7 @@ export const Workspaces = pgTable(
 
 export const WorkspaceRelations = relations(Workspaces, ({ one, many }) => ({
 	// one-to-one
-	bioRoot: one(Bios, {
-		fields: [Workspaces.bioRootId],
-		references: [Bios.id],
-	}),
 	brandKit: one(BrandKits),
-	defaultMetaAdAccount: one(ProviderAccounts, {
-		fields: [Workspaces.defaultMetaAdAccountId],
-		references: [ProviderAccounts.providerAccountId],
-	}),
-	defaultSpotifyAccount: one(ProviderAccounts, {
-		fields: [Workspaces.defaultSpotifyAccountId],
-		references: [ProviderAccounts.providerAccountId],
-	}),
 
 	// many-to-one
 	adCreatives: many(AdCreatives),

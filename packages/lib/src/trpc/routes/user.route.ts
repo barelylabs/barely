@@ -36,7 +36,13 @@ export const userRoute = {
 		const invites = dbHttp.query.WorkspaceInvites.findMany({
 			where: eq(WorkspaceInvites.userId, ctx.user.id),
 			with: {
-				workspace: true,
+				workspace: {
+					columns: {
+						id: true,
+						name: true,
+						handle: true,
+					},
+				},
 			},
 		});
 

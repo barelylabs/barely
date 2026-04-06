@@ -473,7 +473,14 @@ export const campaignRoute = {
 			with: {
 				track: {
 					with: {
-						workspace: true,
+						workspace: {
+							columns: {
+								id: true,
+								name: true,
+								handle: true,
+								spotifyArtistId: true,
+							},
+						},
 						_genres: {
 							with: {
 								genre: true,
@@ -512,7 +519,13 @@ export const campaignRoute = {
 				where: eq(Campaigns.id, input.id),
 				with: {
 					createdBy: true,
-					workspace: true,
+					workspace: {
+						columns: {
+							id: true,
+							name: true,
+							handle: true,
+						},
+					},
 					track: true,
 				},
 			});
@@ -619,7 +632,14 @@ export const campaignRoute = {
 					createdBy: true,
 					track: {
 						with: {
-							workspace: true,
+							workspace: {
+								columns: {
+									id: true,
+									name: true,
+									handle: true,
+									spotifyArtistId: true,
+								},
+							},
 						},
 					},
 				},

@@ -51,6 +51,9 @@ export const workspaceRoute = {
 	nameById: publicProcedure.input(z.string()).query(async ({ input }) => {
 		const workspace = await dbHttp.query.Workspaces.findFirst({
 			where: eq(Workspaces.id, input),
+			columns: {
+				name: true,
+			},
 		});
 
 		return workspace?.name;
