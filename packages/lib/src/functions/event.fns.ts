@@ -466,15 +466,9 @@ export async function recordCartEvent({
 				`fulfillment: ${formatMinorToMajorCurrency(cart.barelyFulfillmentFee, currency)}`
 			:	null,
 		].filter(Boolean);
-		const feeStr =
-			feeDetails.length > 0 ?
-				`\n fees → ${feeDetails.join(' · ')}`
-			:	'';
+		const feeStr = feeDetails.length > 0 ? `\n fees → ${feeDetails.join(' · ')}` : '';
 
-		const checkoutTotal = formatMinorToMajorCurrency(
-			cart.checkoutAmount,
-			currency,
-		);
+		const checkoutTotal = formatMinorToMajorCurrency(cart.checkoutAmount, currency);
 		await log({
 			type: 'sales',
 			location: 'recordCartEvent',
