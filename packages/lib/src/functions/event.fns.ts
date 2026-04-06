@@ -458,10 +458,16 @@ export async function recordCartEvent({
 
 	// Report sales to Slack FIRST - this is the most critical notification
 	if (type === 'cart/purchaseMainWithoutBump' || type === 'cart/purchaseMainWithBump') {
+		const feeDetails = [
+			cart.checkoutHandlingAmount ? `platform: ${formatMinorToMajorCurrency(cart.checkoutHandlingAmount, currency)}` : null,
+			cart.barelyFulfillmentFee ? `fulfillment: ${formatMinorToMajorCurrency(cart.barelyFulfillmentFee, currency)}` : null,
+		].filter(Boolean);
+		const feeStr = feeDetails.length > 0 ? `\n fees → ${feeDetails.join(' · ')}` : '';
+
 		await log({
 			type: 'sales',
 			location: 'recordCartEvent',
-			message: `${cartFunnel.handle} checkout [${cart.id}] :: ${formatMinorToMajorCurrency(cart.checkoutAmount, currency)}`,
+			message: `${cartFunnel.handle} checkout [${cart.id}] :: ${formatMinorToMajorCurrency(cart.checkoutAmount, currency)}${feeStr}`,
 		}).catch(() => {
 			/* non-critical */
 		});
