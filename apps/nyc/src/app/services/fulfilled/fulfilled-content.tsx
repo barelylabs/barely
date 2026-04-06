@@ -463,7 +463,7 @@ export function FulfilledContent() {
 							},
 							{
 								q: 'Do I need to use barely.cart?',
-								a: 'No, but it’s the best experience. barely.cart orders flow in automatically with no manual steps. We can fulfill orders from external platforms (Shopify, Bandcamp, etc.) — those orders include a $1.50/order processing fee to cover manual intake and verification. No monthly fees either way.',
+						a: `No, but it's the best experience. barely.cart orders flow in automatically with no manual steps. We can fulfill orders from external platforms (Shopify, Bandcamp, etc.) — those orders include a $1.50/order processing fee to cover manual intake and verification. No monthly fees either way.`,
 							},
 							{
 								q: 'What does "handling pass-through" mean?',
