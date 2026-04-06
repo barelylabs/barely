@@ -176,6 +176,14 @@ export function FulfilledContent() {
 												$2.50
 											</td>
 										</tr>
+										<tr className='border-b border-white/5'>
+											<td className='px-6 py-4 font-medium text-white'>
+												Off-platform processing fee
+											</td>
+											<td className='px-6 py-4 text-right font-medium text-white'>
+												$1.50 / order
+											</td>
+										</tr>
 										<tr>
 											<td className='px-6 py-4 text-white/80'>
 												Pick fee (additional items)
@@ -187,6 +195,11 @@ export function FulfilledContent() {
 									</tbody>
 								</table>
 							</div>
+							<p className='mt-3 text-sm text-white/50'>
+								The off-platform processing fee applies to any order that doesn&apos;t
+								flow in automatically through barely.cart (e.g. Shopify, Bandcamp, manual
+								orders). It covers manual order intake and verification.
+							</p>
 						</div>
 					</AnimatedSection>
 
@@ -282,6 +295,7 @@ export function FulfilledContent() {
 								checkout. When enabled, they&apos;re bundled into the &quot;shipping &
 								handling&quot; total your customer sees — invisible as a separate line
 								item. Your effective cost drops to just the $2.50 handling fee per order.
+								Off-platform orders include an additional $1.50 processing fee.
 							</p>
 						</div>
 					</AnimatedSection>
@@ -310,6 +324,9 @@ export function FulfilledContent() {
 												Handling
 											</th>
 											<th className='px-6 py-3 text-right text-sm font-medium text-white/60'>
+												Processing
+											</th>
+											<th className='px-6 py-3 text-right text-sm font-medium text-white/60'>
 												Packaging
 											</th>
 											<th className='px-6 py-3 text-right text-sm font-medium text-white/60'>
@@ -322,22 +339,64 @@ export function FulfilledContent() {
 									</thead>
 									<tbody>
 										{[
-											['1 CD', '$2.50', '$0.50', '—', '$3.00'],
-											['1 CD + sticker pack', '$2.50', '$0.50', '$0.25', '$3.25'],
-											['1 t-shirt', '$2.50', '$0.50', '—', '$3.00'],
-											['1 vinyl LP', '$2.50', '$2.00', '—', '$4.50'],
+											['1 CD', '$2.50', '—', '$0.50', '—', '$3.00'],
+											['1 CD + sticker pack', '$2.50', '—', '$0.50', '$0.25', '$3.25'],
+											['1 t-shirt', '$2.50', '—', '$0.50', '—', '$3.00'],
+											['1 vinyl LP', '$2.50', '—', '$2.00', '—', '$4.50'],
 											[
 												'1 vinyl LP + t-shirt + stickers',
 												'$2.50',
+												'—',
 												'$2.00',
 												'$0.50',
 												'$5.00',
 											],
-											['1 CD + t-shirt', '$2.50', '$0.50', '$0.25', '$3.25'],
-										].map(([order, handling, packaging, pick, total], i) => (
+											['1 CD + t-shirt', '$2.50', '—', '$0.50', '$0.25', '$3.25'],
+										].map(([order, handling, processing, packaging, pick, total], i) => (
 											<tr key={i} className={i < 5 ? 'border-b border-white/5' : ''}>
 												<td className='px-6 py-4 text-white/80'>{order}</td>
 												<td className='px-6 py-4 text-right text-white/70'>{handling}</td>
+												<td className='px-6 py-4 text-right text-white/70'>
+													{processing}
+												</td>
+												<td className='px-6 py-4 text-right text-white/70'>
+													{packaging}
+												</td>
+												<td className='px-6 py-4 text-right text-white/70'>{pick}</td>
+												<td className='px-6 py-4 text-right font-medium text-white'>
+													{total}
+												</td>
+											</tr>
+										))}
+										{/* Off-platform examples */}
+										<tr>
+											<td
+												colSpan={6}
+												className='border-t border-white/10 px-6 py-2 text-xs font-medium uppercase tracking-wider text-white/40'
+											>
+												Off-platform orders
+											</td>
+										</tr>
+										{[
+											['1 CD (off-platform)', '$2.50', '$1.50', '$0.50', '—', '$4.50'],
+											[
+												'1 vinyl LP (off-platform)',
+												'$2.50',
+												'$1.50',
+												'$2.00',
+												'—',
+												'$6.00',
+											],
+										].map(([order, handling, processing, packaging, pick, total], i) => (
+											<tr
+												key={'off-' + i}
+												className={i < 1 ? 'border-b border-white/5' : ''}
+											>
+												<td className='px-6 py-4 text-white/80'>{order}</td>
+												<td className='px-6 py-4 text-right text-white/70'>{handling}</td>
+												<td className='px-6 py-4 text-right text-white/70'>
+													{processing}
+												</td>
 												<td className='px-6 py-4 text-right text-white/70'>
 													{packaging}
 												</td>
@@ -404,7 +463,7 @@ export function FulfilledContent() {
 							},
 							{
 								q: 'Do I need to use barely.cart?',
-								a: 'Yes — during the pilot program, Barely Fulfilled is exclusively available to barely.cart users. The integration is built directly into the platform: automatic order flow, dynamic packaging fee calculation at checkout, and the option to pass handling costs through to customers. Support for external platforms (Shopify, Bandcamp, etc.) is on the roadmap.',
+								a: 'No, but it’s the best experience. barely.cart orders flow in automatically with no manual steps. We can fulfill orders from external platforms (Shopify, Bandcamp, etc.) — those orders include a $1.50/order processing fee to cover manual intake and verification. No monthly fees either way.',
 							},
 							{
 								q: 'What does "handling pass-through" mean?',
