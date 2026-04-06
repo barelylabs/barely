@@ -305,9 +305,13 @@ export const invoiceRoute = {
 			);
 			const { isProduction } = await import('@barely/utils');
 
-			// First fetch the full workspace with stripeConnect fields
+			// Fetch only the stripeConnect fields needed for charges check
 			const fullWorkspace = await dbHttp.query.Workspaces.findFirst({
 				where: eq(Workspaces.id, ctx.workspace.id),
+				columns: {
+					stripeConnectChargesEnabled: true,
+					stripeConnectChargesEnabled_devMode: true,
+				},
 			});
 
 			if (!fullWorkspace) {
@@ -512,9 +516,13 @@ export const invoiceRoute = {
 		);
 		const { isProduction } = await import('@barely/utils');
 
-		// First fetch the full workspace with stripeConnect fields
+		// Fetch only the stripeConnect fields needed for charges check
 		const fullWorkspace = await dbHttp.query.Workspaces.findFirst({
 			where: eq(Workspaces.id, ctx.workspace.id),
+			columns: {
+				stripeConnectChargesEnabled: true,
+				stripeConnectChargesEnabled_devMode: true,
+			},
 		});
 
 		if (!fullWorkspace) {

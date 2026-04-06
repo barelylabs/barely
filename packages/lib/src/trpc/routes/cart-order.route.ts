@@ -350,7 +350,12 @@ export const cartOrderRoute = {
 				(await dbPool(ctx.pool).query.Carts.findFirst({
 					where: and(eq(Carts.workspaceId, ctx.workspace.id), eq(Carts.id, input.cartId)),
 					with: {
-						workspace: true,
+						workspace: {
+							columns: {
+								stripeConnectAccountId: true,
+								stripeConnectAccountId_devMode: true,
+							},
+						},
 					},
 				})) ?? raiseTRPCError({ message: 'Cart not found to cancel' });
 
@@ -422,7 +427,16 @@ export const cartOrderRoute = {
 						fan: true,
 						funnel: {
 							with: {
-								workspace: true,
+								workspace: {
+									columns: {
+										stripeConnectAccountId: true,
+										stripeConnectAccountId_devMode: true,
+										stripeConnectChargesEnabled: true,
+										currency: true,
+										cartSupportEmail: true,
+										name: true,
+									},
+								},
 							},
 						},
 					},
@@ -664,10 +678,13 @@ export const cartOrderRoute = {
 				where: and(eq(Carts.workspaceId, ctx.workspace.id), eq(Carts.id, input.cartId)),
 				with: {
 					fan: true,
-					workspace: true,
 					funnel: {
 						with: {
-							workspace: true,
+							workspace: {
+								columns: {
+									cartSupportEmail: true,
+								},
+							},
 						},
 					},
 					mainProduct: true,

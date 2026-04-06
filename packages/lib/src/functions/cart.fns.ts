@@ -92,8 +92,6 @@ export const funnelWith = {
 			// barely fulfillment
 			barelyFulfillmentEligible: true,
 			barelyFulfillmentMode: true,
-			barelyFulfillmentFlatFeePerOrder: true,
-			barelyFulfillmentPercentageFeePerOrder: true,
 			barelyFulfillmentHandlingFeeOverride: true,
 			barelyFulfillmentPickFeeOverride: true,
 			barelyFulfillmentPackagingCdCassetteFeeOverride: true,
@@ -180,8 +178,6 @@ export async function getFunnelByParams(handle: string, key: string) {
 					// barely fulfillment
 					barelyFulfillmentEligible: true,
 					barelyFulfillmentMode: true,
-					barelyFulfillmentFlatFeePerOrder: true,
-					barelyFulfillmentPercentageFeePerOrder: true,
 					barelyFulfillmentHandlingFeeOverride: true,
 					barelyFulfillmentPickFeeOverride: true,
 					barelyFulfillmentPackagingCdCassetteFeeOverride: true,
@@ -438,8 +434,6 @@ export async function getCartById(id: string, handle?: string, funnelKey?: strin
 					// fulfillment
 					barelyFulfillmentEligible: true,
 					barelyFulfillmentMode: true,
-					barelyFulfillmentFlatFeePerOrder: true,
-					barelyFulfillmentPercentageFeePerOrder: true,
 					barelyFulfillmentHandlingFeeOverride: true,
 					barelyFulfillmentPickFeeOverride: true,
 					barelyFulfillmentPackagingCdCassetteFeeOverride: true,
