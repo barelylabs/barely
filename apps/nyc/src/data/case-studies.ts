@@ -271,7 +271,7 @@ export const theNowCase: CaseStudy = {
 		adSpend: '$23,129',
 		total: '$29,679',
 	},
-	challenge: `The Now had just released their debut album "Too Hot To Handle" - recorded at Real World Studios with Grammy-winning producer Oli Jacobs - but were stuck at around 1,000 monthly listeners. Despite strong local support in South Wales and sharing stages with legends like Placebo and Noel Gallagher, they couldn't break beyond their regional fanbase. They needed to build sustainable momentum for the album and expand their reach across the UK and into Europe.`,
+	challenge: `The Now had poured everything into their debut album "Too Hot To Handle" — real studio time, a proper producer, years of gigging across South Wales — but none of it was translating online. They were stuck at around 1,000 monthly Spotify listeners with $16/month in streaming revenue. They had the music and the live show, but no way to reach fans beyond the people who already knew them. They needed a path from regional act to sustainable career.`,
 
 	strategy: [
 		{
@@ -297,7 +297,7 @@ export const theNowCase: CaseStudy = {
 		{
 			title: 'Stan Fan Account',
 			description:
-				'Launched a dedicated TikTok fan account in February 2026 to maximize discovery surface area. The Stan account created breadth-focused organic reach that fed directly into Spotify algorithmic recommendations, contributing to the late-campaign acceleration.',
+				'Launched a dedicated TikTok fan account in February 2026, posting 3x daily from a dedicated device. No single post needed to go viral — the sheer volume of content created constant discovery opportunities that translated into new Spotify listeners week after week.',
 		},
 	],
 
@@ -305,7 +305,7 @@ export const theNowCase: CaseStudy = {
 		{
 			month: 'Months 1-2',
 			event: 'Launch playlist.spark campaigns',
-			metric: '2,241 → 4,187 listeners',
+			metric: '1,347 → 4,187 listeners',
 		},
 		{
 			month: 'Months 3-4',
@@ -346,13 +346,11 @@ export const theNowCase: CaseStudy = {
 
 	keyResults: [
 		'2,646% growth in monthly listeners (1,347 → 37,000)',
-		'Monthly revenue grew from $16 to $2,500 (15,525% increase)',
-		'Built "ON THE ROAD" playlist to 7K followers, creating sustainable discovery channel',
-		'"Wild Curse" drove major Discover Weekly placement after Stan account launch',
+		'Monthly revenue grew from $16 to $2,500 — merch campaigns self-funding continued growth',
+		'Stan fan account drove consistent algorithmic discovery through daily volume, not individual viral posts',
+		'"Wild Curse" hit major Discover Weekly placement, accelerating late-campaign growth',
 		'Multiple sold-out shows on Spring 2026 tour',
-		'Stan fan account accelerated algorithmic discovery within weeks of launch',
 		'Built email list of 298 subscribers — nearly all paying customers',
-		'Physical merch campaigns running above break-even, self-funding continued growth',
 	],
 	testimonial: {
 		quote:
@@ -365,7 +363,7 @@ export const theNowCase: CaseStudy = {
 		after: 2500,
 	},
 	summary:
-		'South Wales alt-rock band achieved 2,646% listener growth and 15,525% revenue increase over 13 months through progressive campaign building, Stan fan account management, and strategic Meta advertising — expanding from regional act to sold-out touring band.',
+		'South Wales alt-rock band grew from 1,347 to 37,000 monthly listeners and $16 to $2,500/mo in revenue over 13 months — expanding from regional act to sold-out touring band with self-funding merch campaigns.',
 	featured: true,
 	socials: {
 		instagram: 'https://www.instagram.com/thenowuk/',
