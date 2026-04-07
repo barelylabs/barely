@@ -95,15 +95,15 @@ export function LabelsContent() {
 							<div className='mb-6 grid grid-cols-1 gap-4 md:grid-cols-3'>
 								<div className='rounded-lg bg-white/5 p-4 text-center'>
 									<p className='text-2xl font-bold text-white'>
-										${NYC_STAN.volumePricing.twoToFour}
+										${NYC_STAN.volumePricing.secondAccount}
 									</p>
-									<p className='text-sm text-white/70'>per account/mo (2-4 accounts)</p>
+									<p className='text-sm text-white/70'>per account/mo (2nd account)</p>
 								</div>
 								<div className='rounded-lg bg-white/5 p-4 text-center'>
 									<p className='text-2xl font-bold text-white'>
-										${NYC_STAN.volumePricing.fivePlus}
+										${NYC_STAN.volumePricing.thirdPlus}
 									</p>
-									<p className='text-sm text-white/70'>per account/mo (5+ accounts)</p>
+									<p className='text-sm text-white/70'>per account/mo (3rd+ accounts)</p>
 								</div>
 								<div className='rounded-lg bg-purple-500/10 p-4 text-center'>
 									<p className='text-2xl font-bold text-purple-300'>
@@ -187,10 +187,10 @@ export function LabelsContent() {
 							<div className='space-y-4 text-lg leading-relaxed text-white/80'>
 								<p>
 									<span className='font-semibold text-white'>Stan roster packages:</span>{' '}
-									TikTok fan account management across your roster, with volume pricing
-									starting at ${NYC_STAN.volumePricing.twoToFour}/account/month for 2-4
-									accounts. Label package available for up to{' '}
-									{NYC_STAN.labelPackage.maxAccounts} accounts at $
+									TikTok fan account management across your roster. 2nd account at $
+									{NYC_STAN.volumePricing.secondAccount}/month, 3rd+ accounts at $
+									{NYC_STAN.volumePricing.thirdPlus}/month each. Label package available
+									for up to {NYC_STAN.labelPackage.maxAccounts} accounts at $
 									{NYC_STAN.labelPackage.price.toLocaleString()}/month.
 								</p>
 								<p>

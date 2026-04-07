@@ -24,8 +24,8 @@ export interface StanConfig {
 	};
 	igReelsAddon: number; // Monthly add-on for Instagram Reels repurposing
 	volumePricing: {
-		twoToFour: number; // Per-account price for 2-4 accounts
-		fivePlus: number; // Per-account price for 5+ accounts
+		secondAccount: number; // Per-account price for 2nd account
+		thirdPlus: number; // Per-account price for 3rd+ accounts
 	};
 	labelPackage: {
 		price: number; // Monthly price for label roster package
@@ -52,11 +52,11 @@ export const NYC_STAN: StanConfig = {
 	},
 	igReelsAddon: 150,
 	volumePricing: {
-		twoToFour: 400,
-		fivePlus: 350,
+		secondAccount: 450,
+		thirdPlus: 400,
 	},
 	labelPackage: {
-		price: 2500,
+		price: 3200,
 		maxAccounts: 8,
 	},
 	setupFees: {

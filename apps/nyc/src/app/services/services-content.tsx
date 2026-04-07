@@ -303,11 +303,31 @@ export function ServicesContent() {
 									</li>
 								))}
 							</ul>
-							<p className='text-sm text-white/60'>
-								Volume pricing available for multiple accounts. Label package: up to{' '}
-								{NYC_STAN.labelPackage.maxAccounts} accounts for $
-								{NYC_STAN.labelPackage.price.toLocaleString()}/mo.
-							</p>
+							<div className='space-y-2 text-sm text-white/60'>
+								<p>
+									Running multiple accounts? Volume pricing available:
+								</p>
+								<ul className='list-inside list-disc space-y-1'>
+									<li>2nd account: ${NYC_STAN.volumePricing.secondAccount}/mo</li>
+									<li>3rd+ accounts: ${NYC_STAN.volumePricing.thirdPlus}/mo each</li>
+								</ul>
+								<p>
+									Labels & management companies: Roster packages at $
+									{NYC_STAN.labelPackage.price.toLocaleString()}/mo for up to{' '}
+									{NYC_STAN.labelPackage.maxAccounts} accounts.{' '}
+									<Link
+										href='/services/labels'
+										className='text-purple-300 underline hover:text-purple-200'
+									>
+										Learn more
+									</Link>
+								</p>
+								<p>
+									One-time setup fee: ${NYC_STAN.setupFees.simple}&ndash;$
+									{NYC_STAN.setupFees.customMax} (based on aesthetic complexity). Waived
+									for Rising+ clients.
+								</p>
+							</div>
 						</div>
 					</AnimatedSection>
 
