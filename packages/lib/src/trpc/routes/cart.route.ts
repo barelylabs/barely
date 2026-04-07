@@ -429,11 +429,20 @@ export const cartRoute = {
 				workspaceOverrides: getWorkspaceFulfillmentOverrides(funnel.workspace),
 			});
 
+			const { barelyPlatformFee, applicationFeeAmount } = getFeeAmountForCheckout({
+				productAmount: amounts.orderProductAmount,
+				vatAmount: amounts.orderVatAmount,
+				shippingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
+				barelyFulfillmentFee: fulfillmentBreakdown.totalFee,
+				workspace: funnel.workspace,
+			});
+
 			const carts = await dbPool(ctx.pool)
 				.update(Carts)
 				.set({
 					...update,
 					...amounts,
+					barelyPlatformFee,
 					barelyFulfillmentFee: fulfillmentBreakdown.totalFee,
 					barelyHandlingFee: fulfillmentBreakdown.handlingFee,
 					barelyPackagingFee: fulfillmentBreakdown.packagingFee,
@@ -459,13 +468,7 @@ export const cartRoute = {
 				stripePaymentIntentId,
 				{
 					amount: amounts.orderAmount,
-					application_fee_amount: getFeeAmountForCheckout({
-						productAmount: amounts.orderProductAmount,
-						vatAmount: amounts.orderVatAmount,
-						shippingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
-						barelyFulfillmentFee: fulfillmentBreakdown.totalFee,
-						workspace: funnel.workspace,
-					}),
+					application_fee_amount: applicationFeeAmount,
 				},
 				{
 					stripeAccount:
@@ -753,15 +756,18 @@ export const cartRoute = {
 				cart.checkoutStripePaymentMethodId ??
 				raiseTRPCError({ message: 'stripePaymentMethodId not found' });
 
+			const { barelyPlatformFee: upsellPlatformFee, applicationFeeAmount } =
+				getFeeAmountForCheckout({
+					productAmount: amounts.upsellProductAmount,
+					vatAmount: amounts.upsellVatAmount,
+					shippingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
+					workspace: funnel.workspace,
+				});
+
 			const paymentIntentRes = await stripe.paymentIntents.create(
 				{
 					amount: amounts.upsellAmount,
-					application_fee_amount: getFeeAmountForCheckout({
-						productAmount: amounts.upsellProductAmount,
-						vatAmount: amounts.upsellVatAmount,
-						shippingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
-						workspace: funnel.workspace,
-					}),
+					application_fee_amount: applicationFeeAmount,
 					currency: cart.workspace.currency,
 					customer: cart.fan.stripeCustomerId ?? undefined,
 					payment_method: stripePaymentMethodId,
@@ -822,6 +828,8 @@ export const cartRoute = {
 				updateCart.orderProductAmount +
 				updateCart.orderShippingAndHandlingAmount +
 				(updateCart.orderVatAmount ?? 0);
+
+			updateCart.barelyPlatformFee = cart.barelyPlatformFee + upsellPlatformFee;
 
 			updateCart.stage = 'upsellConverted';
 			updateCart.upsellConvertedAt = new Date();

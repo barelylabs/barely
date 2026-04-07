@@ -459,8 +459,8 @@ export async function recordCartEvent({
 	// Report sales to Slack FIRST - this is the most critical notification
 	if (type === 'cart/purchaseMainWithoutBump' || type === 'cart/purchaseMainWithBump') {
 		const feeDetails = [
-			cart.checkoutHandlingAmount ?
-				`platform: ${formatMinorToMajorCurrency(cart.checkoutHandlingAmount, currency)}`
+			cart.barelyPlatformFee ?
+				`platform: ${formatMinorToMajorCurrency(cart.barelyPlatformFee, currency)}`
 			:	null,
 			cart.barelyFulfillmentFee ?
 				`fulfillment: ${formatMinorToMajorCurrency(cart.barelyFulfillmentFee, currency)}`

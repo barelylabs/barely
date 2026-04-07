@@ -197,7 +197,11 @@ export function getFeeAmountForCheckout({
 }) {
 	const feePercentage = getFeePercentageForCheckout(workspace);
 
-	const barelyFee = Math.round(productAmount * (feePercentage / 100));
+	const barelyPlatformFee = Math.round(productAmount * (feePercentage / 100));
 
-	return barelyFee + vatAmount + shippingAmount + barelyFulfillmentFee;
+	return {
+		barelyPlatformFee,
+		applicationFeeAmount:
+			barelyPlatformFee + vatAmount + shippingAmount + barelyFulfillmentFee,
+	};
 }

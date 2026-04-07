@@ -203,6 +203,7 @@ export const Carts = pgTable(
 		})
 			.default('artist')
 			.notNull(),
+		barelyPlatformFee: integer('barelyPlatformFee').default(0).notNull(), // in cents (percentage-based platform fee on product amount)
 		barelyFulfillmentFee: integer('barelyFulfillmentFee').default(0).notNull(), // in cents (total of handling + packaging + pick)
 		barelyHandlingFee: integer('barelyHandlingFee').default(0).notNull(), // in cents
 		barelyPackagingFee: integer('barelyPackagingFee').default(0).notNull(), // in cents
