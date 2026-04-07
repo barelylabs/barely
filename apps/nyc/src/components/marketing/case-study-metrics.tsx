@@ -75,7 +75,12 @@ export function CaseStudyMetrics({ before, after }: CaseStudyMetricsProps) {
 			iconColor: 'text-yellow-500',
 			before: before.monthlyRevenue,
 			after: after.monthlyRevenue,
-			growth: 0, // Calculate from dollar amounts if needed
+			growth: (() => {
+				const parseDollars = (s: string) => parseFloat(s.replace(/[^0-9.]/g, ''));
+				const b = parseDollars(before.monthlyRevenue);
+				const a = parseDollars(after.monthlyRevenue);
+				return b > 0 ? Math.round(((a - b) / b) * 100) : 0;
+			})(),
 			highlight: true,
 		},
 	];

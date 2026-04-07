@@ -270,7 +270,9 @@ export default async function CaseStudyPage({
 						</H>
 					</AnimatedSection>
 
-					<div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
+					<div
+						className={`grid grid-cols-1 gap-6 ${study.investment.stanFee ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}
+					>
 						<AnimatedSection animation='scale' delay={200}>
 							<div className='glass rounded-xl p-6 text-center'>
 								<p className='mb-2 text-white/60'>Service Fee</p>
@@ -279,6 +281,17 @@ export default async function CaseStudyPage({
 								</p>
 							</div>
 						</AnimatedSection>
+
+						{study.investment.stanFee && (
+							<AnimatedSection animation='scale' delay={250}>
+								<div className='glass rounded-xl p-6 text-center'>
+									<p className='mb-2 text-white/60'>Stan Account</p>
+									<p className='text-2xl font-bold text-white'>
+										{study.investment.stanFee}
+									</p>
+								</div>
+							</AnimatedSection>
+						)}
 
 						<AnimatedSection animation='scale' delay={300}>
 							<div className='glass rounded-xl p-6 text-center'>
@@ -301,8 +314,29 @@ export default async function CaseStudyPage({
 				</div>
 			</section>
 
+			{/* Flywheel - sustainability framing (data-driven, only renders if present) */}
+			{study.flywheel && (
+				<section className='bg-white/5 px-4 py-12 sm:px-6 lg:px-8'>
+					<div className='mx-auto max-w-4xl'>
+						<AnimatedSection animation='fade-up'>
+							<div className='glass rounded-2xl border border-green-500/20 p-8'>
+								<H size='4' className='mb-4 text-green-500'>
+									{study.flywheel.title}
+								</H>
+								<p className='text-lg leading-relaxed text-white/80'>
+									{study.flywheel.body}
+								</p>
+								{study.flywheel.footnote && (
+									<p className='mt-4 text-sm text-white/50'>{study.flywheel.footnote}</p>
+								)}
+							</div>
+						</AnimatedSection>
+					</div>
+				</section>
+			)}
+
 			{/* Key Results */}
-			<section className='bg-white/5 px-4 py-12 sm:px-6 lg:px-8'>
+			<section className='px-4 py-12 sm:px-6 lg:px-8'>
 				<div className='mx-auto max-w-4xl'>
 					<AnimatedSection animation='fade-up'>
 						<H size='3' className='mb-8 text-3xl'>
