@@ -17,6 +17,22 @@ export function convertUsdToGbpCents(amountInUsdCents: number): number {
 	return Math.round(amountInUsdCents * USD_TO_GBP_RATE);
 }
 
+/**
+ * Convert fulfillment fee from USD to workspace currency if needed.
+ * Fulfillment fees (handling, packaging, pick) are calculated in USD cents.
+ * For GBP workspaces where Barely fulfills, convert to GBP before storing.
+ */
+export function convertFulfillmentAmountIfNeeded(
+	amountInCents: number,
+	fulfilledBy: 'barely' | 'artist',
+	workspaceCurrency: string,
+): number {
+	if (fulfilledBy === 'barely' && workspaceCurrency === 'gbp') {
+		return convertUsdToGbpCents(amountInCents);
+	}
+	return amountInCents;
+}
+
 export function formatMinorToMajorCurrency(
 	amountInMinor: number,
 	currency: 'usd' | 'gbp',

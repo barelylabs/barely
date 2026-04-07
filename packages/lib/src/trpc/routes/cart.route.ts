@@ -5,7 +5,14 @@ import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
 import { Carts } from '@barely/db/sql/cart.sql';
 import { publicProcedure } from '@barely/lib/trpc';
-import { getAbsoluteUrl, isProduction, newId, raiseTRPCError, wait } from '@barely/utils';
+import {
+	convertFulfillmentAmountIfNeeded,
+	getAbsoluteUrl,
+	isProduction,
+	newId,
+	raiseTRPCError,
+	wait,
+} from '@barely/utils';
 import {
 	calculateInitialShippingSchema,
 	updateCheckoutCartFromCheckoutSchema,
@@ -429,11 +436,29 @@ export const cartRoute = {
 				workspaceOverrides: getWorkspaceFulfillmentOverrides(funnel.workspace),
 			});
 
+			// Convert fulfillment fees from USD to workspace currency
+			const barelyHandlingFee = convertFulfillmentAmountIfNeeded(
+				fulfillmentBreakdown.handlingFee,
+				cart.fulfilledBy,
+				funnel.workspace.currency,
+			);
+			const barelyPackagingFee = convertFulfillmentAmountIfNeeded(
+				fulfillmentBreakdown.packagingFee,
+				cart.fulfilledBy,
+				funnel.workspace.currency,
+			);
+			const barelyPickFee = convertFulfillmentAmountIfNeeded(
+				fulfillmentBreakdown.pickFee,
+				cart.fulfilledBy,
+				funnel.workspace.currency,
+			);
+			const barelyFulfillmentFee = barelyHandlingFee + barelyPackagingFee + barelyPickFee;
+
 			const { barelyPlatformFee, applicationFeeAmount } = getFeeAmountForCheckout({
 				productAmount: amounts.orderProductAmount,
 				vatAmount: amounts.orderVatAmount,
 				shippingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
-				barelyFulfillmentFee: fulfillmentBreakdown.totalFee,
+				barelyFulfillmentFee,
 				workspace: funnel.workspace,
 			});
 
@@ -443,10 +468,10 @@ export const cartRoute = {
 					...update,
 					...amounts,
 					barelyPlatformFee,
-					barelyFulfillmentFee: fulfillmentBreakdown.totalFee,
-					barelyHandlingFee: fulfillmentBreakdown.handlingFee,
-					barelyPackagingFee: fulfillmentBreakdown.packagingFee,
-					barelyPickFee: fulfillmentBreakdown.pickFee,
+					barelyFulfillmentFee,
+					barelyHandlingFee,
+					barelyPackagingFee,
+					barelyPickFee,
 				})
 				.where(
 					and(
@@ -781,10 +806,29 @@ export const cartRoute = {
 				workspaceOverrides: getWorkspaceFulfillmentOverrides(funnel.workspace),
 			});
 
+			// Convert fulfillment fees from USD to workspace currency
+			const convertedHandlingFee = convertFulfillmentAmountIfNeeded(
+				updatedFulfillment.handlingFee,
+				cart.fulfilledBy,
+				funnel.workspace.currency,
+			);
+			const convertedPackagingFee = convertFulfillmentAmountIfNeeded(
+				updatedFulfillment.packagingFee,
+				cart.fulfilledBy,
+				funnel.workspace.currency,
+			);
+			const convertedPickFee = convertFulfillmentAmountIfNeeded(
+				updatedFulfillment.pickFee,
+				cart.fulfilledBy,
+				funnel.workspace.currency,
+			);
+			const convertedTotalFee =
+				convertedHandlingFee + convertedPackagingFee + convertedPickFee;
+
 			// Only charge Stripe the delta (what wasn't already collected at checkout)
 			const upsellFulfillmentFeeDelta = Math.max(
 				0,
-				updatedFulfillment.totalFee - cart.barelyFulfillmentFee,
+				convertedTotalFee - cart.barelyFulfillmentFee,
 			);
 
 			const { barelyPlatformFee: upsellPlatformFee, applicationFeeAmount } =
@@ -862,10 +906,10 @@ export const cartRoute = {
 				(updateCart.orderVatAmount ?? 0);
 
 			updateCart.barelyPlatformFee = cart.barelyPlatformFee + upsellPlatformFee;
-			updateCart.barelyFulfillmentFee = updatedFulfillment.totalFee;
-			updateCart.barelyHandlingFee = updatedFulfillment.handlingFee;
-			updateCart.barelyPackagingFee = updatedFulfillment.packagingFee;
-			updateCart.barelyPickFee = updatedFulfillment.pickFee;
+			updateCart.barelyFulfillmentFee = convertedTotalFee;
+			updateCart.barelyHandlingFee = convertedHandlingFee;
+			updateCart.barelyPackagingFee = convertedPackagingFee;
+			updateCart.barelyPickFee = convertedPickFee;
 
 			updateCart.stage = 'upsellConverted';
 			updateCart.upsellConvertedAt = new Date();

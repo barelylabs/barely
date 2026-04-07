@@ -23,6 +23,7 @@ import { sqlIncrement } from '@barely/db/utils';
 import { sendEmail } from '@barely/email';
 import { ReceiptEmailTemplate } from '@barely/email/templates/cart';
 import {
+	convertFulfillmentAmountIfNeeded,
 	convertUsdToGbpCents,
 	formatMinorToMajorCurrency,
 	isProduction,
@@ -327,13 +328,28 @@ export async function createMainCartFromFunnel({
 		vat,
 	);
 
-	// Step 3: Calculate itemized fulfillment fees
+	// Step 3: Calculate itemized fulfillment fees (in USD) and convert to workspace currency
 	const fulfillmentBreakdown = calculateDynamicFulfillmentFee({
 		fulfilledBy,
 		products: [{ merchType: funnel.mainProduct.merchType, quantity: 1 }],
 		workspaceOverrides: getWorkspaceFulfillmentOverrides(funnel.workspace),
 	});
-	const barelyFulfillmentFee = fulfillmentBreakdown.totalFee;
+	const barelyHandlingFee = convertFulfillmentAmountIfNeeded(
+		fulfillmentBreakdown.handlingFee,
+		fulfilledBy,
+		funnel.workspace.currency,
+	);
+	const barelyPackagingFee = convertFulfillmentAmountIfNeeded(
+		fulfillmentBreakdown.packagingFee,
+		fulfilledBy,
+		funnel.workspace.currency,
+	);
+	const barelyPickFee = convertFulfillmentAmountIfNeeded(
+		fulfillmentBreakdown.pickFee,
+		fulfilledBy,
+		funnel.workspace.currency,
+	);
+	const barelyFulfillmentFee = barelyHandlingFee + barelyPackagingFee + barelyPickFee;
 
 	const metadata: z.infer<typeof stripeConnectChargeMetadataSchema> = {
 		paymentType: 'cart',
@@ -386,13 +402,15 @@ export async function createMainCartFromFunnel({
 		emailMarketingOptIn: true,
 		// amounts
 		...amounts,
+		// currency
+		currency: funnel.workspace.currency,
 		// fulfillment
 		fulfilledBy,
 		barelyPlatformFee,
 		barelyFulfillmentFee,
-		barelyHandlingFee: fulfillmentBreakdown.handlingFee,
-		barelyPackagingFee: fulfillmentBreakdown.packagingFee,
-		barelyPickFee: fulfillmentBreakdown.pickFee,
+		barelyHandlingFee,
+		barelyPackagingFee,
+		barelyPickFee,
 	};
 
 	// Shipping is calculated post-page-load via calculateInitialShipping mutation

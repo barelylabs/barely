@@ -196,6 +196,9 @@ export const Carts = pgTable(
 			.default('pending'),
 		fulfilledAt: timestamp('fulfilledAt'),
 
+		// currency (captures workspace currency at time of checkout)
+		currency: varchar('currency', { length: 4, enum: ['usd', 'gbp'] }),
+
 		// barely fulfillment partner
 		fulfilledBy: varchar('fulfilledBy', {
 			length: 20,
