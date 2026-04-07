@@ -20,7 +20,7 @@
             "mcp__airtable__list_records",
             "mcp__airtable__list_bases",
             "mcp__airtable__list_tables",
-			"mcp__vercel__*"
+            "mcp__vercel__*"
 		],
 		"deny": []
 	},
