@@ -429,11 +429,20 @@ export const cartRoute = {
 				workspaceOverrides: getWorkspaceFulfillmentOverrides(funnel.workspace),
 			});
 
+			const { barelyPlatformFee, applicationFeeAmount } = getFeeAmountForCheckout({
+				productAmount: amounts.orderProductAmount,
+				vatAmount: amounts.orderVatAmount,
+				shippingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
+				barelyFulfillmentFee: fulfillmentBreakdown.totalFee,
+				workspace: funnel.workspace,
+			});
+
 			const carts = await dbPool(ctx.pool)
 				.update(Carts)
 				.set({
 					...update,
 					...amounts,
+					barelyPlatformFee,
 					barelyFulfillmentFee: fulfillmentBreakdown.totalFee,
 					barelyHandlingFee: fulfillmentBreakdown.handlingFee,
 					barelyPackagingFee: fulfillmentBreakdown.packagingFee,
@@ -459,13 +468,7 @@ export const cartRoute = {
 				stripePaymentIntentId,
 				{
 					amount: amounts.orderAmount,
-					application_fee_amount: getFeeAmountForCheckout({
-						productAmount: amounts.orderProductAmount,
-						vatAmount: amounts.orderVatAmount,
-						shippingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
-						barelyFulfillmentFee: fulfillmentBreakdown.totalFee,
-						workspace: funnel.workspace,
-					}),
+					application_fee_amount: applicationFeeAmount,
 				},
 				{
 					stripeAccount:
@@ -753,15 +756,50 @@ export const cartRoute = {
 				cart.checkoutStripePaymentMethodId ??
 				raiseTRPCError({ message: 'stripePaymentMethodId not found' });
 
+			// Recalculate fulfillment fees with all products (main + bump + upsell)
+			// to determine the delta from what was already charged at checkout
+			const allFulfillmentProducts: FulfillmentFeeProduct[] = [
+				{
+					merchType: funnel.mainProduct.merchType,
+					quantity: cart.mainProductQuantity,
+				},
+			];
+			if (cart.addedBump && funnel.bumpProduct) {
+				allFulfillmentProducts.push({
+					merchType: funnel.bumpProduct.merchType,
+					quantity: cart.bumpProductQuantity ?? 1,
+				});
+			}
+			allFulfillmentProducts.push({
+				merchType: upsellProduct.merchType,
+				quantity: cart.upsellProductQuantity ?? 1,
+			});
+
+			const updatedFulfillment = calculateDynamicFulfillmentFee({
+				fulfilledBy: cart.fulfilledBy,
+				products: allFulfillmentProducts,
+				workspaceOverrides: getWorkspaceFulfillmentOverrides(funnel.workspace),
+			});
+
+			// Only charge Stripe the delta (what wasn't already collected at checkout)
+			const upsellFulfillmentFeeDelta = Math.max(
+				0,
+				updatedFulfillment.totalFee - cart.barelyFulfillmentFee,
+			);
+
+			const { barelyPlatformFee: upsellPlatformFee, applicationFeeAmount } =
+				getFeeAmountForCheckout({
+					productAmount: amounts.upsellProductAmount,
+					vatAmount: amounts.upsellVatAmount,
+					shippingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
+					barelyFulfillmentFee: upsellFulfillmentFeeDelta,
+					workspace: funnel.workspace,
+				});
+
 			const paymentIntentRes = await stripe.paymentIntents.create(
 				{
 					amount: amounts.upsellAmount,
-					application_fee_amount: getFeeAmountForCheckout({
-						productAmount: amounts.upsellProductAmount,
-						vatAmount: amounts.upsellVatAmount,
-						shippingAmount: 0, // not supported yet. in the future we take a shipping fee if they want to ship through the app.
-						workspace: funnel.workspace,
-					}),
+					application_fee_amount: applicationFeeAmount,
 					currency: cart.workspace.currency,
 					customer: cart.fan.stripeCustomerId ?? undefined,
 					payment_method: stripePaymentMethodId,
@@ -822,6 +860,12 @@ export const cartRoute = {
 				updateCart.orderProductAmount +
 				updateCart.orderShippingAndHandlingAmount +
 				(updateCart.orderVatAmount ?? 0);
+
+			updateCart.barelyPlatformFee = cart.barelyPlatformFee + upsellPlatformFee;
+			updateCart.barelyFulfillmentFee = updatedFulfillment.totalFee;
+			updateCart.barelyHandlingFee = updatedFulfillment.handlingFee;
+			updateCart.barelyPackagingFee = updatedFulfillment.packagingFee;
+			updateCart.barelyPickFee = updatedFulfillment.pickFee;
 
 			updateCart.stage = 'upsellConverted';
 			updateCart.upsellConvertedAt = new Date();

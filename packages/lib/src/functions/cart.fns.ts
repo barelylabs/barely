@@ -342,16 +342,17 @@ export async function createMainCartFromFunnel({
 	};
 
 	// Step 4: Include fulfillment fee in application fee
+	const { barelyPlatformFee, applicationFeeAmount } = getFeeAmountForCheckout({
+		productAmount: amounts.orderProductAmount, // we just take fees on product sales, not shipping or tax
+		vatAmount: amounts.orderVatAmount,
+		shippingAmount: amounts.checkoutShippingAmount,
+		barelyFulfillmentFee,
+		workspace: funnel.workspace,
+	});
 	const paymentIntent = await stripe.paymentIntents.create(
 		{
 			amount: amounts.checkoutAmount,
-			application_fee_amount: getFeeAmountForCheckout({
-				productAmount: amounts.orderProductAmount, // we just take fees on product sales, not shipping or tax
-				vatAmount: amounts.orderVatAmount,
-				shippingAmount: amounts.checkoutShippingAmount,
-				barelyFulfillmentFee,
-				workspace: funnel.workspace,
-			}),
+			application_fee_amount: applicationFeeAmount,
 			currency: funnel.workspace.currency,
 			setup_future_usage: 'off_session',
 			metadata,
@@ -387,6 +388,7 @@ export async function createMainCartFromFunnel({
 		...amounts,
 		// fulfillment
 		fulfilledBy,
+		barelyPlatformFee,
 		barelyFulfillmentFee,
 		barelyHandlingFee: fulfillmentBreakdown.handlingFee,
 		barelyPackagingFee: fulfillmentBreakdown.packagingFee,
