@@ -84,9 +84,7 @@ export function getWikiPagesByCategory(): Record<string, WikiPage[]> {
 
 	for (const page of pages) {
 		const category = page.category;
-		if (!grouped[category]) {
-			grouped[category] = [];
-		}
+		grouped[category] ??= [];
 		grouped[category].push(page);
 	}
 
