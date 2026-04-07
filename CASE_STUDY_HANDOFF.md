@@ -1,189 +1,51 @@
-# Case Study System - Handoff Documentation
+# Case Study System - Update Guide
 
-## Current Status: 95% Complete
+This document tells Claude how to update an existing case study or add a new one. Read this doc, then interview Adam for the data you need.
 
-We have a fully functional case study system with **Proper Youth complete** and **The Now awaiting final client input**.
+Last updated: 2026-04-07
 
 ---
 
-## ✅ What's Complete
+## Architecture
 
-### 1. Case Study Structure (100% Done)
+### Single Source of Truth
 
-**File:** `/apps/nyc/src/data/case-studies.ts`
+All case study data lives in one file: `/apps/nyc/src/data/case-studies.ts`
 
-**New, clean metrics interface:**
+Update that file and the entire site updates automatically:
+- Home page success ticker (aggregate metrics)
+- About page references
+- Tools page workflow examples
+- `/case-studies` listing
+- `/case-studies/[slug]` detail pages
+
+### Key Interfaces
+
 ```typescript
-export interface CaseStudyMetrics {
-  // Spotify - Monthly Stats
-  monthlyListeners: number;
-  monthlyStreams: number;
-  monthlyStreamsPerListener?: number;
-  monthlySaves?: number;
-  monthlyPlaylistAdds?: number;
-
-  // Spotify - Total/Cumulative Stats
-  totalFollowers: number;
-
-  // Revenue
-  monthlyRevenue: string;
-
-  // Email
-  totalEmailSubscribers: number;
-
-  // Social Media - Total/Cumulative (optional)
-  totalInstagramFollowers?: number;
-  totalTikTokFollowers?: number;
-  totalYouTubeSubscribers?: number;
-  totalPatreonMembers?: number;
+CaseStudyMetrics {
+  monthlyListeners, monthlyStreams, monthlyStreamsPerListener?,
+  monthlySaves?, monthlyPlaylistAdds?,
+  totalFollowers,
+  monthlyRevenue,        // formatted string e.g. '$2,500'
+  totalEmailSubscribers,
+  totalInstagramFollowers?, totalTikTokFollowers?,
+  totalYouTubeSubscribers?, totalPatreonMembers?
 }
+
+CaseStudyInvestment {
+  serviceFee,            // Rising+ market rate
+  stanFee?,              // Stan account at market rate ($400/mo), even if waived
+  adSpend,
+  total
+}
+
+CaseStudyStrategy { title, description }
+CaseStudyTimelineEvent { month, event, metric }
+CaseStudyTestimonial { quote, author }
 ```
 
-**Key improvement:** Clear separation of monthly vs. total stats (no more confusing "engagement rate" or ambiguous fields)
+### Components That Render Case Study Data
 
-### 2. Proper Youth Case Study (100% Done)
-
-**Status:** Fully verified, locked, and ready to publish
-- ✅ All metrics accurate (April → October 2024)
-- ✅ Investment: $18,070 total (market rate for Rising+ tier)
-- ✅ Challenge, strategy, timeline all verified
-- ✅ Testimonial approved
-- ✅ Avatar: `/_static/bands/proper-youth-local-gravity.jpg`
-- ✅ Social links: Instagram, Spotify
-
-**Key Stats:**
-- 340% listener growth (5,579 → 24,516)
-- 2,730% revenue increase ($112 → $3,170)
-- 8 months (April - October 2024)
-
-### 3. The Now Case Study (95% Done - Awaiting Client Input)
-
-**Status:** Draft complete with actual data, waiting on testimonial approval
-
-**What's locked in:**
-- ✅ All metrics (March → October 2025)
-- ✅ Investment: $18,579 total
-- ✅ Strategies (4 verified approaches)
-- ✅ Timeline (actual month-by-month progression)
-- ✅ Key results (6 major wins)
-- ✅ Avatar: `/_static/bands/the-now-trio.jpg`
-- ✅ Social links: Instagram, Spotify, YouTube
-
-**What's pending (see punch list):**
-- ❓ Testimonial approval/edits
-- ❓ Challenge description review
-- ❓ Any additional wins to highlight
-
-**Key Stats:**
-- 1,360% listener growth (1,347 → 19,669)
-- 6,519% revenue increase ($16 → $1,059)
-- 8 months (March - October 2025)
-
-### 4. Centralized Data System (100% Done)
-
-**All hard-coded data eliminated:**
-- ✅ `EnhancedSuccessTicker` pulls from `successTickerData`
-- ✅ About page references `properYouthCase.featuredHighlights`
-- ✅ Tools page uses `properYouthCase.featuredHighlights.workflowExample`
-- ✅ Case studies page renders from `allCaseStudies`
-- ✅ Aggregate metrics auto-calculate
-
-**Aggregate metrics auto-update when case studies change:**
-- Total streams generated
-- Average listener growth %
-- Total artists count
-- Success ticker data
-
-### 5. Deleted Legacy Placeholders
-
-Removed 5 fake case studies:
-- ❌ Luna Synthesis (placeholder)
-- ❌ The Velvet Ghosts (placeholder)
-- ❌ Mara Chen (placeholder)
-- ❌ KJ The Prophet (placeholder)
-- ❌ Violet Skies (placeholder)
-
-**Current case studies:** Only Proper Youth + The Now (real data only)
-
----
-
-## 📝 Client Deliverables
-
-### The Now Punch List
-
-**File:** `/THE_NOW_CASE_STUDY_PUNCH_LIST.md`
-
-**Status:** Ready to send to client
-
-**What they need to provide:**
-1. **CRITICAL:** Testimonial approval (draft provided, can sign off/edit/rewrite)
-2. **OPTIONAL:** Challenge description review
-3. **OPTIONAL:** Any additional wins
-4. **OPTIONAL:** Testimonial attribution (band name vs specific member)
-
----
-
-## 🔄 When Client Responds - What to Do
-
-### Step 1: Update The Now Case Study
-
-**File to edit:** `/apps/nyc/src/data/case-studies.ts`
-
-**Location:** `theNowCase` object starts around **line 235**
-
-**Actions:**
-
-1. **Update testimonial quote** (line ~330):
-   ```typescript
-   testimonial: {
-     quote: "[INSERT THEIR APPROVED/EDITED QUOTE]",
-     author: 'The Now', // or specific band member if they specify
-   },
-   ```
-
-2. **Update challenge description** if they provide edits (line ~273)
-
-3. **Add any additional key results** to the `keyResults` array (line ~328)
-
-4. **Remove ALL comment markers:**
-   - Delete all lines with `// CLIENT:`
-   - Delete all lines with `// NEEDS:`
-   - Delete all lines with `// DRAFT`
-   - Clean up inline comments like `// PLACEHOLDER`
-
-### Step 2: Verify Data Structure
-
-Run a quick check:
-```bash
-# TypeScript should compile without errors
-cd apps/nyc
-pnpm typecheck
-```
-
-### Step 3: Test the Site
-
-Check these pages locally:
-- `/` - Home (success ticker should show updated aggregate metrics)
-- `/about` - About (Proper Youth references should work)
-- `/tools` - Tools (workflow example should render)
-- `/case-studies` - All case studies (should show both)
-- `/case-studies/proper-youth` - Proper Youth detail page
-- `/case-studies/the-now` - The Now detail page
-
-### Step 4: Push Live
-
-The case study system is complete and ready for production once The Now's input is finalized.
-
----
-
-## 📁 Key File Locations
-
-### Data Files
-- **Case studies data:** `/apps/nyc/src/data/case-studies.ts`
-- **Client punch list:** `/THE_NOW_CASE_STUDY_PUNCH_LIST.md`
-- **This handoff doc:** `/CASE_STUDY_HANDOFF.md`
-
-### Components Using Case Study Data
 - `/apps/nyc/src/components/marketing/enhanced-success-ticker.tsx`
 - `/apps/nyc/src/components/marketing/artist-testimonials.tsx`
 - `/apps/nyc/src/app/about/page.tsx`
@@ -192,114 +54,181 @@ The case study system is complete and ready for production once The Now's input 
 - `/apps/nyc/src/app/case-studies/[slug]/page.tsx`
 
 ### Images
+
 - Proper Youth: `/apps/nyc/public/_static/bands/proper-youth-local-gravity.jpg`
 - The Now: `/apps/nyc/public/_static/bands/the-now-trio.jpg`
 
 ---
 
-## 🎯 What Makes This System Good
+## How to Update an Existing Case Study
 
-### Single Source of Truth
-- All case study data lives in one file
-- No duplicate data across the site
-- Update once, reflects everywhere
+### Step 1: Interview Adam
 
-### Type-Safe
-- TypeScript interfaces ensure consistency
-- Compiler catches missing required fields
-- Clear separation of monthly vs. total stats
+Ask these questions in order. Be specific about what you need — don't accept vague answers.
 
-### Auto-Updating
-- Aggregate metrics recalculate automatically
-- Success ticker updates when case studies change
-- Add new case study → everything updates
+#### A. Period & Monthly Data
 
-### Easy to Expand
-To add a new case study in the future:
-1. Copy the `theNowCase` or `properYouthCase` structure
-2. Fill in the data following the clear interfaces
-3. Add to `allCaseStudies` array
-4. Add to `caseStudies` object
-5. Done! The entire site updates automatically
+> What months are we extending through? (e.g. "through September 2026")
 
----
+For each new month since the last update, I need:
+1. **Monthly listeners**
+2. **Monthly streams**
 
-## 🚨 Important Notes
+#### B. Final Month Snapshot
 
-### Don't Mix Market Rate vs Actual Costs
-- **Proper Youth:** Used market rate for service fee ($4,250) even though Adam is in the band
-- **The Now:** Using market rate for service fee ($5,750)
-- **Reasoning:** Case studies should show what a client WOULD pay, not internal accounting
+For the new end month specifically, I also need:
+3. **Streams per listener** (or I can calculate)
+4. **Monthly saves**
+5. **Monthly playlist adds**
+6. **Spotify followers** (total)
+7. **Monthly revenue** (in USD)
+8. **Email subscribers** (total)
+9. **Instagram followers** (total)
+10. **TikTok followers** (total, if applicable)
+11. **YouTube subscribers** (total, if applicable)
 
-### Generic Month Labels in Timeline
-- Use "Month 1", "Months 2-3", etc. (not "April", "May")
-- Makes case studies evergreen and relatable year-round
-- Actual dates still shown in hero section (startDate/endDate)
+#### C. Investment
 
-### Featured Highlights
-- Used for pulling specific quotes/stats into other pages
-- Proper Youth has `featuredHighlights` for About page and Tools page
-- Not all case studies need this (only if referenced elsewhere)
+> What's the total additional ad spend since the last update?
 
----
+> Have any new services been added? (e.g. Stan account — include at market rate even if waived)
 
-## ✅ Ready State Checklist
+> Has the service fee tier changed?
 
-Before going live, ensure:
+#### D. New Strategies
 
-**The Now Case Study:**
-- [ ] Client testimonial approved/finalized
-- [ ] All `// CLIENT:` comments removed
-- [ ] All `// NEEDS:` comments removed
-- [ ] Challenge description reviewed
-- [ ] TypeScript compiles without errors
+> Any new strategies deployed since the last update?
 
-**Site-wide:**
-- [ ] Success ticker shows correct aggregate metrics
-- [ ] Both case studies visible on `/case-studies`
-- [ ] Detail pages render correctly
-- [ ] About page Proper Youth references work
-- [ ] Tools page workflow example renders
-- [ ] All images load properly
-- [ ] Social links work
+Examples of strategies we've added in the past:
+- Stan fan account management
+- Track-specific Discover Weekly pushes
+- Physical merch campaigns
+- Playlist building
 
----
+#### E. Milestones & Key Results
 
-## 💬 Quick Command Reference
+> What are the major wins since the last update?
+
+Prompt for specifics:
+- Discover Weekly / algorithmic placements (which tracks?)
+- Sold-out shows / tour milestones
+- Merch/revenue milestones (e.g. self-funding campaigns)
+- Playlist growth
+- Notable fan engagement moments
+- Stan account impact
+
+#### F. Testimonial
+
+> Does the current testimonial still reflect their story, or should it be updated?
+
+The testimonial should reference current numbers and the most compelling narrative arc. If revenue or milestones have changed significantly, update the quote.
+
+#### G. Challenge & Summary
+
+> Does the challenge description still read correctly? (It describes the "before" state, so it usually doesn't change.)
+
+> The summary will need updating — I'll draft one based on the new data.
+
+### Step 2: Update the Data
+
+Edit `/apps/nyc/src/data/case-studies.ts`:
+
+1. **`endDate`** — new end date string
+2. **`metrics.after`** — all fields from the final month snapshot
+3. **`investment`** — updated totals (always use market rates, not internal accounting)
+4. **`strategy`** — add new strategies, update descriptions of existing ones if scope changed
+5. **`timeline`** — add new timeline entries for the extended months. Group logically (e.g. "Months 9-10", "Month 13"). Use the pattern: `{ month, event, metric: 'X → Y listeners' }`
+6. **`keyResults`** — update growth percentages, add new wins, remove any that are now superseded
+7. **`testimonial`** — update if numbers or narrative have changed
+8. **`merchRevenue.after`** — update to match current monthly revenue number
+9. **`summary`** — rewrite to reflect updated stats and timeframe
+
+### Step 3: Recalculate Headline Numbers
+
+Double-check these derived values:
+- **Listener growth %**: `(after.monthlyListeners - before.monthlyListeners) / before.monthlyListeners * 100`
+- **Revenue growth %**: `(after revenue number - before revenue number) / before revenue number * 100`
+- **Campaign duration**: count months from startDate to endDate
+
+These appear in `keyResults`, `summary`, and the testimonial. Make sure they're consistent everywhere.
+
+### Step 4: Verify
 
 ```bash
-# Start dev server
-pnpm dev
+pnpm -F @barely/nyc typecheck
+```
 
-# Type check
-cd apps/nyc && pnpm typecheck
+Check that no `// CLIENT:`, `// DRAFT`, `// NEEDS:`, or `// PLACEHOLDER` comments exist:
+```
+grep -n "CLIENT:\|DRAFT\|NEEDS:\|PLACEHOLDER" apps/nyc/src/data/case-studies.ts
+```
 
-# Build for production
-pnpm build
+### Step 5: Commit & Push
 
-# Commit when ready
-git add .
-git commit -m "feat: finalize case studies for Proper Youth and The Now"
+Commit with a message like:
+```
+feat(nyc): update [Artist] case study through [Month Year]
 ```
 
 ---
 
-## 📞 If Context Clears
+## How to Add a New Case Study
 
-**To resume this work, provide:**
-1. This handoff document (`CASE_STUDY_HANDOFF.md`)
-2. The completed punch list from The Now
-3. Say: "Please finalize The Now case study with their responses from the punch list"
+1. Copy an existing case study object (e.g. `theNowCase`) in `case-studies.ts`
+2. Fill in all fields following the interfaces above
+3. Add to the `allCaseStudies` array
+4. Add to the `caseStudies` record
+5. Add artist image to `/apps/nyc/public/_static/bands/`
+6. Optionally add `featuredHighlights` if the case study should be referenced on other pages (About, Tools)
 
-**I'll know to:**
-1. Open `/apps/nyc/src/data/case-studies.ts`
-2. Update the `theNowCase` object (starts ~line 235)
-3. Remove all comment markers
-4. Verify everything compiles
-5. Confirm the site is ready to publish
+The aggregate metrics, success ticker, and case studies listing page all update automatically.
 
 ---
 
-Last updated: 2025-01-24
-Status: Awaiting The Now's testimonial approval
-Completion: 95%
+## Important Conventions
+
+### Market Rate Pricing
+
+Always use what a client WOULD pay, not internal accounting:
+- **Proper Youth**: $4,250 service fee (even though Adam is in the band)
+- **The Now**: $5,750 service fee + $400/mo Stan (even though Stan was waived)
+
+### Generic Timeline Labels
+
+Use "Month 1", "Months 2-3", etc. — not calendar months. This keeps case studies evergreen. The actual dates are shown via `startDate`/`endDate`.
+
+### Investment Fields
+
+If the artist uses additional paid services (Stan, etc.), add them as optional fields on `CaseStudyInvestment` and render them conditionally in the detail page (`/apps/nyc/src/app/case-studies/[slug]/page.tsx`). The detail page already handles `stanFee` conditionally.
+
+---
+
+## Current Case Studies
+
+### Proper Youth
+- **Period**: April 2024 - October 2024 (8 months)
+- **Listeners**: 5,579 -> 24,516 (340% growth)
+- **Revenue**: $112 -> $3,170 (2,730% growth)
+- **Investment**: $18,070
+- **Status**: Complete, locked
+
+### The Now
+- **Period**: March 2025 - March 2026 (13 months)
+- **Listeners**: 1,347 -> 37,000 (2,646% growth)
+- **Revenue**: $16 -> $2,500 (15,525% growth)
+- **Investment**: $29,679
+- **Services**: Rising+ + Stan (from Feb 2026)
+- **Status**: Complete, testimonial approved
+- **Last updated**: 2026-04-07
+
+---
+
+## Resuming This Work
+
+Say: "I want to update the [Artist] case study" and provide this doc (`CASE_STUDY_HANDOFF.md`).
+
+Claude will:
+1. Read this doc and the current case study data
+2. Interview you using the checklist above
+3. Update the data file
+4. Verify and push
