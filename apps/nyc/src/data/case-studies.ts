@@ -93,6 +93,11 @@ export interface CaseStudy {
 		patreon?: string;
 		spotify?: string;
 	};
+	flywheel?: {
+		title: string;
+		body: string;
+		footnote?: string;
+	};
 	featuredHighlights?: CaseStudyFeaturedHighlight;
 }
 
@@ -369,6 +374,12 @@ export const theNowCase: CaseStudy = {
 		instagram: 'https://www.instagram.com/thenowuk/',
 		spotify: 'https://open.spotify.com/artist/6Cd7IpKrJhEJOJnLG7VsIU',
 		youtube: 'https://www.youtube.com/@thenowofficial',
+	},
+	flywheel: {
+		title: 'The Flywheel',
+		body: "Year one is about building the machine — growing the audience, testing what works, and finding the fans who actually buy. By the end of this campaign, The Now's merch campaigns were running above break-even, meaning every sale funded more growth. At their current trajectory, year two's revenue is on track to recoup the full first-year marketing investment — while the fanbase keeps compounding.",
+		footnote:
+			"Growth continues with continued investment. This isn't passive income — it's a real business that rewards consistent effort.",
 	},
 };
 

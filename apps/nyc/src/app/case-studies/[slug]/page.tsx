@@ -312,31 +312,28 @@ export default async function CaseStudyPage({
 				</div>
 			</section>
 
-			{/* The Flywheel - sustainability framing */}
-			<section className='bg-white/5 px-4 py-12 sm:px-6 lg:px-8'>
-				<div className='mx-auto max-w-4xl'>
-					<AnimatedSection animation='fade-up'>
-						<div className='glass rounded-2xl border border-green-500/20 p-8'>
-							<H size='4' className='mb-4 text-green-500'>
-								The Flywheel
-							</H>
-							<p className='text-lg leading-relaxed text-white/80'>
-								Year one is about building the machine — growing the audience,
-								testing what works, and finding the fans who actually buy.
-								By the end of this campaign, {study.artistName}&apos;s merch
-								campaigns were running above break-even, meaning every sale
-								funded more growth. At their current trajectory, year two&apos;s
-								revenue is on track to recoup the full first-year marketing
-								investment — while the fanbase keeps compounding.
-							</p>
-							<p className='mt-4 text-sm text-white/50'>
-								Growth continues with continued investment. This isn&apos;t passive
-								income — it&apos;s a real business that rewards consistent effort.
-							</p>
-						</div>
-					</AnimatedSection>
-				</div>
-			</section>
+			{/* Flywheel - sustainability framing (data-driven, only renders if present) */}
+			{study.flywheel && (
+				<section className='bg-white/5 px-4 py-12 sm:px-6 lg:px-8'>
+					<div className='mx-auto max-w-4xl'>
+						<AnimatedSection animation='fade-up'>
+							<div className='glass rounded-2xl border border-green-500/20 p-8'>
+								<H size='4' className='mb-4 text-green-500'>
+									{study.flywheel.title}
+								</H>
+								<p className='text-lg leading-relaxed text-white/80'>
+									{study.flywheel.body}
+								</p>
+								{study.flywheel.footnote && (
+									<p className='mt-4 text-sm text-white/50'>
+										{study.flywheel.footnote}
+									</p>
+								)}
+							</div>
+						</AnimatedSection>
+					</div>
+				</section>
+			)}
 
 			{/* Key Results */}
 			<section className='px-4 py-12 sm:px-6 lg:px-8'>
