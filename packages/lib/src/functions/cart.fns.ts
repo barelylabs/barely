@@ -23,7 +23,7 @@ import { sqlIncrement } from '@barely/db/utils';
 import { sendEmail } from '@barely/email';
 import { ReceiptEmailTemplate } from '@barely/email/templates/cart';
 import {
-	convertUsdToGbpCents,
+	convertBarelyFeeToWorkspaceCurrency,
 	formatMinorToMajorCurrency,
 	isProduction,
 	numToPaddedString,
@@ -327,13 +327,28 @@ export async function createMainCartFromFunnel({
 		vat,
 	);
 
-	// Step 3: Calculate itemized fulfillment fees
+	// Step 3: Calculate itemized fulfillment fees (in USD) and convert to workspace currency
 	const fulfillmentBreakdown = calculateDynamicFulfillmentFee({
 		fulfilledBy,
 		products: [{ merchType: funnel.mainProduct.merchType, quantity: 1 }],
 		workspaceOverrides: getWorkspaceFulfillmentOverrides(funnel.workspace),
 	});
-	const barelyFulfillmentFee = fulfillmentBreakdown.totalFee;
+	const barelyHandlingFee = convertBarelyFeeToWorkspaceCurrency(
+		fulfillmentBreakdown.handlingFee,
+		fulfilledBy,
+		funnel.workspace.currency,
+	);
+	const barelyPackagingFee = convertBarelyFeeToWorkspaceCurrency(
+		fulfillmentBreakdown.packagingFee,
+		fulfilledBy,
+		funnel.workspace.currency,
+	);
+	const barelyPickFee = convertBarelyFeeToWorkspaceCurrency(
+		fulfillmentBreakdown.pickFee,
+		fulfilledBy,
+		funnel.workspace.currency,
+	);
+	const barelyFulfillmentFee = barelyHandlingFee + barelyPackagingFee + barelyPickFee;
 
 	const metadata: z.infer<typeof stripeConnectChargeMetadataSchema> = {
 		paymentType: 'cart',
@@ -386,13 +401,15 @@ export async function createMainCartFromFunnel({
 		emailMarketingOptIn: true,
 		// amounts
 		...amounts,
+		// currency
+		currency: funnel.workspace.currency,
 		// fulfillment
 		fulfilledBy,
 		barelyPlatformFee,
 		barelyFulfillmentFee,
-		barelyHandlingFee: fulfillmentBreakdown.handlingFee,
-		barelyPackagingFee: fulfillmentBreakdown.packagingFee,
-		barelyPickFee: fulfillmentBreakdown.pickFee,
+		barelyHandlingFee,
+		barelyPackagingFee,
+		barelyPickFee,
 	};
 
 	// Shipping is calculated post-page-load via calculateInitialShipping mutation
@@ -513,19 +530,18 @@ export async function getProductsShippingRateEstimate(props: {
 
 /**
  * Convert shipping amount from USD to workspace currency if needed.
- * When Barely fulfills orders from the US warehouse, shipping rates come back in USD.
- * For GBP workspaces, we need to convert to GBP before storing.
+ * Delegates to the shared convertBarelyFeeToWorkspaceCurrency utility.
  */
 export function convertShippingAmountIfNeeded(
 	amountInCents: number,
 	fulfilledBy: 'barely' | 'artist',
-	workspaceCurrency: string,
+	workspaceCurrency: 'usd' | 'gbp',
 ): number {
-	// Barely ships from US (USD), convert to GBP if workspace uses GBP
-	if (fulfilledBy === 'barely' && workspaceCurrency === 'gbp') {
-		return convertUsdToGbpCents(amountInCents);
-	}
-	return amountInCents;
+	return convertBarelyFeeToWorkspaceCurrency(
+		amountInCents,
+		fulfilledBy,
+		workspaceCurrency,
+	);
 }
 
 /* email updates */

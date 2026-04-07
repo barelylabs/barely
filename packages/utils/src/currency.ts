@@ -17,6 +17,22 @@ export function convertUsdToGbpCents(amountInUsdCents: number): number {
 	return Math.round(amountInUsdCents * USD_TO_GBP_RATE);
 }
 
+/**
+ * Convert a USD amount to workspace currency if needed.
+ * Used for shipping rates and fulfillment fees when Barely fulfills from the US.
+ * For GBP workspaces, converts to GBP. For USD workspaces, returns unchanged.
+ */
+export function convertBarelyFeeToWorkspaceCurrency(
+	amountInCents: number,
+	fulfilledBy: 'barely' | 'artist',
+	workspaceCurrency: 'usd' | 'gbp',
+): number {
+	if (fulfilledBy === 'barely' && workspaceCurrency === 'gbp') {
+		return convertUsdToGbpCents(amountInCents);
+	}
+	return amountInCents;
+}
+
 export function formatMinorToMajorCurrency(
 	amountInMinor: number,
 	currency: 'usd' | 'gbp',

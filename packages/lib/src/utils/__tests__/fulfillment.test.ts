@@ -1,3 +1,4 @@
+import { convertBarelyFeeToWorkspaceCurrency } from '@barely/utils';
 import { describe, expect, it } from 'vitest';
 
 import type { FulfillmentFeeOverrides, FulfillmentFeeProduct } from '../fulfillment';
@@ -252,5 +253,31 @@ describe('calculateDynamicFulfillmentFee', () => {
 		});
 		expect(result.packagingFee).toBe(100);
 		expect(result.totalFee).toBe(350);
+	});
+});
+
+describe('convertBarelyFeeToWorkspaceCurrency', () => {
+	it('returns unchanged amount when fulfilled by artist', () => {
+		expect(convertBarelyFeeToWorkspaceCurrency(250, 'artist', 'gbp')).toBe(250);
+	});
+
+	it('returns unchanged amount when workspace currency is usd', () => {
+		expect(convertBarelyFeeToWorkspaceCurrency(250, 'barely', 'usd')).toBe(250);
+	});
+
+	it('converts USD to GBP when barely fulfills for GBP workspace', () => {
+		// 250 USD cents * 0.75 = 187.5, rounded to 188
+		expect(convertBarelyFeeToWorkspaceCurrency(250, 'barely', 'gbp')).toBe(188);
+	});
+
+	it('handles zero amounts', () => {
+		expect(convertBarelyFeeToWorkspaceCurrency(0, 'barely', 'gbp')).toBe(0);
+	});
+
+	it('rounds correctly for odd amounts', () => {
+		// 33 * 0.75 = 24.75, rounded to 25
+		expect(convertBarelyFeeToWorkspaceCurrency(33, 'barely', 'gbp')).toBe(25);
+		// 25 * 0.75 = 18.75, rounded to 19
+		expect(convertBarelyFeeToWorkspaceCurrency(25, 'barely', 'gbp')).toBe(19);
 	});
 });
