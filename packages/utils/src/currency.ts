@@ -18,14 +18,14 @@ export function convertUsdToGbpCents(amountInUsdCents: number): number {
 }
 
 /**
- * Convert fulfillment fee from USD to workspace currency if needed.
- * Fulfillment fees (handling, packaging, pick) are calculated in USD cents.
- * For GBP workspaces where Barely fulfills, convert to GBP before storing.
+ * Convert a USD amount to workspace currency if needed.
+ * Used for shipping rates and fulfillment fees when Barely fulfills from the US.
+ * For GBP workspaces, converts to GBP. For USD workspaces, returns unchanged.
  */
-export function convertFulfillmentAmountIfNeeded(
+export function convertBarelyFeeToWorkspaceCurrency(
 	amountInCents: number,
 	fulfilledBy: 'barely' | 'artist',
-	workspaceCurrency: string,
+	workspaceCurrency: 'usd' | 'gbp',
 ): number {
 	if (fulfilledBy === 'barely' && workspaceCurrency === 'gbp') {
 		return convertUsdToGbpCents(amountInCents);

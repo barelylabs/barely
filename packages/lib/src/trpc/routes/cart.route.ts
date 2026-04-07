@@ -6,7 +6,7 @@ import { dbPool } from '@barely/db/pool';
 import { Carts } from '@barely/db/sql/cart.sql';
 import { publicProcedure } from '@barely/lib/trpc';
 import {
-	convertFulfillmentAmountIfNeeded,
+	convertBarelyFeeToWorkspaceCurrency,
 	getAbsoluteUrl,
 	isProduction,
 	newId,
@@ -437,17 +437,17 @@ export const cartRoute = {
 			});
 
 			// Convert fulfillment fees from USD to workspace currency
-			const barelyHandlingFee = convertFulfillmentAmountIfNeeded(
+			const barelyHandlingFee = convertBarelyFeeToWorkspaceCurrency(
 				fulfillmentBreakdown.handlingFee,
 				cart.fulfilledBy,
 				funnel.workspace.currency,
 			);
-			const barelyPackagingFee = convertFulfillmentAmountIfNeeded(
+			const barelyPackagingFee = convertBarelyFeeToWorkspaceCurrency(
 				fulfillmentBreakdown.packagingFee,
 				cart.fulfilledBy,
 				funnel.workspace.currency,
 			);
-			const barelyPickFee = convertFulfillmentAmountIfNeeded(
+			const barelyPickFee = convertBarelyFeeToWorkspaceCurrency(
 				fulfillmentBreakdown.pickFee,
 				cart.fulfilledBy,
 				funnel.workspace.currency,
@@ -807,17 +807,17 @@ export const cartRoute = {
 			});
 
 			// Convert fulfillment fees from USD to workspace currency
-			const convertedHandlingFee = convertFulfillmentAmountIfNeeded(
+			const convertedHandlingFee = convertBarelyFeeToWorkspaceCurrency(
 				updatedFulfillment.handlingFee,
 				cart.fulfilledBy,
 				funnel.workspace.currency,
 			);
-			const convertedPackagingFee = convertFulfillmentAmountIfNeeded(
+			const convertedPackagingFee = convertBarelyFeeToWorkspaceCurrency(
 				updatedFulfillment.packagingFee,
 				cart.fulfilledBy,
 				funnel.workspace.currency,
 			);
-			const convertedPickFee = convertFulfillmentAmountIfNeeded(
+			const convertedPickFee = convertBarelyFeeToWorkspaceCurrency(
 				updatedFulfillment.pickFee,
 				cart.fulfilledBy,
 				funnel.workspace.currency,
