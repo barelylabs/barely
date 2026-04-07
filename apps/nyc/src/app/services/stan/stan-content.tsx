@@ -550,29 +550,42 @@ export function StanContent() {
 								<table className='w-full'>
 									<thead>
 										<tr className='border-b border-white/10'>
-											<th className='p-4 text-left text-white/70'>Accounts</th>
-											<th className='p-4 text-center text-white/70'>Per Account/Month</th>
+											<th className='p-4 text-left text-white/70'>
+												Accounts (same client)
+											</th>
+											<th className='p-4 text-center text-white/70'>Rate per account</th>
 										</tr>
 									</thead>
 									<tbody>
 										<tr className='border-b border-white/10'>
-											<td className='p-4 text-white'>2-4 accounts</td>
-											<td className='p-4 text-center text-white'>
-												${NYC_STAN.volumePricing.twoToFour}/month
+											<td className='p-4 text-white'>1st account</td>
+											<td className='p-4 text-center'>
+												<span className='text-white'>
+													${NYC_STAN.price.standalone}/mo
+												</span>
+												<span className='ml-2 text-sm text-purple-300'>
+													(${NYC_STAN.price.risingBundle} Rising+)
+												</span>
 											</td>
 										</tr>
 										<tr className='border-b border-white/10'>
-											<td className='p-4 text-white'>5+ accounts</td>
+											<td className='p-4 text-white'>2nd account</td>
 											<td className='p-4 text-center text-white'>
-												${NYC_STAN.volumePricing.fivePlus}/month
+												${NYC_STAN.volumePricing.secondAccount}/mo
+											</td>
+										</tr>
+										<tr className='border-b border-white/10'>
+											<td className='p-4 text-white'>3rd+ accounts</td>
+											<td className='p-4 text-center text-white'>
+												${NYC_STAN.volumePricing.thirdPlus}/mo each
 											</td>
 										</tr>
 										<tr>
 											<td className='p-4 text-purple-300'>
-												Label Package (up to {NYC_STAN.labelPackage.maxAccounts})
+												Label package (up to {NYC_STAN.labelPackage.maxAccounts})
 											</td>
 											<td className='p-4 text-center text-purple-300'>
-												${NYC_STAN.labelPackage.price.toLocaleString()}/month
+												${NYC_STAN.labelPackage.price.toLocaleString()}/mo
 											</td>
 										</tr>
 									</tbody>
@@ -632,8 +645,8 @@ export function StanContent() {
 							<p className='mb-4 text-lg text-white/80'>
 								Managing TikTok presence across a roster? Our label package covers up to{' '}
 								{NYC_STAN.labelPackage.maxAccounts} accounts for $
-								{NYC_STAN.labelPackage.price.toLocaleString()}/month with volume discounts
-								for larger rosters.
+								{NYC_STAN.labelPackage.price.toLocaleString()}/month, with per-account
+								pricing available for smaller rosters.
 							</p>
 							<Link href='/services/labels'>
 								<MarketingButton marketingLook='glass' size='sm'>
@@ -685,8 +698,8 @@ export function StanContent() {
 								a: "We can work with limited assets—AI-generated visuals, lyric posts, meme formats, and creative repurposing go a long way. But the more raw material you can provide, the better the account will perform. We'll talk through what you have during onboarding.",
 							},
 							{
-								q: 'Do you offer volume discounts?',
-								a: `Yes. 2-4 accounts are $${NYC_STAN.volumePricing.twoToFour}/month each, 5+ accounts are $${NYC_STAN.volumePricing.fivePlus}/month each, and we have a label package for up to ${NYC_STAN.labelPackage.maxAccounts} accounts at $${NYC_STAN.labelPackage.price.toLocaleString()}/month.`,
+								q: 'Do you offer discounts for multiple accounts?',
+								a: `Yes — your second account is $${NYC_STAN.volumePricing.secondAccount}/month, and any additional accounts after that are $${NYC_STAN.volumePricing.thirdPlus}/month each. Labels and management companies should ask about our roster packages at $${NYC_STAN.labelPackage.price.toLocaleString()}/month for up to ${NYC_STAN.labelPackage.maxAccounts} accounts.`,
 							},
 							{
 								q: 'What does the setup fee cover?',
