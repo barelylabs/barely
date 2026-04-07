@@ -178,7 +178,7 @@ export function FulfilledContent() {
 										</tr>
 										<tr className='border-b border-white/5'>
 											<td className='px-6 py-4 font-medium text-white'>
-												Off-platform processing fee
+												Off-platform processing fee*
 											</td>
 											<td className='px-6 py-4 text-right font-medium text-white'>
 												$1.50 / order
@@ -196,7 +196,7 @@ export function FulfilledContent() {
 								</table>
 							</div>
 							<p className='mt-3 text-sm text-white/50'>
-								The off-platform processing fee applies to any order that doesn&apos;t
+								*The off-platform processing fee applies to any order that doesn&apos;t
 								flow in automatically through barely.cart (e.g. Shopify, Bandcamp, manual
 								orders). It covers manual order intake and verification.
 							</p>
