@@ -270,7 +270,9 @@ export default async function CaseStudyPage({
 						</H>
 					</AnimatedSection>
 
-					<div className={`grid grid-cols-1 gap-6 ${study.investment.stanFee ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
+					<div
+						className={`grid grid-cols-1 gap-6 ${study.investment.stanFee ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}
+					>
 						<AnimatedSection animation='scale' delay={200}>
 							<div className='glass rounded-xl p-6 text-center'>
 								<p className='mb-2 text-white/60'>Service Fee</p>
@@ -325,9 +327,7 @@ export default async function CaseStudyPage({
 									{study.flywheel.body}
 								</p>
 								{study.flywheel.footnote && (
-									<p className='mt-4 text-sm text-white/50'>
-										{study.flywheel.footnote}
-									</p>
+									<p className='mt-4 text-sm text-white/50'>{study.flywheel.footnote}</p>
 								)}
 							</div>
 						</AnimatedSection>

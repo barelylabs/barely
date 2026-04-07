@@ -76,8 +76,7 @@ export function CaseStudyMetrics({ before, after }: CaseStudyMetricsProps) {
 			before: before.monthlyRevenue,
 			after: after.monthlyRevenue,
 			growth: (() => {
-				const parseDollars = (s: string) =>
-					parseFloat(s.replace(/[^0-9.]/g, ''));
+				const parseDollars = (s: string) => parseFloat(s.replace(/[^0-9.]/g, ''));
 				const b = parseDollars(before.monthlyRevenue);
 				const a = parseDollars(after.monthlyRevenue);
 				return b > 0 ? Math.round(((a - b) / b) * 100) : 0;
