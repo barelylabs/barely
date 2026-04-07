@@ -24,6 +24,7 @@ export interface CaseStudyMetrics {
 
 export interface CaseStudyInvestment {
 	serviceFee: string;
+	stanFee?: string;
 	adSpend: string;
 	total: string;
 }
@@ -239,7 +240,7 @@ export const theNowCase: CaseStudy = {
 	serviceTier: 'Rising+',
 	avatarUrl: '/_static/bands/the-now-trio.jpg',
 	startDate: 'March 2025',
-	endDate: 'October 2025',
+	endDate: 'March 2026',
 	metrics: {
 		before: {
 			monthlyListeners: 1347,
@@ -253,26 +254,25 @@ export const theNowCase: CaseStudy = {
 			totalInstagramFollowers: 7207,
 		},
 		after: {
-			monthlyListeners: 19669,
-			monthlyStreams: 58708,
-			monthlyStreamsPerListener: 2.985,
-			monthlySaves: 1831,
-			monthlyPlaylistAdds: 1679,
-			totalFollowers: 1724,
-			monthlyRevenue: '$1,059',
-			totalEmailSubscribers: 35,
-			totalInstagramFollowers: 7855,
+			monthlyListeners: 37000,
+			monthlyStreams: 99000,
+			monthlyStreamsPerListener: 2.7,
+			monthlySaves: 4600,
+			monthlyPlaylistAdds: 4900,
+			totalFollowers: 2700,
+			monthlyRevenue: '$2,500',
+			totalEmailSubscribers: 298,
+			totalInstagramFollowers: 11000,
 		},
 	},
 	investment: {
 		serviceFee: '$5,750',
-		adSpend: '$12,829',
-		total: '$18,579',
+		stanFee: '$800',
+		adSpend: '$23,129',
+		total: '$29,679',
 	},
-	// CLIENT: Please review and edit this challenge description to accurately reflect your situation before working with Barely
 	challenge: `The Now had just released their debut album "Too Hot To Handle" - recorded at Real World Studios with Grammy-winning producer Oli Jacobs - but were stuck at around 1,000 monthly listeners. Despite strong local support in South Wales and sharing stages with legends like Placebo and Noel Gallagher, they couldn't break beyond their regional fanbase. They needed to build sustainable momentum for the album and expand their reach across the UK and into Europe.`,
 
-	// CLIENT: Please verify these were the main strategies we used, and suggest any edits
 	strategy: [
 		{
 			title: 'Progressive Campaign Building',
@@ -287,12 +287,17 @@ export const theNowCase: CaseStudy = {
 		{
 			title: 'Track-Specific Push',
 			description:
-				'Focused campaigns behind "Get Out" drove major Discover Weekly placement, accelerating toward 225K streams.',
+				'Focused campaigns behind "Get Out" and "Wild Curse" drove major Discover Weekly placements, with "Wild Curse" becoming a breakout single in early 2026.',
 		},
 		{
 			title: 'Free CD & Merch Launch',
 			description:
 				'Launched "pay what you want" CD campaign with autographed copies, converting engaged listeners into paying fans and email subscribers.',
+		},
+		{
+			title: 'Stan Fan Account',
+			description:
+				'Launched a dedicated TikTok fan account in February 2026 to maximize discovery surface area. The Stan account created breadth-focused organic reach that fed directly into Spotify algorithmic recommendations, contributing to the late-campaign acceleration.',
 		},
 	],
 
@@ -320,33 +325,47 @@ export const theNowCase: CaseStudy = {
 		{
 			month: 'Month 8',
 			event: 'Launch CD/merch campaigns & gig promotion',
-			metric: '26,044 → 19,669 listeners',
+			metric: '26,044 → 20,000 listeners',
+		},
+		{
+			month: 'Months 9-10',
+			event: 'Maintained base through seasonal dip, continued Rising+ campaigns',
+			metric: '20,000 → 15,000 → 23,000 listeners',
+		},
+		{
+			month: 'Months 11-12',
+			event: 'Stan fan account launch + "Wild Curse" Discover Weekly push',
+			metric: '23,000 → 29,000 listeners',
+		},
+		{
+			month: 'Month 13',
+			event: 'Sold-out Spring 2026 tour dates, full algorithmic momentum',
+			metric: '29,000 → 37,000 listeners',
 		},
 	],
 
-	// CLIENT: Please review these results and suggest any edits
 	keyResults: [
-		'1,360% growth in monthly listeners (1,347 → 19,669)',
-		'Monthly revenue grew from $16 to $1,059 (6,519% increase)',
+		'2,646% growth in monthly listeners (1,347 → 37,000)',
+		'Monthly revenue grew from $16 to $2,500 (15,525% increase)',
 		'Built "ON THE ROAD" playlist to 7K followers, creating sustainable discovery channel',
-		'"Get Out" accelerated toward 225K streams via major Discover Weekly push',
+		'"Wild Curse" drove major Discover Weekly placement after Stan account launch',
+		'Multiple sold-out shows on Spring 2026 tour',
+		'Stan fan account accelerated algorithmic discovery within weeks of launch',
+		'Built email list of 298 subscribers — nearly all paying customers',
 		'Launched successful "pay what you want" CD campaign with autographed copies',
-		'First month of gig promotion generated $234 in ticket sales',
 	],
-	// DRAFT TESTIMONIAL for client approval - they can edit or completely rewrite
 	testimonial: {
 		quote:
 			"We'd just released our debut album and were stuck at 1K listeners despite all the work we'd put in. Barely's approach was completely different from anything we'd tried - data-driven campaigns that actually built a real fanbase. The free CD campaign brought in genuine fans who actually showed up to gigs and bought merch. Going from $16 to over $1K in monthly revenue showed us this could actually be sustainable.",
-		author: 'The Now', // CLIENT: Should this be attributed to a specific band member or just "The Now"?
+		author: 'The Now',
 	},
 
 	merchRevenue: {
 		before: 16,
-		after: 1059,
+		after: 2500,
 	},
-	// DRAFT SUMMARY - client should review
 	summary:
-		'South Wales alt-rock band achieved 1,360% listener growth and built sustainable revenue through free CD campaigns and strategic Meta advertising, expanding from regional to UK-wide fanbase.',
+		'South Wales alt-rock band achieved 2,646% listener growth and 15,525% revenue increase over 13 months through progressive campaign building, Stan fan account management, and strategic Meta advertising — expanding from regional act to sold-out touring band.',
 	featured: true,
 	socials: {
 		instagram: 'https://www.instagram.com/thenowuk/',

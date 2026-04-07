@@ -270,7 +270,7 @@ export default async function CaseStudyPage({
 						</H>
 					</AnimatedSection>
 
-					<div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
+					<div className={`grid grid-cols-1 gap-6 ${study.investment.stanFee ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
 						<AnimatedSection animation='scale' delay={200}>
 							<div className='glass rounded-xl p-6 text-center'>
 								<p className='mb-2 text-white/60'>Service Fee</p>
@@ -279,6 +279,17 @@ export default async function CaseStudyPage({
 								</p>
 							</div>
 						</AnimatedSection>
+
+						{study.investment.stanFee && (
+							<AnimatedSection animation='scale' delay={250}>
+								<div className='glass rounded-xl p-6 text-center'>
+									<p className='mb-2 text-white/60'>Stan Account</p>
+									<p className='text-2xl font-bold text-white'>
+										{study.investment.stanFee}
+									</p>
+								</div>
+							</AnimatedSection>
+						)}
 
 						<AnimatedSection animation='scale' delay={300}>
 							<div className='glass rounded-xl p-6 text-center'>
