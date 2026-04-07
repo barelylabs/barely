@@ -304,9 +304,7 @@ export function ServicesContent() {
 								))}
 							</ul>
 							<div className='space-y-2 text-sm text-white/60'>
-								<p>
-									Running multiple accounts? Volume pricing available:
-								</p>
+								<p>Running multiple accounts? Volume pricing available:</p>
 								<ul className='list-inside list-disc space-y-1'>
 									<li>2nd account: ${NYC_STAN.volumePricing.secondAccount}/mo</li>
 									<li>3rd+ accounts: ${NYC_STAN.volumePricing.thirdPlus}/mo each</li>
