@@ -479,10 +479,24 @@ export async function recordCartEvent({
 	}
 
 	if (type === 'cart/purchaseUpsell') {
+		const upsellTotal = formatMinorToMajorCurrency(
+			cart.upsellProductAmount ?? 0,
+			currency,
+		);
+		const feeDetails = [
+			cart.barelyPlatformFee ?
+				`platform: ${formatMinorToMajorCurrency(cart.barelyPlatformFee, currency)}`
+			:	null,
+			cart.barelyFulfillmentFee ?
+				`fulfillment: ${formatMinorToMajorCurrency(cart.barelyFulfillmentFee, currency)}`
+			:	null,
+		].filter(Boolean);
+		const feeStr = feeDetails.length > 0 ? `\n fees → ${feeDetails.join(' · ')}` : '';
+
 		await log({
 			type: 'sales',
 			location: 'recordCartEvent',
-			message: `${cartFunnel.handle} upsell [${cart.id}] :: ${formatMinorToMajorCurrency(cart.upsellProductAmount ?? 0, currency)}`,
+			message: `${cartFunnel.handle} upsell [${cart.id}] :: ${upsellTotal}${feeStr}`,
 		}).catch(() => {
 			/* non-critical */
 		});
