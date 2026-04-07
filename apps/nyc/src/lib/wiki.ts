@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import { z } from 'zod/v4';
 
 export interface WikiPage {
 	slug: string;
@@ -12,6 +13,14 @@ export interface WikiPage {
 }
 
 const pagesDirectory = path.join(process.cwd(), 'src/app/wiki/_pages');
+const resolvedPagesDirectory = path.resolve(pagesDirectory);
+
+const frontmatterSchema = z.object({
+	title: z.string().optional(),
+	description: z.string().optional(),
+	category: z.string().optional(),
+	lastUpdated: z.union([z.string(), z.date()]).optional(),
+});
 
 export function getWikiSlugs() {
 	try {
@@ -28,22 +37,31 @@ export function getWikiSlugs() {
 export function getWikiPageBySlug(slug: string): WikiPage | null {
 	try {
 		const fullPath = path.join(pagesDirectory, `${slug}.mdx`);
-		const fileContents = fs.readFileSync(fullPath, 'utf8');
+		const resolvedPath = path.resolve(fullPath);
+		if (!resolvedPath.startsWith(resolvedPagesDirectory + path.sep)) {
+			return null;
+		}
+		const fileContents = fs.readFileSync(resolvedPath, 'utf8');
 		const { data, content } = matter(fileContents);
 
-		const frontmatter = data as {
-			title?: string;
-			description?: string;
-			category?: string;
-			lastUpdated?: string;
-		};
+		const result = frontmatterSchema.safeParse(data);
+		if (!result.success) {
+			console.error('Invalid frontmatter for slug:', slug, result.error);
+			return null;
+		}
+		const frontmatter = result.data;
+		const rawLastUpdated = frontmatter.lastUpdated;
+		const lastUpdated =
+			rawLastUpdated instanceof Date ?
+				rawLastUpdated.toISOString()
+			:	(rawLastUpdated ?? new Date().toISOString());
 
 		return {
 			slug,
 			title: frontmatter.title ?? 'Untitled',
 			description: frontmatter.description ?? '',
 			category: frontmatter.category ?? 'General',
-			lastUpdated: frontmatter.lastUpdated ?? new Date().toISOString(),
+			lastUpdated,
 			content,
 		};
 	} catch (error) {

@@ -5,8 +5,7 @@ export const metadata: Metadata = {
 		default: 'Wiki | Barely NYC',
 		template: '%s | Barely NYC Wiki',
 	},
-	description:
-		'Resources and guides for independent artists working with Barely NYC.',
+	description: 'Resources and guides for independent artists working with Barely NYC.',
 };
 
 export default function WikiLayout({ children }: { children: React.ReactNode }) {
