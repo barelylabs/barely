@@ -352,11 +352,11 @@ export const theNowCase: CaseStudy = {
 		'Multiple sold-out shows on Spring 2026 tour',
 		'Stan fan account accelerated algorithmic discovery within weeks of launch',
 		'Built email list of 298 subscribers — nearly all paying customers',
-		'Launched successful "pay what you want" CD campaign with autographed copies',
+		'Physical merch campaigns running above break-even, self-funding continued growth',
 	],
 	testimonial: {
 		quote:
-			"We'd just released our debut album and were stuck at 1K listeners despite all the work we'd put in. Barely's approach was completely different from anything we'd tried - data-driven campaigns that actually built a real fanbase. The free CD campaign brought in genuine fans who actually showed up to gigs and bought merch. Going from $16 to over $1K in monthly revenue showed us this could actually be sustainable.",
+			"We'd just released our debut album and were stuck at 1K listeners despite all the work we'd put in. Barely's approach was completely different from anything we'd tried - data-driven campaigns that actually built a real fanbase. The merch campaigns basically pay for themselves, so we can reinvest straight back into growth. Going from $16 to $2,500 a month in revenue while selling out shows - that's when it clicked that this is actually sustainable.",
 		author: 'The Now',
 	},
 
