@@ -45,7 +45,7 @@ export const ShopifyAccountCard = () => {
 	);
 
 	const connectShopify = () => {
-		if (!shopDomain) return;
+		if (!shopDomain) return Promise.resolve();
 
 		// Normalize domain: add .myshopify.com if not present
 		const normalizedDomain =
