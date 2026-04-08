@@ -21,6 +21,7 @@ export default async function InvoiceDetailPage({
 			<DashContentHeader
 				title={`Invoice ${invoice.invoiceNumber}`}
 				subtitle={`Created on ${new Date(invoice.createdAt).toLocaleDateString()}`}
+				backHref={`/${awaitedParams.handle}/invoices`}
 			/>
 			<DashContent>
 				<InvoiceDetail invoice={invoice} handle={awaitedParams.handle} />

@@ -61,11 +61,21 @@ export type UpdateInvoice = z.input<typeof updateInvoiceSchema>;
 export type Invoice = InferSelectModel<typeof Invoices>;
 
 // Filter and search schemas
+export const INVOICE_FILTER_STATUSES = [...INVOICE_STATUSES, 'overdue'] as const;
+
+export const INVOICE_SORT_FIELDS = ['createdAt', 'dueDate', 'total'] as const;
+
+export type InvoiceSortField = (typeof INVOICE_SORT_FIELDS)[number];
+
 export const invoiceFilterParamsSchema = z.object({
 	search: z.string().optional(),
-	status: z.enum(INVOICE_STATUSES).optional(),
+	status: z.enum(INVOICE_FILTER_STATUSES).optional(),
 	clientId: z.string().optional(),
 	showArchived: z.boolean().optional(),
+	sortBy: z.enum(INVOICE_SORT_FIELDS).optional(),
+	sortOrder: z.enum(['asc', 'desc']).optional(),
+	dateFrom: z.string().optional(),
+	dateTo: z.string().optional(),
 });
 
 export const invoiceSearchParamsSchema = invoiceFilterParamsSchema.extend({
@@ -79,7 +89,14 @@ export const invoiceSearchParamsSchema = invoiceFilterParamsSchema.extend({
 });
 
 export const selectWorkspaceInvoicesSchema = invoiceFilterParamsSchema.extend({
-	cursor: z.object({ id: z.string(), createdAt: z.coerce.date() }).optional(),
+	cursor: z
+		.object({
+			id: z.string(),
+			createdAt: z.coerce.date(),
+			dueDate: z.coerce.date().optional(),
+			total: z.coerce.number().optional(),
+		})
+		.optional(),
 	limit: z.coerce.number().min(1).max(100).optional().default(20),
 });
 

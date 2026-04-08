@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { dbPool } from '@barely/db/pool';
-import { Invoices, Workspaces } from '@barely/db/sql';
+import { InvoiceClients, Invoices, Workspaces } from '@barely/db/sql';
 import { sqlAnd, sqlCount, sqlStringContains } from '@barely/db/utils';
 import { newId, raise, raiseTRPCError } from '@barely/utils';
 import {
@@ -13,7 +13,7 @@ import {
 	updateInvoiceSchema,
 } from '@barely/validators';
 import { TRPCError } from '@trpc/server';
-import { and, asc, desc, eq, gt, gte, inArray, isNull, lt, or } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, gte, inArray, isNull, lt, or, sql } from 'drizzle-orm';
 import DOMPurify from 'isomorphic-dompurify';
 import { z } from 'zod/v4';
 
@@ -30,24 +30,82 @@ export const invoiceRoute = {
 	byWorkspace: workspaceProcedure
 		.input(selectWorkspaceInvoicesSchema)
 		.query(async ({ input, ctx }) => {
-			const { limit, cursor, search, status, clientId, showArchived } = input;
+			const {
+				limit,
+				cursor,
+				search,
+				status,
+				clientId,
+				showArchived,
+				sortBy,
+				sortOrder,
+				dateFrom,
+				dateTo,
+			} = input;
+
+			// Determine sort column and direction
+			const sortField = sortBy ?? 'createdAt';
+			const sortDir = sortOrder ?? 'desc';
+			const sortColumn =
+				sortField === 'dueDate' ? Invoices.dueDate
+				: sortField === 'total' ? Invoices.total
+				: Invoices.createdAt;
+
+			// Build cursor condition based on sort field
+			const cursorCondition = (() => {
+				if (!cursor) return undefined;
+				const comparator = sortDir === 'desc' ? lt : gt;
+				const tiebreaker = sortDir === 'desc' ? gt : lt;
+
+				if (sortField === 'dueDate' && cursor.dueDate !== undefined) {
+					return or(
+						comparator(Invoices.dueDate, cursor.dueDate),
+						and(eq(Invoices.dueDate, cursor.dueDate), tiebreaker(Invoices.id, cursor.id)),
+					);
+				}
+				if (sortField === 'total' && cursor.total !== undefined) {
+					return or(
+						comparator(Invoices.total, cursor.total),
+						and(eq(Invoices.total, cursor.total), tiebreaker(Invoices.id, cursor.id)),
+					);
+				}
+				// Default: sort by createdAt
+				return or(
+					comparator(Invoices.createdAt, cursor.createdAt),
+					and(
+						eq(Invoices.createdAt, cursor.createdAt),
+						tiebreaker(Invoices.id, cursor.id),
+					),
+				);
+			})();
+
 			const invoices = await dbHttp.query.Invoices.findMany({
 				where: sqlAnd([
 					eq(Invoices.workspaceId, ctx.workspace.id),
-					!!search?.length && sqlStringContains(Invoices.invoiceNumber, search),
-					!!status && eq(Invoices.status, status),
-					!!clientId && eq(Invoices.clientId, clientId),
-					showArchived ? undefined : isNull(Invoices.archivedAt),
-					!!cursor &&
+					!!search?.length &&
 						or(
-							lt(Invoices.createdAt, cursor.createdAt),
-							and(eq(Invoices.createdAt, cursor.createdAt), gt(Invoices.id, cursor.id)),
+							sqlStringContains(Invoices.invoiceNumber, search),
+							sql`EXISTS (SELECT 1 FROM ${InvoiceClients} WHERE ${InvoiceClients.id} = ${Invoices.clientId} AND LOWER(${InvoiceClients.name}) LIKE LOWER('%' || ${search} || '%'))`,
 						),
+					status === 'overdue' ?
+						and(
+							or(eq(Invoices.status, 'sent'), eq(Invoices.status, 'viewed')),
+							lt(Invoices.dueDate, new Date()),
+						)
+					:	!!status && eq(Invoices.status, status),
+					!!clientId && eq(Invoices.clientId, clientId),
+					!!dateFrom && gte(Invoices.createdAt, new Date(dateFrom)),
+					!!dateTo && lt(Invoices.createdAt, new Date(dateTo + 'T23:59:59.999Z')),
+					showArchived ? undefined : isNull(Invoices.archivedAt),
+					cursorCondition,
 				]),
 				with: {
 					client: true,
 				},
-				orderBy: [desc(Invoices.createdAt), asc(Invoices.id)],
+				orderBy: [
+					sortDir === 'desc' ? desc(sortColumn) : asc(sortColumn),
+					sortDir === 'desc' ? asc(Invoices.id) : desc(Invoices.id),
+				],
 				limit: limit + 1,
 			});
 
@@ -60,6 +118,8 @@ export const invoiceRoute = {
 						{
 							id: nextInvoice.id,
 							createdAt: nextInvoice.createdAt,
+							dueDate: nextInvoice.dueDate,
+							total: nextInvoice.total,
 						}
 					:	undefined;
 			}

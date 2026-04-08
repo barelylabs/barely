@@ -12,6 +12,7 @@ import { ArchiveOrDeleteInvoiceModal } from '~/app/[handle]/invoices/_components
 import { CreateInvoiceButton } from '~/app/[handle]/invoices/_components/create-invoice-button';
 import { InvoiceFilters } from '~/app/[handle]/invoices/_components/invoice-filters';
 import { InvoiceHotkeys } from '~/app/[handle]/invoices/_components/invoice-hotkeys';
+import { InvoiceNav } from '~/app/[handle]/invoices/_components/invoice-nav';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
 export default async function InvoicesPage({
@@ -42,9 +43,10 @@ export default async function InvoicesPage({
 			<DashContentHeader
 				title='Invoices'
 				button={<CreateInvoiceButton />}
-				settingsHref={`/${awaitedParams.handle}/invoices/clients`}
+				settingsHref={`/${awaitedParams.handle}/invoices/settings`}
 			/>
 			<DashContent>
+				<InvoiceNav />
 				<InvoiceFilters />
 				<Suspense fallback={<GridListSkeleton />}>
 					<AllInvoices />

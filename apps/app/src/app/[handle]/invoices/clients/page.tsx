@@ -11,6 +11,7 @@ import { AllClients } from '~/app/[handle]/invoices/_components/all-clients';
 import { ClientFilters } from '~/app/[handle]/invoices/_components/client-filters';
 import { CreateClientButton } from '~/app/[handle]/invoices/_components/create-client-button';
 import { CreateOrUpdateClientModal } from '~/app/[handle]/invoices/_components/create-or-update-client-modal';
+import { InvoiceNav } from '~/app/[handle]/invoices/_components/invoice-nav';
 import { HydrateClient, prefetch, trpc } from '~/trpc/server';
 
 export default async function ClientsPage({
@@ -38,12 +39,9 @@ export default async function ClientsPage({
 
 	return (
 		<HydrateClient>
-			<DashContentHeader
-				title='Clients'
-				subtitle='Manage your invoice clients'
-				button={<CreateClientButton />}
-			/>
+			<DashContentHeader title='Invoices' button={<CreateClientButton />} />
 			<DashContent>
+				<InvoiceNav />
 				<ClientFilters />
 				<Suspense fallback={<GridListSkeleton />}>
 					<AllClients />

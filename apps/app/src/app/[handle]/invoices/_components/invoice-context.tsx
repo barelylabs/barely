@@ -13,20 +13,37 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 // Define the page data type for invoices
 interface InvoicePageData {
 	invoices: AppRouterOutputs['invoice']['byWorkspace']['invoices'];
-	nextCursor?: { id: string; createdAt: Date } | null;
+	nextCursor?: {
+		id: string;
+		createdAt: Date;
+		dueDate?: Date;
+		total?: number;
+	} | null;
 }
 
 // Create the search params hook for invoices
 export const useInvoiceSearchParams = createResourceSearchParamsHook({
 	additionalParsers: {
-		status: parseAsStringEnum(['draft', 'sent', 'viewed', 'paid', 'overdue', 'voided']),
+		status: parseAsStringEnum(['created', 'sent', 'viewed', 'paid', 'overdue', 'voided']),
 		clientId: parseAsString,
+		sortBy: parseAsStringEnum(['createdAt', 'dueDate', 'total']),
+		sortOrder: parseAsStringEnum(['asc', 'desc']),
+		dateFrom: parseAsString,
+		dateTo: parseAsString,
 	},
 	additionalActions: {
 		setStatus: action((setParams, status: string | undefined) => setParams({ status })),
 		setClientId: action((setParams, clientId: string | undefined) =>
 			setParams({ clientId }),
 		),
+		setSortBy: action((setParams, sortBy: string | undefined) => setParams({ sortBy })),
+		setSortOrder: action((setParams, sortOrder: string | undefined) =>
+			setParams({ sortOrder }),
+		),
+		setDateFrom: action((setParams, dateFrom: string | undefined) =>
+			setParams({ dateFrom }),
+		),
+		setDateTo: action((setParams, dateTo: string | undefined) => setParams({ dateTo })),
 	},
 });
 

@@ -160,9 +160,19 @@ export function InvoiceRender({
 						From
 					</Text>
 					<div className='mt-3 space-y-1'>
-						<Text variant='md/semibold' className='text-gray-900'>
-							{workspace.name}
-						</Text>
+						<div className='flex items-center gap-2'>
+							<div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-800 text-xs font-semibold text-white'>
+								{workspace.name
+									.split(' ')
+									.map(n => n[0])
+									.join('')
+									.toUpperCase()
+									.slice(0, 2)}
+							</div>
+							<Text variant='md/semibold' className='text-gray-900'>
+								{workspace.name}
+							</Text>
+						</div>
 						{workspace.supportEmail && (
 							<Text variant='sm/normal' className='text-gray-600'>
 								{workspace.supportEmail}

@@ -82,6 +82,10 @@ interface FiltersProps<SortBy extends string = string> {
 	status?: string;
 	setStatus?: (status: string) => void;
 	statusOptions?: { label: string; value: string }[];
+	dateFrom?: string;
+	setDateFrom?: (date: string | undefined) => void;
+	dateTo?: string;
+	setDateTo?: (date: string | undefined) => void;
 }
 
 export function Filters<SortBy extends string = string>({
@@ -113,6 +117,10 @@ export function Filters<SortBy extends string = string>({
 	status,
 	setStatus,
 	statusOptions,
+	dateFrom,
+	setDateFrom,
+	dateTo,
+	setDateTo,
 }: FiltersProps<SortBy>) {
 	const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -360,6 +368,29 @@ export function Filters<SortBy extends string = string>({
 										))}
 									</SelectContent>
 								</Select>
+							</div>
+						</div>
+					)}
+
+					{setDateFrom && setDateTo && (
+						<div className='flex flex-col gap-4 pb-4'>
+							<div className='flex flex-col gap-2'>
+								<Label>Date Range</Label>
+								<div className='flex items-center gap-2'>
+									<Input
+										type='date'
+										value={dateFrom ?? ''}
+										onChange={e => setDateFrom(e.target.value || undefined)}
+										className='h-9 text-sm'
+									/>
+									<span className='text-sm text-muted-foreground'>to</span>
+									<Input
+										type='date'
+										value={dateTo ?? ''}
+										onChange={e => setDateTo(e.target.value || undefined)}
+										className='h-9 text-sm'
+									/>
+								</div>
 							</div>
 						</div>
 					)}
