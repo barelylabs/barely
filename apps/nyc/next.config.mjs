@@ -74,6 +74,18 @@ const config = {
 				destination: 'https://cal.com/barely/monthly',
 				permanent: true,
 			},
+			// Service short-URL redirects
+			{ source: '/bedroom', destination: '/services/bedroom', permanent: true },
+			{ source: '/breakout', destination: '/services/breakout', permanent: true },
+			{
+				source: '/fulfilled',
+				destination: '/services/fulfilled',
+				permanent: true,
+			},
+			{ source: '/labels', destination: '/services/labels', permanent: true },
+			{ source: '/rising', destination: '/services/rising', permanent: true },
+			{ source: '/stan', destination: '/services/stan', permanent: true },
+			{ source: '/swarm', destination: '/services/swarm', permanent: true },
 		];
 	},
 
