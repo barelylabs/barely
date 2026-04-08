@@ -10,7 +10,7 @@ import {
 import { getBarelyFulfillmentAddress } from '../../env';
 
 export type FulfillmentMode = 'artist_all' | 'barely_us' | 'barely_worldwide';
-export type FulfilledBy = 'artist' | 'barely';
+export type FulfilledBy = 'artist' | 'barely' | 'shopify';
 
 export interface ShippingAddress {
 	name?: string | null;

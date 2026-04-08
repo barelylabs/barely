@@ -2,9 +2,9 @@ const SHOPIFY_API_VERSION = '2025-04';
 
 interface ShopifyGraphQLResponse<T> {
 	data: T;
-	errors?: Array<{
+	errors?: {
 		message: string;
-		locations?: Array<{ line: number; column: number }>;
+		locations?: { line: number; column: number }[];
 		path?: string[];
 		extensions?: {
 			code: string;
@@ -18,7 +18,7 @@ interface ShopifyGraphQLResponse<T> {
 				};
 			};
 		};
-	}>;
+	}[];
 	extensions?: {
 		cost?: {
 			requestedQueryCost: number;
@@ -83,9 +83,7 @@ export class ShopifyClient {
 		}
 
 		if (!response.ok) {
-			throw new Error(
-				`Shopify API error: ${response.status} ${response.statusText}`,
-			);
+			throw new Error(`Shopify API error: ${response.status} ${response.statusText}`);
 		}
 
 		const result = (await response.json()) as ShopifyGraphQLResponse<T>;

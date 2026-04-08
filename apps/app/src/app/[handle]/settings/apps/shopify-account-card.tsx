@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWorkspace } from '@barely/hooks';
-import { onPromise, toTitleCase } from '@barely/utils';
+import { onPromise } from '@barely/utils';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
@@ -48,9 +48,10 @@ export const ShopifyAccountCard = () => {
 		if (!shopDomain) return;
 
 		// Normalize domain: add .myshopify.com if not present
-		const normalizedDomain = shopDomain.includes('.myshopify.com')
-			? shopDomain
-			: `${shopDomain.replace(/\.myshopify\.com$/, '')}.myshopify.com`;
+		const normalizedDomain =
+			shopDomain.includes('.myshopify.com') ? shopDomain : (
+				`${shopDomain.replace(/\.myshopify\.com$/, '')}.myshopify.com`
+			);
 
 		authorize({
 			provider: 'shopify',
@@ -91,9 +92,7 @@ export const ShopifyAccountCard = () => {
 						<div className='flex w-full flex-row items-center'>
 							<div className='flex flex-grow flex-col'>
 								<p className='text-md'>{account.username ?? 'Shopify Store'}</p>
-								<p className='text-sm text-muted-foreground'>
-									{account.server}
-								</p>
+								<p className='text-sm text-muted-foreground'>{account.server}</p>
 							</div>
 
 							<AlertDialog
@@ -112,11 +111,7 @@ export const ShopifyAccountCard = () => {
 				))}
 
 			{!isConnected && !showDomainInput && (
-				<Button
-					look='secondary'
-					onClick={() => setShowDomainInput(true)}
-					fullWidth
-				>
+				<Button look='secondary' onClick={() => setShowDomainInput(true)} fullWidth>
 					Connect Shopify Store
 				</Button>
 			)}

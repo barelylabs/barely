@@ -1,5 +1,5 @@
 import { dbHttp } from '@barely/db/client';
-import { ApparelSizes, Carts, Products } from '@barely/db/sql';
+import { ApparelSizes, Carts } from '@barely/db/sql';
 import { logger, task } from '@trigger.dev/sdk';
 import { and, eq } from 'drizzle-orm';
 
@@ -55,7 +55,9 @@ export const createShopifyOrderTask = task({
 		}
 
 		if (cart.shopifyOrderId) {
-			logger.log(`Cart ${cartId} already has Shopify order ${cart.shopifyOrderId}, skipping`);
+			logger.log(
+				`Cart ${cartId} already has Shopify order ${cart.shopifyOrderId}, skipping`,
+			);
 			return;
 		}
 
@@ -73,34 +75,32 @@ export const createShopifyOrderTask = task({
 		}
 
 		// Build line items from products that have Shopify variant mappings
-		const lineItems: Array<{
+		const lineItems: {
 			variantId: string;
 			quantity: number;
 			priceSet: {
 				shopMoney: { amount: string; currencyCode: string };
 			};
-		}> = [];
+		}[] = [];
 
-		const currency = (cart.currency ?? funnel.workspace.currency ?? 'usd').toUpperCase();
+		const currency = (cart.currency ?? funnel.workspace.currency).toUpperCase();
 
 		// Main product
-		if (funnel.mainProduct) {
-			const variantId = await resolveShopifyVariantId(
-				funnel.mainProduct,
-				cart.mainProductApparelSize,
-			);
-			if (variantId) {
-				lineItems.push({
-					variantId,
-					quantity: cart.mainProductQuantity ?? 1,
-					priceSet: {
-						shopMoney: {
-							amount: ((cart.mainProductPrice ?? funnel.mainProduct.price) / 100).toFixed(2),
-							currencyCode: currency,
-						},
+		const mainVariantId = await resolveShopifyVariantId(
+			funnel.mainProduct,
+			cart.mainProductApparelSize,
+		);
+		if (mainVariantId) {
+			lineItems.push({
+				variantId: mainVariantId,
+				quantity: cart.mainProductQuantity,
+				priceSet: {
+					shopMoney: {
+						amount: (cart.mainProductPrice / 100).toFixed(2),
+						currencyCode: currency,
 					},
-				});
-			}
+				},
+			});
 		}
 
 		// Bump product (only if added)
@@ -115,7 +115,9 @@ export const createShopifyOrderTask = task({
 					quantity: cart.bumpProductQuantity ?? 1,
 					priceSet: {
 						shopMoney: {
-							amount: ((cart.bumpProductPrice ?? funnel.bumpProduct.price) / 100).toFixed(2),
+							amount: ((cart.bumpProductPrice ?? funnel.bumpProduct.price) / 100).toFixed(
+								2,
+							),
 							currencyCode: currency,
 						},
 					},
@@ -135,7 +137,9 @@ export const createShopifyOrderTask = task({
 					quantity: cart.upsellProductQuantity ?? 1,
 					priceSet: {
 						shopMoney: {
-							amount: ((cart.upsellProductPrice ?? funnel.upsellProduct.price) / 100).toFixed(2),
+							amount: (
+								(cart.upsellProductPrice ?? funnel.upsellProduct.price) / 100
+							).toFixed(2),
 							currencyCode: currency,
 						},
 					},
@@ -157,20 +161,21 @@ export const createShopifyOrderTask = task({
 					firstName: cart.firstName ?? undefined,
 					lastName: cart.lastName ?? undefined,
 				},
-				shippingAddress: cart.shippingAddressLine1
-					? {
+				shippingAddress:
+					cart.shippingAddressLine1 ?
+						{
 							firstName: cart.firstName ?? undefined,
 							lastName: cart.lastName ?? undefined,
-							address1: cart.shippingAddressLine1 ?? undefined,
+							address1: cart.shippingAddressLine1,
 							address2: cart.shippingAddressLine2 ?? undefined,
 							city: cart.shippingAddressCity ?? undefined,
 							province: cart.shippingAddressState ?? undefined,
 							country: cart.shippingAddressCountry ?? undefined,
 							zip: cart.shippingAddressPostalCode ?? undefined,
 						}
-					: undefined,
+					:	undefined,
 				currency,
-				note: `Order placed via barely.cart - Funnel: ${funnel.name ?? funnel.key}`,
+				note: `Order placed via barely.cart - Funnel: ${funnel.name}`,
 				tags: ['barely-cart', `funnel:${funnel.key}`],
 			});
 
@@ -186,9 +191,7 @@ export const createShopifyOrderTask = task({
 				})
 				.where(eq(Carts.id, cartId));
 
-			logger.log(
-				`Shopify order ${result.shopifyOrderNumber} created for cart ${cartId}`,
-			);
+			logger.log(`Shopify order ${result.shopifyOrderNumber} created for cart ${cartId}`);
 		} catch (error) {
 			await log({
 				type: 'errors',

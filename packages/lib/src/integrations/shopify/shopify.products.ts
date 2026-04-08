@@ -13,7 +13,7 @@ export interface ShopifyProduct {
 	id: string;
 	title: string;
 	status: string;
-	images: { nodes: Array<{ url: string }> };
+	images: { nodes: { url: string }[] };
 	variants: { nodes: ShopifyProductVariant[] };
 }
 

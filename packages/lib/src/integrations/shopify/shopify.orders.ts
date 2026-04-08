@@ -40,10 +40,10 @@ interface OrderCreateResult {
 			name: string;
 			displayFinancialStatus: string;
 		} | null;
-		userErrors: Array<{
+		userErrors: {
 			field: string[] | null;
 			message: string;
-		}>;
+		}[];
 	};
 }
 
@@ -72,8 +72,7 @@ export async function createShopifyOrder(
 	input: ShopifyOrderInput,
 ) {
 	const totalAmount = input.lineItems.reduce(
-		(sum, item) =>
-			sum + parseFloat(item.priceSet.shopMoney.amount) * item.quantity,
+		(sum, item) => sum + parseFloat(item.priceSet.shopMoney.amount) * item.quantity,
 		0,
 	);
 
@@ -93,20 +92,20 @@ export async function createShopifyOrder(
 					lastName: input.customer.lastName,
 				},
 			},
-			...(input.shippingAddress
-				? {
-						shippingAddress: {
-							firstName: input.shippingAddress.firstName,
-							lastName: input.shippingAddress.lastName,
-							address1: input.shippingAddress.address1,
-							address2: input.shippingAddress.address2,
-							city: input.shippingAddress.city,
-							provinceCode: input.shippingAddress.province,
-							countryCode: input.shippingAddress.country,
-							zip: input.shippingAddress.zip,
-						},
-					}
-				: {}),
+			...(input.shippingAddress ?
+				{
+					shippingAddress: {
+						firstName: input.shippingAddress.firstName,
+						lastName: input.shippingAddress.lastName,
+						address1: input.shippingAddress.address1,
+						address2: input.shippingAddress.address2,
+						city: input.shippingAddress.city,
+						provinceCode: input.shippingAddress.province,
+						countryCode: input.shippingAddress.country,
+						zip: input.shippingAddress.zip,
+					},
+				}
+			:	{}),
 			transactions: [
 				{
 					kind: 'SALE',
@@ -127,10 +126,7 @@ export async function createShopifyOrder(
 		},
 	};
 
-	const result = await client.query<OrderCreateResult>(
-		ORDER_CREATE_MUTATION,
-		variables,
-	);
+	const result = await client.query<OrderCreateResult>(ORDER_CREATE_MUTATION, variables);
 
 	const orderCreate = result.data.orderCreate;
 

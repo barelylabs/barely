@@ -1,11 +1,11 @@
-import type { NextRequest } from 'next/server';
 import { createHmac, timingSafeEqual } from 'crypto';
+import type { NextRequest } from 'next/server';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { dbHttp } from '@barely/db/client';
 import { ProviderAccounts } from '@barely/db/sql/provider-account.sql';
 import { getUserWorkspacesById } from '@barely/lib/functions/workspace.fns';
-import { getAbsoluteUrl, getCurrentAppVariant, newId, raise } from '@barely/utils';
+import { newId, raise } from '@barely/utils';
 import { providerStateSchema } from '@barely/validators';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod/v4';
