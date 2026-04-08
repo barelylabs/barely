@@ -199,10 +199,14 @@ export const Carts = pgTable(
 		// currency (captures workspace currency at time of checkout)
 		currency: varchar('currency', { length: 4, enum: ['usd', 'gbp'] }),
 
-		// barely fulfillment partner
+		// shopify integration
+		shopifyOrderId: varchar('shopifyOrderId', { length: 255 }),
+		shopifyOrderNumber: varchar('shopifyOrderNumber', { length: 50 }),
+
+		// fulfillment partner
 		fulfilledBy: varchar('fulfilledBy', {
 			length: 20,
-			enum: ['artist', 'barely'],
+			enum: ['artist', 'barely', 'shopify'],
 		})
 			.default('artist')
 			.notNull(),

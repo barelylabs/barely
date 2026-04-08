@@ -76,6 +76,7 @@ export const providerAccountRoute = {
 		.input(
 			z.object({
 				provider: insertProviderAccountSchema.shape.provider,
+				shopDomain: z.string().optional(),
 			}),
 		)
 		.mutation(({ ctx, input }) => {
@@ -87,9 +88,32 @@ export const providerAccountRoute = {
 					getCurrentAppVariant(),
 					`${ctx.workspace.handle}/settings/apps`,
 				),
+				...(input.shopDomain ? { shopDomain: input.shopDomain } : {}),
 			};
 
 			const base64EncodedState = Buffer.from(JSON.stringify(state)).toString('base64');
+
+			if (provider === 'shopify') {
+				const shopDomain = input.shopDomain;
+				if (!shopDomain) {
+					throw new Error('shopDomain is required for Shopify authorization');
+				}
+
+				const shopifyAuthorization = new URL(
+					`https://${shopDomain}/admin/oauth/authorize`,
+				);
+				shopifyAuthorization.searchParams.set('client_id', libEnv.SHOPIFY_CLIENT_ID);
+				shopifyAuthorization.searchParams.set(
+					'scope',
+					'read_products,write_orders,read_orders,read_inventory',
+				);
+				shopifyAuthorization.searchParams.set(
+					'redirect_uri',
+					getAbsoluteUrl(getCurrentAppVariant(), 'api/apps/callback/shopify'),
+				);
+				shopifyAuthorization.searchParams.set('state', base64EncodedState);
+				return shopifyAuthorization.toString();
+			}
 
 			if (provider === 'mailchimp') {
 				const mailchimpAuthorization = new URL(

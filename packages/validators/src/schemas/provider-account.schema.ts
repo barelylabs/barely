@@ -15,4 +15,5 @@ export type SelectProviderAccount = z.infer<typeof selectProviderAccountSchema>;
 export const providerStateSchema = z.object({
 	workspaceId: z.string(),
 	redirectUrl: z.string().url(),
+	shopDomain: z.string().optional(),
 });

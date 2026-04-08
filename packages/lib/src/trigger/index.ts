@@ -1,5 +1,6 @@
 export * from './cart.trigger';
 export * from './cart-cleanup.trigger';
+export * from './shopify.trigger';
 export * from './daily-streaming-stats.trigger';
 export * from './daily-stripe-connect-check.trigger';
 export * from './email-broadcast.trigger';
