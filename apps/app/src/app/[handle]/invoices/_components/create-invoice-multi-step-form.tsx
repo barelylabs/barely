@@ -72,7 +72,6 @@ const paymentFormSchema = z.object({
 // Step 4: Review schema (just for send email preference)
 const reviewFormSchema = z.object({
 	sendEmail: z.boolean().default(false),
-	ccEmail: z.union([z.email(), z.literal('')]),
 });
 
 const STEPS = ['client', 'details', 'payment', 'review'] as const;
@@ -138,7 +137,6 @@ export function CreateInvoiceMultiStepForm() {
 		schema: reviewFormSchema,
 		defaultValues: {
 			sendEmail: false,
-			ccEmail: '',
 		},
 	});
 	// Get next invoice number using efficient COUNT query
@@ -200,7 +198,6 @@ export function CreateInvoiceMultiStepForm() {
 			billingInterval,
 			recurringDiscountPercent,
 			sendEmail: reviewForm.watch('sendEmail'),
-			ccEmail: reviewForm.watch('ccEmail'),
 		};
 	}, [
 		selectedClientId,
@@ -810,13 +807,15 @@ export function CreateInvoiceMultiStepForm() {
 													disabled
 												/>
 											</div>
-											<TextField
-												control={reviewForm.control}
-												name='ccEmail'
-												label='CC'
-												type='email'
-												placeholder='Optional'
-											/>
+											{selectedClientData?.ccEmails &&
+												selectedClientData.ccEmails.length > 0 && (
+													<div>
+														<Label>CC</Label>
+														<p className='mt-1.5 text-sm text-muted-foreground'>
+															{selectedClientData.ccEmails.join(', ')}
+														</p>
+													</div>
+												)}
 										</div>
 									</div>
 								</div>

@@ -25,6 +25,7 @@ interface SendInvoiceEmailProps {
 			InvoiceClient,
 			| 'name'
 			| 'email'
+			| 'ccEmails'
 			| 'company'
 			| 'addressLine1'
 			| 'addressLine2'
@@ -86,11 +87,14 @@ export async function sendInvoiceEmail({ invoice, pdfBase64 }: SendInvoiceEmailP
 		workspace.supportEmail ??
 		'invoices@barely.ai';
 
+	const ccEmails = client.ccEmails?.filter(e => e.length > 0);
+
 	// Send email
 	const result = await sendEmail({
 		from: 'hello@pay.barelyinvoice.com',
 		fromFriendlyName: 'Barely Invoice',
 		to: client.email,
+		cc: ccEmails?.length ? ccEmails : undefined,
 		replyTo,
 		bcc: [replyTo, 'invoices@barely.ai'].filter(email => email.length > 0),
 		subject: `Invoice ${invoice.invoiceNumber} from ${workspace.name}`,
@@ -142,6 +146,7 @@ export async function sendInvoiceEmail({ invoice, pdfBase64 }: SendInvoiceEmailP
 				subject: `Invoice ${invoice.invoiceNumber} from ${workspace.name}`,
 				from: workspace.cartSupportEmail ?? 'invoices@barely.ai',
 				to: client.email,
+				...(ccEmails?.length && { cc: ccEmails.join(', ') }),
 			},
 		});
 
@@ -198,10 +203,13 @@ export async function sendInvoiceReminderEmail({
 		workspace.supportEmail ??
 		'invoices@barely.ai';
 
+	const reminderCcEmails = client.ccEmails?.filter(e => e.length > 0);
+
 	const result = await sendEmail({
 		from: 'hello@pay.barelyinvoice.com',
 		fromFriendlyName: 'Barely Invoice',
 		to: client.email,
+		cc: reminderCcEmails?.length ? reminderCcEmails : undefined,
 		replyTo,
 		bcc: [
 			workspace.invoiceSupportEmail ??
@@ -246,6 +254,7 @@ export async function sendInvoiceReminderEmail({
 				subject: `[REMINDER] Invoice ${invoice.invoiceNumber} from ${workspace.name} - Payment Overdue`,
 				from: workspace.cartSupportEmail ?? 'invoices@barely.ai',
 				to: client.email,
+				...(reminderCcEmails?.length && { cc: reminderCcEmails.join(', ') }),
 			},
 		});
 
@@ -309,10 +318,13 @@ export async function sendInvoicePaymentReceivedEmail({
 		workspace.supportEmail ??
 		'invoices@barely.ai';
 
+	const paymentCcEmails = client.ccEmails?.filter(e => e.length > 0);
+
 	const result = await sendEmail({
 		from: 'hello@pay.barelyinvoice.com',
 		fromFriendlyName: 'Barely Invoice',
 		to: client.email,
+		cc: paymentCcEmails?.length ? paymentCcEmails : undefined,
 		replyTo,
 		bcc: [replyTo, 'invoices@barely.ai'].filter(email => email.length > 0),
 		subject: `Payment Received - Invoice ${invoice.invoiceNumber}`,
@@ -355,6 +367,7 @@ export async function sendInvoicePaymentReceivedEmail({
 				subject: `Payment Received - Invoice ${invoice.invoiceNumber}`,
 				from: workspace.cartSupportEmail ?? 'invoices@barely.ai',
 				to: client.email,
+				...(paymentCcEmails?.length && { cc: paymentCcEmails.join(', ') }),
 			},
 		});
 	}

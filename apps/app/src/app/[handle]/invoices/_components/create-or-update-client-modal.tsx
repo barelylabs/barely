@@ -12,6 +12,8 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
 import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
+import { Input } from '@barely/ui/input';
+import { Label } from '@barely/ui/label';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
 import { Switch } from '@barely/ui/switch';
 
@@ -19,6 +21,14 @@ import {
 	useClient,
 	useClientSearchParams,
 } from '~/app/[handle]/invoices/_components/client-context';
+
+function parseCcEmails(value: string): string[] | null {
+	const emails = value
+		.split(',')
+		.map(e => e.trim().toLowerCase())
+		.filter(e => e.length > 0);
+	return emails.length > 0 ? emails : null;
+}
 
 export function CreateOrUpdateClientModal({
 	mode,
@@ -78,6 +88,10 @@ export function CreateOrUpdateClientModal({
 		:	false,
 	);
 
+	const [ccEmailsInput, setCcEmailsInput] = useState(
+		mode === 'update' ? (selectedClient?.ccEmails?.join(', ') ?? '') : '',
+	);
+
 	const { form, onSubmit } = useCreateOrUpdateForm({
 		updateItem: mode === 'create' ? null : (selectedClient ?? null),
 		upsertSchema: upsertInvoiceClientSchema.extend({
@@ -101,12 +115,14 @@ export function CreateOrUpdateClientModal({
 		handleCreateItem: async d => {
 			await createClient({
 				...d,
+				ccEmails: parseCcEmails(ccEmailsInput),
 				handle,
 			});
 		},
 		handleUpdateItem: async d => {
 			await updateClient({
 				...d,
+				ccEmails: parseCcEmails(ccEmailsInput),
 				handle,
 			});
 		},
@@ -149,7 +165,7 @@ export function CreateOrUpdateClientModal({
 		[onSubmit, addAddress],
 	);
 
-	const submitDisabled = mode === 'update' && !form.formState.isDirty;
+	const submitDisabled = mode === 'update' && !form.formState.isDirty && !ccEmailsInput;
 
 	return (
 		<Modal
@@ -182,6 +198,20 @@ export function CreateOrUpdateClientModal({
 							startIcon='email'
 							required
 						/>
+
+						<div>
+							<Label htmlFor='ccEmails'>CC Emails</Label>
+							<Input
+								id='ccEmails'
+								className='mt-1.5'
+								value={ccEmailsInput}
+								onChange={e => setCcEmailsInput(e.target.value)}
+								placeholder='accounting@example.com, finance@example.com'
+							/>
+							<p className='mt-1 text-xs text-muted-foreground'>
+								Comma-separated. These emails will receive all invoice communications.
+							</p>
+						</div>
 
 						<TextField
 							control={form.control}
