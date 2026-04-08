@@ -152,14 +152,16 @@ export const emailTemplateGroupRoute = {
 				throw new Error('Failed to create email template group');
 			}
 
-			// add email templates to group
-			await dbHttp.insert(_EmailTemplates_To_EmailTemplateGroups).values(
-				emailTemplates.map((et, index) => ({
-					emailTemplateGroupId: createdEmailTemplateGroup.id,
-					emailTemplateId: et.id,
-					index: index,
-				})),
-			);
+			// add email templates to group (only if there are any)
+			if (emailTemplates.length > 0) {
+				await dbHttp.insert(_EmailTemplates_To_EmailTemplateGroups).values(
+					emailTemplates.map((et, index) => ({
+						emailTemplateGroupId: createdEmailTemplateGroup.id,
+						emailTemplateId: et.id,
+						index: index,
+					})),
+				);
+			}
 
 			return createdEmailTemplateGroup;
 		}),
@@ -187,35 +189,46 @@ export const emailTemplateGroupRoute = {
 			// console.log('emailTemplates', emailTemplates);
 
 			// delete email templates not in the updated list
-			await dbHttp.delete(_EmailTemplates_To_EmailTemplateGroups).where(
-				and(
-					eq(_EmailTemplates_To_EmailTemplateGroups.emailTemplateGroupId, groupId),
-					notInArray(
-						_EmailTemplates_To_EmailTemplateGroups.emailTemplateId,
-						emailTemplates.map(et => et.id),
+			if (emailTemplates.length === 0) {
+				// If no templates, delete all associations
+				await dbHttp
+					.delete(_EmailTemplates_To_EmailTemplateGroups)
+					.where(
+						eq(_EmailTemplates_To_EmailTemplateGroups.emailTemplateGroupId, groupId),
+					);
+			} else {
+				await dbHttp.delete(_EmailTemplates_To_EmailTemplateGroups).where(
+					and(
+						eq(_EmailTemplates_To_EmailTemplateGroups.emailTemplateGroupId, groupId),
+						notInArray(
+							_EmailTemplates_To_EmailTemplateGroups.emailTemplateId,
+							emailTemplates.map(et => et.id),
+						),
 					),
-				),
-			);
+				);
+			}
 
-			// add new email templates to group
-			await dbHttp
-				.insert(_EmailTemplates_To_EmailTemplateGroups)
-				.values(
-					emailTemplates.map((et, index) => ({
-						emailTemplateGroupId: updatedEmailTemplateGroup.id,
-						emailTemplateId: et.id,
-						index,
-					})),
-				)
-				.onConflictDoUpdate({
-					target: [
-						_EmailTemplates_To_EmailTemplateGroups.emailTemplateGroupId,
-						_EmailTemplates_To_EmailTemplateGroups.emailTemplateId,
-					],
-					set: {
-						index: sql`excluded.index`,
-					},
-				});
+			// add new email templates to group (only if there are any)
+			if (emailTemplates.length > 0) {
+				await dbHttp
+					.insert(_EmailTemplates_To_EmailTemplateGroups)
+					.values(
+						emailTemplates.map((et, index) => ({
+							emailTemplateGroupId: updatedEmailTemplateGroup.id,
+							emailTemplateId: et.id,
+							index,
+						})),
+					)
+					.onConflictDoUpdate({
+						target: [
+							_EmailTemplates_To_EmailTemplateGroups.emailTemplateGroupId,
+							_EmailTemplates_To_EmailTemplateGroups.emailTemplateId,
+						],
+						set: {
+							index: sql`excluded.index`,
+						},
+					});
+			}
 
 			return updatedEmailTemplateGroup;
 		}),
