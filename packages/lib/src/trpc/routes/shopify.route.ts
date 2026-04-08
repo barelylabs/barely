@@ -1,6 +1,7 @@
 import type { TRPCRouterRecord } from '@trpc/server';
 import { dbHttp } from '@barely/db/client';
 import { ApparelSizes, Products } from '@barely/db/sql';
+import { TRPCError } from '@trpc/server';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
@@ -46,46 +47,72 @@ export const shopifyRoute = {
 					.optional(),
 			}),
 		)
-		.mutation(async ({ input }) => {
-			// Update the product with the Shopify product ID and default variant
-			await dbHttp
-				.update(Products)
-				.set({
-					shopifyProductId: input.shopifyProductId,
-					shopifyVariantId: input.shopifyVariantId ?? null,
-				})
-				.where(eq(Products.id, input.productId));
+		.mutation(async ({ ctx, input }) => {
+			// Verify the product belongs to this workspace
+			const product = await dbHttp.query.Products.findFirst({
+				where: and(
+					eq(Products.id, input.productId),
+					eq(Products.workspaceId, ctx.workspace.id),
+				),
+			});
 
-			// Update apparel size mappings if provided
-			if (input.apparelSizeMappings?.length) {
-				for (const mapping of input.apparelSizeMappings) {
-					await dbHttp
-						.update(ApparelSizes)
-						.set({ shopifyVariantId: mapping.shopifyVariantId })
-						.where(
-							and(
-								eq(ApparelSizes.productId, input.productId),
-								eq(ApparelSizes.size, mapping.size),
-							),
-						);
-				}
+			if (!product) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Product not found',
+				});
 			}
+
+			// Wrap all writes in a transaction for atomicity
+			await dbHttp.transaction(async tx => {
+				await tx
+					.update(Products)
+					.set({
+						shopifyProductId: input.shopifyProductId,
+						shopifyVariantId: input.shopifyVariantId ?? null,
+					})
+					.where(
+						and(
+							eq(Products.id, input.productId),
+							eq(Products.workspaceId, ctx.workspace.id),
+						),
+					);
+
+				if (input.apparelSizeMappings?.length) {
+					for (const mapping of input.apparelSizeMappings) {
+						await tx
+							.update(ApparelSizes)
+							.set({ shopifyVariantId: mapping.shopifyVariantId })
+							.where(
+								and(
+									eq(ApparelSizes.productId, input.productId),
+									eq(ApparelSizes.size, mapping.size),
+								),
+							);
+					}
+				}
+			});
 
 			return { success: true };
 		}),
 
 	disconnectProduct: workspaceProcedure
 		.input(z.object({ productId: z.string() }))
-		.mutation(async ({ input }) => {
+		.mutation(async ({ ctx, input }) => {
 			await dbHttp
 				.update(Products)
 				.set({
 					shopifyProductId: null,
 					shopifyVariantId: null,
 				})
-				.where(eq(Products.id, input.productId));
+				.where(
+					and(
+						eq(Products.id, input.productId),
+						eq(Products.workspaceId, ctx.workspace.id),
+					),
+				);
 
-			// Clear apparel size Shopify mappings
+			// Clear apparel size Shopify mappings (scoped via product ownership above)
 			await dbHttp
 				.update(ApparelSizes)
 				.set({ shopifyVariantId: null })

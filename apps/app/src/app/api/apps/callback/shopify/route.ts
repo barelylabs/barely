@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { createHmac, timingSafeEqual } from 'crypto';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { dbHttp } from '@barely/db/client';
@@ -19,12 +20,41 @@ export async function GET(req: NextRequest) {
 	}
 
 	const params = req.nextUrl.searchParams;
+
+	// Verify HMAC signature from Shopify (required by Shopify OAuth spec)
+	const hmac = params.get('hmac');
+	if (!hmac) {
+		return new Response('Missing HMAC parameter', { status: 400 });
+	}
+
+	const allParams = Object.fromEntries(params.entries());
+	delete allParams.hmac;
+	const sortedMessage = Object.keys(allParams)
+		.sort()
+		.map(key => `${key}=${allParams[key]}`)
+		.join('&');
+	const generatedHmac = createHmac('sha256', appEnv.SHOPIFY_CLIENT_SECRET)
+		.update(sortedMessage)
+		.digest('hex');
+	const hashesMatch =
+		hmac.length === generatedHmac.length &&
+		timingSafeEqual(Buffer.from(hmac, 'utf-8'), Buffer.from(generatedHmac, 'utf-8'));
+	if (!hashesMatch) {
+		return new Response('HMAC verification failed', { status: 403 });
+	}
+
 	const code = params.get('code') ?? raise('code is required');
 	const base64EncodedState = params.get('state') ?? raise('state is required');
 	const base64DecodedState = Buffer.from(base64EncodedState, 'base64').toString('utf-8');
 	const state = providerStateSchema.parse(JSON.parse(base64DecodedState));
 
 	const shopDomain = state.shopDomain ?? raise('shopDomain is required in state');
+
+	// Validate that the shop param from Shopify matches the expected shop domain
+	const shopParam = params.get('shop');
+	if (shopParam && shopParam !== shopDomain) {
+		return new Response('Shop domain mismatch', { status: 403 });
+	}
 
 	const userId = session.user.id;
 	if (!userId) {
