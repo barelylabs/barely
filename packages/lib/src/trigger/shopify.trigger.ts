@@ -208,12 +208,20 @@ export const createShopifyOrderTask = task({
  * For apparel products with a selected size, looks up the ApparelSizes.shopifyVariantId.
  * For non-apparel products, uses Products.shopifyVariantId.
  */
+type ApparelSizeValue = 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
+
+const APPAREL_SIZES = new Set<ApparelSizeValue>(['XS', 'S', 'M', 'L', 'XL', 'XXL']);
+
+function isApparelSize(value: string): value is ApparelSizeValue {
+	return APPAREL_SIZES.has(value as ApparelSizeValue);
+}
+
 async function resolveShopifyVariantId(
 	product: { id: string; shopifyVariantId: string | null },
 	apparelSize: string | null | undefined,
 ): Promise<string | null> {
 	// If an apparel size is selected, try to get the size-specific variant
-	if (apparelSize) {
+	if (apparelSize && isApparelSize(apparelSize)) {
 		const sizeRow = await dbHttp.query.ApparelSizes.findFirst({
 			where: and(
 				eq(ApparelSizes.productId, product.id),

@@ -534,7 +534,7 @@ export async function getProductsShippingRateEstimate(props: {
  */
 export function convertShippingAmountIfNeeded(
 	amountInCents: number,
-	fulfilledBy: 'barely' | 'artist',
+	fulfilledBy: 'barely' | 'artist' | 'shopify',
 	workspaceCurrency: 'usd' | 'gbp',
 ): number {
 	return convertBarelyFeeToWorkspaceCurrency(

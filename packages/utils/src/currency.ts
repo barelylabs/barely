@@ -24,7 +24,7 @@ export function convertUsdToGbpCents(amountInUsdCents: number): number {
  */
 export function convertBarelyFeeToWorkspaceCurrency(
 	amountInCents: number,
-	fulfilledBy: 'barely' | 'artist',
+	fulfilledBy: 'barely' | 'artist' | 'shopify',
 	workspaceCurrency: 'usd' | 'gbp',
 ): number {
 	if (fulfilledBy === 'barely' && workspaceCurrency === 'gbp') {
