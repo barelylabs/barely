@@ -25,6 +25,7 @@ import { and, eq, notInArray } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import type { generateFileBlurHash } from '../../trigger/file-blurhash.trigger';
+import type { createShopifyOrderTask } from '../../trigger/shopify.trigger';
 import type { FulfillmentFeeProduct } from '../../utils/fulfillment';
 import { getBrandKit } from '../../functions/brand-kit.fns';
 import {
@@ -956,6 +957,15 @@ export const cartRoute = {
 
 			await incrementAssetValuesOnCartPurchase(cart, amounts.upsellProductAmount);
 
+			// Create Shopify order after upsell converted
+			await tasks
+				.trigger<typeof createShopifyOrderTask>('create-shopify-order', {
+					cartId: cart.id,
+				})
+				.catch(() => {
+					/* non-blocking */
+				});
+
 			// 👇 ok because it only happens in a route handler
 			(await cookies()).set(
 				`${funnel.handle}.${funnel.key}.cartStage`,
@@ -1025,6 +1035,15 @@ export const cartRoute = {
 			// console.log('updating declined upsell cart', cart);
 
 			await dbPool(ctx.pool).update(Carts).set(cart).where(eq(Carts.id, input.cartId));
+
+			// Create Shopify order after upsell declined
+			await tasks
+				.trigger<typeof createShopifyOrderTask>('create-shopify-order', {
+					cartId: input.cartId,
+				})
+				.catch(() => {
+					/* non-blocking */
+				});
 
 			(await cookies()).set(`${funnel.handle}.${funnel.key}.cartStage`, 'upsellDeclined'); // ok because it only happens in a route handler
 

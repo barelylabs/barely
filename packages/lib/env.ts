@@ -89,6 +89,8 @@ export const libEnv = createEnv({
 		SHIPENGINE_API_KEY: z.string(),
 		SHIPSTATION_API_KEY_US: z.string(),
 		SHIPSTATION_API_KEY_UK: z.string(),
+		SHOPIFY_CLIENT_ID: z.string(),
+		SHOPIFY_CLIENT_SECRET: z.string(),
 		SPOTIFY_CLIENT_ID: z.string(),
 		SPOTIFY_CLIENT_SECRET: z.string(),
 		STRIPE_SECRET_KEY: z.string(),

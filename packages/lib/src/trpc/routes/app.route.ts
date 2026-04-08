@@ -39,6 +39,7 @@ import { playlistRoute } from './playlist.route';
 import { pressKitRoute } from './press-kit.route';
 import { productRoute } from './product.route';
 import { providerAccountRoute } from './provider-account.route';
+import { shopifyRoute } from './shopify.route';
 import { spotifyRoute } from './spotify.route';
 import { statRoute } from './stat.route';
 import { stripeConnectRoute } from './stripe-connect.route';
@@ -84,6 +85,7 @@ export const appRouter = createTRPCRouter({
 	pressKit: pressKitRoute,
 	product: productRoute,
 	providerAccount: providerAccountRoute,
+	shopify: shopifyRoute,
 	spotify: spotifyRoute,
 	stat: statRoute,
 	stripeConnect: stripeConnectRoute,

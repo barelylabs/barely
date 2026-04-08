@@ -12,6 +12,7 @@ import { Stripe } from 'stripe';
 
 import type { handleAbandonedUpsell } from '../trigger/cart.trigger';
 import type { handleFlow } from '../trigger/flow.trigger';
+import type { createShopifyOrderTask } from '../trigger/shopify.trigger';
 import { stripe } from '../integrations/stripe';
 import { log } from '../utils/log';
 import {
@@ -198,6 +199,15 @@ export async function handleStripeConnectChargeSuccess(
 				upsellProduct: cartFunnel.upsellProduct,
 				currency: cartFunnel.workspace.currency,
 			});
+
+			// Create Shopify order for checkoutConverted (no upsell in funnel)
+			await tasks
+				.trigger<typeof createShopifyOrderTask>('create-shopify-order', {
+					cartId: prevCart.id,
+				})
+				.catch(() => {
+					/* non-blocking - Shopify order creation failure doesn't block checkout */
+				});
 		}
 
 		// check for any triggers

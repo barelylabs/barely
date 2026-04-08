@@ -1,9 +1,10 @@
 import type { UpdateCart } from '@barely/validators';
 import { dbHttp } from '@barely/db/client';
 import { Carts } from '@barely/db/sql';
-import { logger, schedules, task, wait } from '@trigger.dev/sdk';
+import { logger, schedules, task, tasks, wait } from '@trigger.dev/sdk';
 import { and, eq, lt } from 'drizzle-orm';
 
+import type { createShopifyOrderTask } from './shopify.trigger';
 import { funnelWith, sendCartReceiptEmail } from '../functions/cart.fns';
 
 export const handleAbandonedUpsell = task({
@@ -47,6 +48,15 @@ export const handleAbandonedUpsell = task({
 		}
 
 		await dbHttp.update(Carts).set(updateCartData).where(eq(Carts.id, cart.id));
+
+		// Create Shopify order after upsell abandoned
+		await tasks
+			.trigger<typeof createShopifyOrderTask>('create-shopify-order', {
+				cartId: cart.id,
+			})
+			.catch(() => {
+				/* non-blocking */
+			});
 
 		logger.log('Cart abandoned: ' + cart.id);
 	},

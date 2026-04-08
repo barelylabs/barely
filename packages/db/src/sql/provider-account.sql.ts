@@ -14,6 +14,7 @@ export const providersEnum = [
 	'facebook',
 	'google',
 	'mailchimp',
+	'shopify',
 	'spotify',
 	'tiktok',
 ] as const;

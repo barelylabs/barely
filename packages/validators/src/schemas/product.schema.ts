@@ -30,6 +30,7 @@ export const insertProductSchema = createInsertSchema(Products, {
 			z.object({
 				size: apparelSizeSchema,
 				stock: z.number().min(0).max(9999).nullable(),
+				shopifyVariantId: z.string().nullable().optional(),
 			}),
 		)
 		.optional(),
@@ -76,5 +77,9 @@ export const defaultProduct: CreateProduct = {
 
 export type NormalizedProductWith_Images = Omit<Product, '_images'> & {
 	images: SortableFile[];
-	_apparelSizes: { size: ApparelSize; stock: number | null }[];
+	_apparelSizes: {
+		size: ApparelSize;
+		stock: number | null;
+		shopifyVariantId: string | null;
+	}[];
 };

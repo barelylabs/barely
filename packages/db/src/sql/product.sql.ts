@@ -47,6 +47,10 @@ export const Products = pgTable('Products', {
 	customsDescription: varchar('customsDescription', { length: 255 }),
 	hsCode: varchar('hsCode', { length: 15 }),
 	countryOfOrigin: varchar('countryOfOrigin', { length: 2 }),
+
+	// shopify integration
+	shopifyProductId: varchar('shopifyProductId', { length: 255 }),
+	shopifyVariantId: varchar('shopifyVariantId', { length: 255 }),
 });
 
 export const Product_Relations = relations(Products, ({ one, many }) => ({
@@ -83,6 +87,9 @@ export const ApparelSizes = pgTable(
 		}).notNull(),
 
 		stock: integer('stock'),
+
+		// shopify integration
+		shopifyVariantId: varchar('shopifyVariantId', { length: 255 }),
 	},
 	table => ({
 		pk: primaryKey({ columns: [table.productId, table.size] }),
