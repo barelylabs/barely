@@ -8,5 +8,6 @@ export * from './fan.trigger';
 export * from './file-blurhash.trigger';
 export * from './flow.trigger';
 export * from './overdue-invoices.trigger';
+export * from './spotify-pre-save.trigger';
 export * from './sync-spotify-artist.trigger';
 export * from './workspace-usage';

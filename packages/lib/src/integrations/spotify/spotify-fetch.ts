@@ -1,5 +1,5 @@
 import type { Schema, z, ZodType } from 'zod/v4';
-import { zGet, zPost } from '@barely/utils';
+import { zGet, zPost, zPut } from '@barely/utils';
 
 import { log } from '../../utils/log';
 import { isRetryableSpotifyError, withRetry } from '../../utils/retry';
@@ -74,6 +74,43 @@ export async function spotifyGet<Schema extends ZodType, ErrorSchema extends Zod
 				message: `Retrying Spotify API call to ${endpoint} (attempt ${attempt}/3): ${String(error)}`,
 				type: 'logs',
 				location: 'spotifyGet.retry',
+			});
+		},
+	});
+}
+
+/**
+ * Wrapper around zPut that adds retry logic for Spotify API calls
+ */
+export async function spotifyPut<Schema extends ZodType, ErrorSchema extends ZodType>(
+	endpoint: string,
+	schema: Schema,
+	options: ZFetchProps<ErrorSchema> & { body?: object },
+): Promise<ZFetchResponse<Schema, ErrorSchema>> {
+	return withRetry(() => zPut(endpoint, schema, options), {
+		retries: 3,
+		initialDelay: 1000,
+		maxDelay: 10000,
+		shouldRetry: error => {
+			if (error instanceof Error && error.message === 'zPut err') {
+				return true;
+			}
+			if (
+				error &&
+				typeof error === 'object' &&
+				'status' in error &&
+				'success' in error &&
+				error.success === false
+			) {
+				return isRetryableSpotifyError(error);
+			}
+			return false;
+		},
+		onRetry: (error, attempt) => {
+			void log({
+				message: `Retrying Spotify API PUT to ${endpoint} (attempt ${attempt}/3): ${String(error)}`,
+				type: 'logs',
+				location: 'spotifyPut.retry',
 			});
 		},
 	});

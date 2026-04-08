@@ -21,6 +21,7 @@ import { useTRPC } from '@barely/api/app/trpc.react';
 
 import { Button } from '@barely/ui/button';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
+import { SelectField } from '@barely/ui/forms/select-field';
 import { TextField } from '@barely/ui/forms/text-field';
 import { Label } from '@barely/ui/label';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@barely/ui/modal';
@@ -65,6 +66,7 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 			key: '',
 			sourceUrl: '',
 			scheme: 'light',
+			trackId: mode === 'update' ? (selectedFmPage?.trackId ?? '') : '',
 			links: mode === 'update' ? (selectedFmPage?.links ?? []) : [],
 		},
 		handleCreateItem: async d => {
@@ -117,6 +119,25 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 	/* modal */
 	const showFmModal = mode === 'create' ? showCreateModal : showUpdateModal;
 	const setShowFmModal = mode === 'create' ? setShowCreateModal : setShowUpdateModal;
+
+	/* tracks for pre-save */
+	const { data: tracksData } = useQuery(
+		trpc.track.byWorkspace.queryOptions({ handle, limit: 100 }, { enabled: showFmModal }),
+	);
+
+	const trackOptions = useMemo(() => {
+		const options: { value: string; label: string }[] = [
+			{ value: '', label: 'None (no pre-save)' },
+		];
+		for (const track of tracksData?.tracks ?? []) {
+			const releasedLabel = track.released ? ' (released)' : '';
+			options.push({
+				value: track.id,
+				label: `${track.name}${releasedLabel}`,
+			});
+		}
+		return options;
+	}, [tracksData]);
 
 	const handleCloseModal = useCallback(async () => {
 		focusGridList();
@@ -291,6 +312,14 @@ export function CreateOrUpdateFmModal({ mode }: { mode: 'create' | 'update' }) {
 							existingImageBlurDataUrl={artworkImagePreviewBlurDataUrl}
 						/>
 					</div>
+
+					<SelectField
+						label='Pre-save Track'
+						control={form.control}
+						name='trackId'
+						options={trackOptions}
+						placeholder='Select a track for pre-save...'
+					/>
 
 					<div className='flex w-full flex-col items-start gap-1'>
 						<Label>Links</Label>

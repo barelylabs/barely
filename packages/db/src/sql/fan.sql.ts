@@ -25,7 +25,10 @@ export const Fans = pgTable(
 		email: varchar('email', { length: 255 }).notNull(),
 		phoneNumber: varchar('phoneNumber', { length: 255 }),
 
-		appReferer: varchar('appReferer', { length: 255, enum: ['vip', 'cart', 'bio'] }),
+		appReferer: varchar('appReferer', {
+			length: 255,
+			enum: ['vip', 'cart', 'bio', 'fm'],
+		}),
 
 		// shipping address
 		shippingAddressLine1: varchar('shippingAddressLine1', { length: 255 }),

@@ -147,6 +147,7 @@ export const fmRoute = {
 				workspaceId: ctx.workspace.id,
 				handle: ctx.workspace.handle,
 				key: sanitizeKey(data.key),
+				trackId: data.trackId ?? null,
 			};
 
 			const fmPages = await dbPool(ctx.pool)
@@ -178,6 +179,7 @@ export const fmRoute = {
 				.set({
 					...data,
 					key: data.key ? sanitizeKey(data.key) : undefined,
+					trackId: data.trackId === '' ? null : data.trackId,
 				})
 				.where(and(eq(FmPages.id, id), eq(FmPages.workspaceId, ctx.workspace.id)))
 				.returning();
