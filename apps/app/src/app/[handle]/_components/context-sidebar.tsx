@@ -1,7 +1,7 @@
 'use client';
 
 import type { Product } from '@barely/utils';
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useWorkspace } from '@barely/hooks';
@@ -12,6 +12,8 @@ import { navHistoryAtom } from '@barely/atoms/navigation-history';
 
 import { Icon } from '@barely/ui/icon';
 import { Text } from '@barely/ui/typography';
+
+import { SideNavContext } from './dashboard-layout';
 
 interface ProductRoute {
 	path: string;
@@ -29,7 +31,7 @@ interface ContextSidebarProps {
 export function ContextSidebar({ productId }: ContextSidebarProps) {
 	const pathname = usePathname();
 	const { handle, isPersonal } = useWorkspace();
-	// const { hasFeature, isFmVariant } = useCurrentApp();
+	const { sidebarExpanded } = useContext(SideNavContext);
 	const navHistory = useAtomValue(navHistoryAtom);
 
 	const isSettings = pathname.includes('/settings');
@@ -172,10 +174,22 @@ export function ContextSidebar({ productId }: ContextSidebarProps) {
 	return (
 		<>
 			{/* Background fill for context sidebar area */}
-			<div className='fixed left-[60px] top-0 h-screen w-60 bg-accent' />
+			<div
+				className={cn(
+					'fixed left-[60px] top-0 h-screen w-60 bg-accent transition-opacity duration-200',
+					sidebarExpanded ? 'md:opacity-100' : 'md:pointer-events-none md:opacity-0',
+				)}
+			/>
 
 			{/* Floating context sidebar card */}
-			<aside className='fixed left-[64px] top-2 z-40 h-[calc(100vh-1rem)] w-56'>
+			<aside
+				className={cn(
+					'fixed left-[64px] top-2 z-40 h-[calc(100vh-1rem)] w-56 transition-[opacity,transform] duration-200',
+					sidebarExpanded ?
+						'md:translate-x-0 md:opacity-100'
+					:	'md:pointer-events-none md:-translate-x-4 md:opacity-0',
+				)}
+			>
 				<div className='flex h-full flex-col overflow-hidden rounded-xl border border-subtle-foreground/50 bg-card/50 shadow-md'>
 					{/* Settings back link or Product Header */}
 					{isSettings ?

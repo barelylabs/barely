@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { checkIfWorkspaceHasPendingInviteForUser } from '@barely/lib/functions/workspace.fns';
 
@@ -15,7 +16,13 @@ export default async function HandleLayout({
 	params: Promise<{ handle: string }>;
 	children: React.ReactNode;
 }) {
-	const [session, awaitedParams] = await Promise.all([getSession(), params]);
+	const [session, awaitedParams, cookieStore] = await Promise.all([
+		getSession(),
+		params,
+		cookies(),
+	]);
+
+	const sidebarExpanded = cookieStore.get('sidebar-expanded')?.value !== 'false';
 
 	if (!session) return redirect('/login');
 
@@ -57,7 +64,9 @@ export default async function HandleLayout({
 				<AppAnalyticsTracker />
 				<div className='mx-auto flex w-full flex-1 flex-row'>
 					<NewWorkspaceModal />
-					<DashboardLayout>{children}</DashboardLayout>
+					<DashboardLayout initialSidebarExpanded={sidebarExpanded}>
+						{children}
+					</DashboardLayout>
 				</div>
 			</WorkspaceProviders>
 		</HydrateClient>

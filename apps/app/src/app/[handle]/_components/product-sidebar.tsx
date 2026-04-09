@@ -1,7 +1,7 @@
 'use client';
 
 import type { Product } from '@barely/utils';
-import { Fragment, useMemo } from 'react';
+import { Fragment, useContext, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useUser, useWorkspace, useWorkspaces } from '@barely/hooks';
@@ -27,6 +27,7 @@ import { Tooltip } from '@barely/ui/tooltip';
 import { Text } from '@barely/ui/typography';
 
 import { authClient } from '~/auth/client';
+import { SideNavContext } from './dashboard-layout';
 import { WorkspaceSwitcher } from './workspace-switcher';
 
 export function ProductSidebar() {
@@ -36,6 +37,7 @@ export function ProductSidebar() {
 	const allWorkspaces = useWorkspaces();
 	const router = useRouter();
 	const { theme, setTheme } = useTheme();
+	const { sidebarExpanded, toggleSidebar } = useContext(SideNavContext);
 
 	// Find user's personal workspace
 	const personalWorkspace = allWorkspaces.find(
@@ -202,6 +204,28 @@ export function ProductSidebar() {
 					)}
 				</div>
 			)}
+
+			{/* Sidebar Toggle - desktop only */}
+			<div className='hidden p-3 md:block'>
+				<Tooltip
+					content={sidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+					side='right'
+					delayDuration={300}
+				>
+					<button
+						onClick={toggleSidebar}
+						className={cn(
+							'flex h-11 w-11 items-center justify-center rounded-lg transition-all duration-150',
+							'outline-none focus-visible:ring-2 focus-visible:ring-black/20',
+							'active:bg-subtle-foreground/50 hover:bg-subtle-foreground/50',
+						)}
+					>
+						{sidebarExpanded ?
+							<Icon.sidebarClose className='h-5 w-5' />
+						:	<Icon.sidebarOpen className='h-5 w-5' />}
+					</button>
+				</Tooltip>
+			</div>
 
 			{/* User Menu */}
 			<div className='p-3'>

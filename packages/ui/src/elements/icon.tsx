@@ -151,6 +151,8 @@ import {
 	PackagePlus,
 	Palette,
 	PanelLeft,
+	PanelLeftClose,
+	PanelLeftOpen,
 	PanelRight,
 	PartyPopper,
 	Pause,
@@ -488,6 +490,8 @@ export const Icon = {
 	shoppingBag: ShoppingBag,
 	shuffle: Shuffle,
 	sidebar: PanelLeft,
+	sidebarClose: PanelLeftClose,
+	sidebarOpen: PanelLeftOpen,
 	// slash:
 	skipBackward: SkipBack,
 	skipForward: SkipForward,
