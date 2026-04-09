@@ -5,7 +5,9 @@ import { z } from 'zod/v4';
 
 import { querySelectionSchema } from '../helpers';
 
-export const insertInvoiceClientSchema = createInsertSchema(InvoiceClients);
+export const insertInvoiceClientSchema = createInsertSchema(InvoiceClients, {
+	ccEmails: z.array(z.email()).nullable().optional(),
+});
 export const createInvoiceClientSchema = insertInvoiceClientSchema.omit({
 	id: true,
 	workspaceId: true,
@@ -54,6 +56,7 @@ export const selectWorkspaceInvoiceClientsSchema = invoiceClientFilterParamsSche
 export const defaultInvoiceClient: CreateInvoiceClient = {
 	name: '',
 	email: '',
+	ccEmails: null,
 	company: null,
 	address: null,
 	addressLine1: null,

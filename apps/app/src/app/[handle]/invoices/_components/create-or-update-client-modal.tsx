@@ -20,6 +20,30 @@ import {
 	useClientSearchParams,
 } from '~/app/[handle]/invoices/_components/client-context';
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function parseCcEmails(value: string | null | undefined): string[] | null {
+	if (!value) return null;
+	const emails = value
+		.split(',')
+		.map(e => e.trim().toLowerCase())
+		.filter(e => e.length > 0);
+	return emails.length > 0 ? emails : null;
+}
+
+function validateCcEmails(value: string | null | undefined): string | undefined {
+	if (!value) return undefined;
+	const entries = value
+		.split(',')
+		.map(e => e.trim())
+		.filter(e => e.length > 0);
+	const invalid = entries.filter(e => !emailRegex.test(e));
+	if (invalid.length > 0) {
+		return `Invalid email${invalid.length > 1 ? 's' : ''}: ${invalid.join(', ')}`;
+	}
+	return undefined;
+}
+
 export function CreateOrUpdateClientModal({
 	mode,
 	onClose,
@@ -78,9 +102,21 @@ export function CreateOrUpdateClientModal({
 		:	false,
 	);
 
+	// Map selectedClient to form-compatible type (ccEmails: string[] -> string)
+	const updateItemForForm =
+		mode === 'create' ? null
+		: selectedClient ?
+			{
+				...selectedClient,
+				ccEmails: selectedClient.ccEmails?.join(', ') ?? null,
+			}
+		:	null;
+
 	const { form, onSubmit } = useCreateOrUpdateForm({
-		updateItem: mode === 'create' ? null : (selectedClient ?? null),
+		updateItem: updateItemForForm,
 		upsertSchema: upsertInvoiceClientSchema.extend({
+			// ccEmails is a comma-separated string in the form, parsed to string[] on submit
+			ccEmails: z.string().nullable(),
 			addressLine1: addAddress ? z.string() : z.string().nullable(),
 			city: addAddress ? z.string() : z.string().nullable(),
 			state: addAddress ? z.string() : z.string().nullable(),
@@ -90,6 +126,7 @@ export function CreateOrUpdateClientModal({
 		defaultValues: {
 			name: mode === 'update' ? (selectedClient?.name ?? '') : '',
 			email: mode === 'update' ? (selectedClient?.email ?? '') : '',
+			ccEmails: mode === 'update' ? (selectedClient?.ccEmails?.join(', ') ?? null) : null,
 			company: mode === 'update' ? (selectedClient?.company ?? null) : null,
 			// address: mode === 'update' ? (selectedClient?.address ?? null) : null,
 			addressLine1: mode === 'update' ? (selectedClient?.addressLine1 ?? null) : null,
@@ -99,14 +136,18 @@ export function CreateOrUpdateClientModal({
 			postalCode: mode === 'update' ? (selectedClient?.postalCode ?? null) : null,
 		},
 		handleCreateItem: async d => {
+			const { ccEmails: ccEmailsStr, ...rest } = d;
 			await createClient({
-				...d,
+				...rest,
+				ccEmails: parseCcEmails(ccEmailsStr),
 				handle,
 			});
 		},
 		handleUpdateItem: async d => {
+			const { ccEmails: ccEmailsStr, ...rest } = d;
 			await updateClient({
-				...d,
+				...rest,
+				ccEmails: parseCcEmails(ccEmailsStr),
 				handle,
 			});
 		},
@@ -122,7 +163,14 @@ export function CreateOrUpdateClientModal({
 	}, [focusGridList, queryClient, trpc.invoiceClient, setShowModal, onClose, mode]);
 
 	const handleSubmit = useCallback(
-		async (data: z.infer<typeof upsertInvoiceClientSchema>) => {
+		async (data: Parameters<typeof onSubmit>[0]) => {
+			// Validate CC emails before submitting
+			const ccError = validateCcEmails(data.ccEmails);
+			if (ccError) {
+				form.setError('ccEmails', { message: ccError });
+				return;
+			}
+
 			const { addressLine1, addressLine2, city, state, country, postalCode, ...rest } =
 				data;
 			const addressData =
@@ -146,7 +194,7 @@ export function CreateOrUpdateClientModal({
 
 			await onSubmit({ ...rest, ...addressData });
 		},
-		[onSubmit, addAddress],
+		[onSubmit, addAddress, form],
 	);
 
 	const submitDisabled = mode === 'update' && !form.formState.isDirty;
@@ -181,6 +229,14 @@ export function CreateOrUpdateClientModal({
 							placeholder='client@example.com'
 							startIcon='email'
 							required
+						/>
+
+						<TextField
+							control={form.control}
+							name='ccEmails'
+							label='CC Emails'
+							placeholder='accounting@example.com, finance@example.com'
+							description='Comma-separated. These emails will receive all invoice communications.'
 						/>
 
 						<TextField

@@ -56,6 +56,7 @@ export async function getInvoiceById({
 					id: true,
 					name: true,
 					email: true,
+					ccEmails: true,
 					company: true,
 					addressLine1: true,
 					addressLine2: true,

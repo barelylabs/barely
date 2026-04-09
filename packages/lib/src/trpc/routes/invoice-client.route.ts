@@ -144,6 +144,9 @@ export const invoiceClientRoute = {
 				id: newId('invoiceClient'),
 				name: input.name.trim(),
 				email: input.email.trim().toLowerCase(),
+				ccEmails:
+					input.ccEmails?.map(e => e.trim().toLowerCase()).filter(e => e.length > 0) ??
+					null,
 				company: input.company ? input.company.trim() : undefined,
 				address: input.address ? input.address.trim() : undefined,
 				addressLine1: input.addressLine1 ? input.addressLine1.trim() : undefined,
@@ -165,9 +168,17 @@ export const invoiceClientRoute = {
 	update: workspaceProcedure
 		.input(updateInvoiceClientSchema)
 		.mutation(async ({ input, ctx }) => {
+			const sanitizedInput = {
+				...input,
+				...(input.ccEmails !== undefined && {
+					ccEmails:
+						input.ccEmails?.map(e => e.trim().toLowerCase()).filter(e => e.length > 0) ??
+						null,
+				}),
+			};
 			const updatedClients = await dbPool(ctx.pool)
 				.update(InvoiceClients)
-				.set(input)
+				.set(sanitizedInput)
 				.where(
 					and(
 						eq(InvoiceClients.id, input.id),

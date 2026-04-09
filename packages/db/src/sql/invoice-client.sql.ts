@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { index, pgTable, text, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
+import { index, jsonb, pgTable, text, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
 
 import { dbId, primaryId, timestamps } from '../utils';
 import { Invoices } from './invoice.sql';
@@ -22,6 +22,7 @@ export const InvoiceClients = pgTable(
 		// Client information
 		name: varchar('name', { length: 255 }).notNull(),
 		email: varchar('email', { length: 255 }).notNull(),
+		ccEmails: jsonb('ccEmails').$type<string[]>(),
 		company: varchar('company', { length: 255 }),
 		address: text('address'), // deprecated
 
