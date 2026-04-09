@@ -23,6 +23,7 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { atom, useAtom } from 'jotai';
 import { useFormContext } from 'react-hook-form';
+import { toast } from 'sonner';
 
 import { useCartTRPC } from '@barely/api/public/cart.trpc.react';
 
@@ -356,7 +357,15 @@ export function CheckoutForm({
 		if (!stripe || !elements) {
 			return;
 		}
-		await syncCart(data);
+
+		try {
+			await syncCart(data);
+		} catch (err) {
+			const message =
+				err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+			toast.error(message);
+			return;
+		}
 
 		await stripe.confirmPayment({
 			elements,

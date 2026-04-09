@@ -10,7 +10,7 @@ import { determineFulfillmentResponsibility } from '../utils/fulfillment';
 
 interface DecrementProductInventoryParams {
 	productId: string;
-	apparelSize?: string | null;
+	apparelSize?: ApparelSize | null;
 	shippingCountry?: string | null;
 	workspaceFulfillmentMode: FulfillmentMode;
 	orderId?: string;
@@ -101,12 +101,11 @@ async function decrementProductStock(params: {
 
 async function decrementApparelSizeStock(params: {
 	productId: string;
-	apparelSize: string;
+	apparelSize: ApparelSize;
 	pool: 'workspace' | 'barely';
 	reason: string;
 }) {
-	const { productId, apparelSize: rawApparelSize, pool, reason } = params;
-	const apparelSize = rawApparelSize as ApparelSize;
+	const { productId, apparelSize, pool, reason } = params;
 	const column = pool === 'barely' ? ApparelSizes.barelyStock : ApparelSizes.stock;
 
 	// Read current stock before decrement for accurate delta calculation
@@ -158,7 +157,7 @@ type ProductWithApparelSizes = InferSelectModel<typeof Products> & {
 
 interface CheckProductAvailabilityParams {
 	productId: string;
-	apparelSize?: string | null;
+	apparelSize?: ApparelSize | null;
 	shippingCountry?: string | null;
 	workspaceFulfillmentMode: FulfillmentMode;
 	/** Pass a pre-fetched product to avoid a redundant DB query */

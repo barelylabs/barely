@@ -302,6 +302,40 @@ export const cartRoute = {
 			const { funnel } = cart;
 			if (!funnel) throw new Error('funnel not found');
 
+			// Server-side inventory check before payment
+			const shippingCountry =
+				update.shippingAddressCountry ?? cart.shippingAddressCountry;
+
+			const mainAvailability = await checkProductAvailability({
+				productId: funnel.mainProductId,
+				apparelSize: cart.mainProductApparelSize,
+				shippingCountry,
+				workspaceFulfillmentMode: funnel.workspace.barelyFulfillmentMode,
+			});
+
+			if (!mainAvailability.available) {
+				throw new TRPCError({
+					code: 'PRECONDITION_FAILED',
+					message: 'This product is currently sold out.',
+				});
+			}
+
+			if (cart.addedBump && funnel.bumpProductId) {
+				const bumpAvailability = await checkProductAvailability({
+					productId: funnel.bumpProductId,
+					apparelSize: cart.bumpProductApparelSize,
+					shippingCountry,
+					workspaceFulfillmentMode: funnel.workspace.barelyFulfillmentMode,
+				});
+
+				if (!bumpAvailability.available) {
+					throw new TRPCError({
+						code: 'PRECONDITION_FAILED',
+						message: 'The add-on product is currently sold out.',
+					});
+				}
+			}
+
 			const updateCart: UpdateCart = {
 				id: cart.id,
 				...update,
