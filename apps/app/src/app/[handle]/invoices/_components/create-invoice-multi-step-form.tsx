@@ -48,7 +48,7 @@ import { InvoicePreview } from './invoice-preview';
 const lineItemSchema = z.object({
 	description: z.string().min(1, 'Description is required'),
 	quantity: z.number().min(1, 'Quantity must be at least 1'),
-	unitPrice: z.number().min(0.01, 'Price must be greater than 0'),
+	unitPrice: z.number(),
 });
 
 const detailsFormSchema = z.object({
@@ -572,6 +572,7 @@ export function CreateInvoiceMultiStepForm() {
 															placeholder='0.00'
 															outputUnit='minor'
 															currency={currency}
+															allowNegativeValue={true}
 														/>
 													</div>
 												</div>

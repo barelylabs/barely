@@ -354,7 +354,7 @@ export function InvoiceRender({
 										</Text>
 									</td>
 									<td className='px-4 py-3 text-right'>
-										{item.rate > 0 ?
+										{item.rate !== 0 ?
 											<Text variant='sm/normal' className='text-gray-900'>
 												{formatMinorToMajorCurrency(item.rate, currency)}
 											</Text>
@@ -363,7 +363,7 @@ export function InvoiceRender({
 										:	null}
 									</td>
 									<td className='px-4 py-3 text-right'>
-										{item.amount > 0 ?
+										{item.amount !== 0 ?
 											<Text variant='sm/medium' className='text-gray-900'>
 												{formatMinorToMajorCurrency(item.amount, currency)}
 											</Text>

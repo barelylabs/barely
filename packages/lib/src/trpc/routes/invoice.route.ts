@@ -351,6 +351,14 @@ export const invoiceRoute = {
 			// Calculate totals
 			const { subtotal, total } = calculateInvoiceTotal(sanitizedLineItems, tax ?? 0);
 
+			if (total <= 0) {
+				throw new TRPCError({
+					code: 'BAD_REQUEST',
+					message:
+						'Invoice total must be greater than zero. Credits cannot exceed the invoice amount.',
+				});
+			}
+
 			// Always generate invoice number server-side to prevent race conditions
 			const maxRetries = 3;
 			for (let attempt = 0; attempt < maxRetries; attempt++) {
@@ -451,6 +459,15 @@ export const invoiceRoute = {
 							sanitizedLineItems ?? existingInvoice.lineItems,
 							tax ?? existingInvoice.tax,
 						);
+
+						if (total <= 0) {
+							throw new TRPCError({
+								code: 'BAD_REQUEST',
+								message:
+									'Invoice total must be greater than zero. Credits cannot exceed the invoice amount.',
+							});
+						}
+
 						return {
 							...(sanitizedLineItems && { lineItems: sanitizedLineItems }),
 							...(tax !== undefined && { tax }),
