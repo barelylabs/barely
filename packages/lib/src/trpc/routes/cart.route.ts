@@ -38,6 +38,10 @@ import {
 	sendCartReceiptEmail,
 } from '../../functions/cart.fns';
 import { recordCartEvent } from '../../functions/event.fns';
+import {
+	checkProductAvailability,
+	decrementProductInventory,
+} from '../../functions/inventory.fns';
 import { getStripeConnectAccountId } from '../../functions/stripe-connect.fns';
 import { stripe } from '../../integrations/stripe';
 import { ratelimit } from '../../integrations/upstash';
@@ -309,6 +313,40 @@ export const cartRoute = {
 
 			const { funnel } = cart;
 			if (!funnel) throw new Error('funnel not found');
+
+			// Server-side inventory check before payment
+			const shippingCountry =
+				update.shippingAddressCountry ?? cart.shippingAddressCountry;
+
+			const mainAvailability = await checkProductAvailability({
+				productId: funnel.mainProductId,
+				apparelSize: cart.mainProductApparelSize,
+				shippingCountry,
+				workspaceFulfillmentMode: funnel.workspace.barelyFulfillmentMode,
+			});
+
+			if (!mainAvailability.available) {
+				throw new TRPCError({
+					code: 'PRECONDITION_FAILED',
+					message: 'This product is currently sold out.',
+				});
+			}
+
+			if (cart.addedBump && funnel.bumpProductId) {
+				const bumpAvailability = await checkProductAvailability({
+					productId: funnel.bumpProductId,
+					apparelSize: cart.bumpProductApparelSize,
+					shippingCountry,
+					workspaceFulfillmentMode: funnel.workspace.barelyFulfillmentMode,
+				});
+
+				if (!bumpAvailability.available) {
+					throw new TRPCError({
+						code: 'PRECONDITION_FAILED',
+						message: 'The add-on product is currently sold out.',
+					});
+				}
+			}
 
 			const updateCart: UpdateCart = {
 				id: cart.id,
@@ -769,6 +807,21 @@ export const cartRoute = {
 			const upsellProduct =
 				funnel.upsellProduct ?? raiseTRPCError({ message: 'upsell product not found' });
 
+			// Check upsell product inventory before charging
+			const upsellAvailability = await checkProductAvailability({
+				productId: upsellProduct.id,
+				apparelSize: cart.upsellProductApparelSize,
+				shippingCountry: cart.shippingAddressCountry,
+				workspaceFulfillmentMode: funnel.workspace.barelyFulfillmentMode,
+			});
+
+			if (!upsellAvailability.available) {
+				throw new TRPCError({
+					code: 'PRECONDITION_FAILED',
+					message: 'This product is sold out.',
+				});
+			}
+
 			const vat = getVatRateForCheckout(
 				funnel.workspace.shippingAddressCountry,
 				cart.shippingAddressCountry,
@@ -955,6 +1008,17 @@ export const cartRoute = {
 				.where(eq(Carts.id, input.cartId));
 
 			await incrementAssetValuesOnCartPurchase(cart, amounts.upsellProductAmount);
+
+			// decrement upsell product inventory
+			if (funnel.upsellProductId) {
+				await decrementProductInventory({
+					productId: funnel.upsellProductId,
+					apparelSize: cart.upsellProductApparelSize,
+					shippingCountry: cart.shippingAddressCountry,
+					workspaceFulfillmentMode: funnel.workspace.barelyFulfillmentMode,
+					orderId: String(cart.orderId),
+				});
+			}
 
 			// 👇 ok because it only happens in a route handler
 			(await cookies()).set(

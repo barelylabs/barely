@@ -35,7 +35,11 @@ export const Products = pgTable('Products', {
 		.default('cd')
 		.notNull(),
 
+	// inventory
+	inventoryEnabled: boolean('inventoryEnabled').default(false).notNull(),
+	allowOverselling: boolean('allowOverselling').default(false).notNull(),
 	stock: integer('stock'),
+	barelyStock: integer('barelyStock'),
 
 	// shipping dimensions
 	weight: integer('weight').default(0),
@@ -83,6 +87,7 @@ export const ApparelSizes = pgTable(
 		}).notNull(),
 
 		stock: integer('stock'),
+		barelyStock: integer('barelyStock'),
 	},
 	table => ({
 		pk: primaryKey({ columns: [table.productId, table.size] }),

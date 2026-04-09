@@ -30,6 +30,7 @@ export const insertProductSchema = createInsertSchema(Products, {
 			z.object({
 				size: apparelSizeSchema,
 				stock: z.number().min(0).max(9999).nullable(),
+				barelyStock: z.number().min(0).max(9999).nullable().optional(),
 			}),
 		)
 		.optional(),
@@ -71,10 +72,16 @@ export const defaultProduct: CreateProduct = {
 	name: '',
 	price: 0,
 	merchType: 'cd',
+	inventoryEnabled: false,
+	allowOverselling: false,
 	_apparelSizes: [],
 };
 
 export type NormalizedProductWith_Images = Omit<Product, '_images'> & {
 	images: SortableFile[];
-	_apparelSizes: { size: ApparelSize; stock: number | null }[];
+	_apparelSizes: {
+		size: ApparelSize;
+		stock: number | null;
+		barelyStock: number | null;
+	}[];
 };

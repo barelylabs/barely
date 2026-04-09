@@ -136,6 +136,7 @@ export const productRoute = {
 						productId,
 						size: s.size,
 						stock: s.stock,
+						barelyStock: s.barelyStock ?? null,
 					})),
 				);
 			}
@@ -209,12 +210,14 @@ export const productRoute = {
 							productId: input.id,
 							size: s.size,
 							stock: s.stock,
+							barelyStock: s.barelyStock ?? null,
 						})),
 					)
 					.onConflictDoUpdate({
 						target: [ApparelSizes.productId, ApparelSizes.size],
 						set: {
 							stock: sql`EXCLUDED.stock`,
+							barelyStock: sql`EXCLUDED."barelyStock"`,
 						},
 					});
 			}

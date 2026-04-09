@@ -2,6 +2,7 @@
 
 import type { AppRouterOutputs } from '@barely/api/app/app.router';
 
+import { Badge } from '@barely/ui/badge';
 import { GridListSkeleton } from '@barely/ui/components/grid-list-skeleton';
 import { NoResultsPlaceholder } from '@barely/ui/components/no-results-placeholder';
 import { GridList, GridListCard } from '@barely/ui/grid-list';
@@ -48,11 +49,47 @@ export function AllProducts() {
 	);
 }
 
-function ProductCard({
-	product,
-}: {
-	product: AppRouterOutputs['product']['byWorkspace']['products'][0];
-}) {
+type ProductItem = AppRouterOutputs['product']['byWorkspace']['products'][0];
+
+function getProductStockStatus(product: ProductItem) {
+	if (!product.inventoryEnabled) return 'untracked' as const;
+
+	const totalStock = (product.stock ?? 0) + (product.barelyStock ?? 0);
+
+	// For apparel, sum across all sizes
+	const apparelTotal = product._apparelSizes.reduce(
+		(sum, s) => sum + (s.stock ?? 0) + (s.barelyStock ?? 0),
+		0,
+	);
+
+	const effectiveStock = product._apparelSizes.length > 0 ? apparelTotal : totalStock;
+
+	if (effectiveStock <= 0) return 'out' as const;
+	if (effectiveStock <= 5) return 'low' as const;
+	return 'in' as const;
+}
+
+function ProductStockBadge({ product }: { product: ProductItem }) {
+	const status = getProductStockStatus(product);
+
+	if (status === 'untracked') return null;
+
+	const config = {
+		in: { label: 'In Stock', variant: 'success' as const },
+		low: { label: 'Low Stock', variant: 'warning' as const },
+		out: { label: 'Sold Out', variant: 'danger' as const },
+	};
+
+	const { label, variant } = config[status];
+
+	return (
+		<Badge variant={variant} size='sm'>
+			{label}
+		</Badge>
+	);
+}
+
+function ProductCard({ product }: { product: ProductItem }) {
 	const { setShowUpdateModal, setShowArchiveModal, setShowDeleteModal } =
 		useProductSearchParams();
 
@@ -67,24 +104,7 @@ function ProductCard({
 			title={product.name}
 			img={{ ...product.images[0], alt: `${product.name} product image` }}
 		>
-			{/* <div className='flex flex-grow flex-row items-center gap-4'>
-				<div className='flex flex-col items-start gap-1'>
-					<div className='flex flex-row items-center gap-2'>
-						<Img
-							{...(s3Key ? { s3Key } : { src: '/images/product-placeholder.png' })}
-							{...(blurDataUrl ? { blurDataUrl } : {})}
-							alt='Product Image'
-							className='h-8 w-8 rounded-md bg-muted object-cover sm:h-16 sm:w-16'
-							width={40}
-							height={40}
-							sizes='40px'
-						/>
-						<Text variant='md/semibold' className='text-accent-foreground'>
-							{product.name}
-						</Text>
-					</div>
-				</div>
-			</div> */}
+			<ProductStockBadge product={product} />
 		</GridListCard>
 	);
 }

@@ -16,7 +16,7 @@ import {
 	useUpload,
 	useWorkspace,
 } from '@barely/hooks';
-import { insert } from '@barely/utils';
+import { cn, insert } from '@barely/utils';
 import {
 	apparelSizeSchema,
 	defaultProduct,
@@ -28,6 +28,7 @@ import { atom } from 'jotai';
 
 import { useTRPC } from '@barely/api/app/trpc.react';
 
+import { Button } from '@barely/ui/button';
 import { CurrencyField } from '@barely/ui/forms/currency-field';
 import { DatetimeField } from '@barely/ui/forms/datetime-field';
 import { Form, SubmitButton } from '@barely/ui/forms/form';
@@ -271,10 +272,16 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 								type='multiple'
 								value={form.watch('_apparelSizes')?.map(s => s.size) ?? []}
 								onValueChange={value => {
-									const _apparelSizes = value.map(v => ({
-										size: apparelSizeSchema.parse(v),
-										stock: 100,
-									}));
+									const existingSizes = form.getValues('_apparelSizes') ?? [];
+									const _apparelSizes = value.map(v => {
+										const size = apparelSizeSchema.parse(v);
+										const existing = existingSizes.find(s => s.size === size);
+										return {
+											size,
+											stock: existing?.stock ?? 0,
+											barelyStock: existing?.barelyStock ?? null,
+										};
+									});
 									form.setValue('_apparelSizes', _apparelSizes);
 								}}
 								className='w-fit'
@@ -306,6 +313,66 @@ export function CreateOrUpdateProductModal({ mode }: { mode: 'create' | 'update'
 					{form.watch('preorder') && (
 						<DatetimeField control={form.control} name='preorderDeliveryEstimate' />
 					)}
+
+					<Separator />
+
+					<SwitchField
+						control={form.control}
+						name='inventoryEnabled'
+						label='Track inventory'
+					/>
+
+					{form.watch('inventoryEnabled') && (
+						<>
+							<SwitchField
+								control={form.control}
+								name='allowOverselling'
+								label='Continue selling when out of stock'
+							/>
+
+							{!isApparelType(form.watch('merchType') ?? '') && (
+								<div className='flex flex-col gap-1'>
+									<Label>Stock</Label>
+									<div className='flex items-center gap-2'>
+										<StockAdjustInput
+											value={form.watch('stock') ?? 0}
+											onChange={val => form.setValue('stock', val, { shouldDirty: true })}
+										/>
+									</div>
+								</div>
+							)}
+
+							{isApparelType(form.watch('merchType') ?? '') &&
+								(form.watch('_apparelSizes')?.length ?? 0) > 0 && (
+									<div className='flex flex-col gap-2'>
+										<Label>Stock per Size</Label>
+										<div className='flex flex-col gap-1'>
+											{(form.watch('_apparelSizes') ?? []).map((sizeEntry, idx) => (
+												<div key={sizeEntry.size} className='flex items-center gap-3'>
+													<span className='w-10 text-sm font-medium'>
+														{sizeEntry.size}
+													</span>
+													<StockAdjustInput
+														value={sizeEntry.stock ?? 0}
+														onChange={val => {
+															const sizes = [...(form.getValues('_apparelSizes') ?? [])];
+															if (sizes[idx]) {
+																sizes[idx] = { ...sizes[idx], stock: val };
+																form.setValue('_apparelSizes', sizes, {
+																	shouldDirty: true,
+																});
+															}
+														}}
+													/>
+												</div>
+											))}
+										</div>
+									</div>
+								)}
+						</>
+					)}
+
+					<Separator />
 
 					<Label>Description</Label>
 					<MDXEditor
@@ -375,5 +442,52 @@ function ApparelSizeToggleItem({
 		<ToggleGroupItem value={value} className='w-10'>
 			{children}
 		</ToggleGroupItem>
+	);
+}
+
+function StockAdjustInput({
+	value,
+	onChange,
+}: {
+	value: number;
+	onChange: (val: number) => void;
+}) {
+	return (
+		<div className='flex items-center gap-1'>
+			<Button
+				look='outline'
+				size='sm'
+				type='button'
+				className='h-8 w-8 p-0'
+				onClick={() => onChange(Math.max(0, value - 1))}
+			>
+				<Icon.minus className='h-3 w-3' />
+			</Button>
+			<input
+				type='number'
+				min={0}
+				max={9999}
+				value={value}
+				onChange={e => {
+					const num = parseInt(e.target.value, 10);
+					if (!isNaN(num) && num >= 0 && num <= 9999) {
+						onChange(num);
+					}
+				}}
+				className={cn(
+					'h-8 w-16 rounded-md border border-border bg-background px-2 text-center text-sm',
+					'focus:outline-none focus:ring-1 focus:ring-ring',
+				)}
+			/>
+			<Button
+				look='outline'
+				size='sm'
+				type='button'
+				className='h-8 w-8 p-0'
+				onClick={() => onChange(Math.min(9999, value + 1))}
+			>
+				<Icon.plus className='h-3 w-3' />
+			</Button>
+		</div>
 	);
 }
